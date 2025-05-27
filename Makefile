@@ -1,26 +1,30 @@
-.PHONY: build run test clean deps migrate
+.PHONY: build run test clean docker-up docker-down
 
 # Build the application
 build:
-	go build -o bin/server main.go
+	go build -o bin/server cmd/server/main.go
 
 # Run the application
-run:
-	go run main.go
+run: build
+	./bin/server
 
 # Run tests
-test:
-	@if ! docker ps --format '{{.Names}}' | grep -q '^im_mysql$$'; then \
-		echo 'Starting MySQL with docker-compose...'; \
-		docker-compose up -d; \
-	else \
-		echo 'MySQL container already running.'; \
-	fi
-	go test -v
+test: docker-up
+	@echo "Waiting for MySQL to be ready..."
+	@sleep 5
+	go test -v ./...
 
 # Clean build artifacts
 clean:
 	rm -rf bin/
+
+# Start Docker services
+docker-up:
+	docker-compose up -d
+
+# Stop Docker services
+docker-down:
+	docker-compose down
 
 # Install dependencies
 deps:

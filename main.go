@@ -4,20 +4,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/VI-IM/im_backend_go/internal/router"
 )
 
 func main() {
-	r := mux.NewRouter()
-
-	// Add your routes here
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	}).Methods(http.MethodGet)
+	// Initialize router
+	router.Init()
 
 	log.Println("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe(":8080", router.Router); err != nil {
 		log.Fatal(err)
 	}
 }

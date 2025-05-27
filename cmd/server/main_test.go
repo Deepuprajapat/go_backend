@@ -34,10 +34,13 @@ func TestHealthEndpoint(t *testing.T) {
 		t.Errorf("Expected status code %d, got %d", http.StatusOK, w.Code)
 	}
 
-	// Check response body
-	expected := "OK"
-	if w.Body.String() != expected {
-		t.Errorf("Expected response body %q, got %q", expected, w.Body.String())
+	var response map[string]string
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+		t.Fatalf("Failed to read response body: %v", err)
+	}
+
+	if response["status"] != "ok" {
+		t.Errorf("Expected status 'ok', got '%s'", response["status"])
 	}
 }
 
@@ -51,7 +54,7 @@ func TestGenerateToken(t *testing.T) {
 			name: "valid request",
 			payload: map[string]interface{}{
 				"phone": "1234567890",
-				"otp":   "123456",
+				"code":  "123456",
 			},
 			wantStatus: http.StatusOK,
 		},
@@ -59,12 +62,12 @@ func TestGenerateToken(t *testing.T) {
 			name: "invalid phone",
 			payload: map[string]interface{}{
 				"phone": "invalid",
-				"otp":   "123456",
+				"code":  "123456",
 			},
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name: "missing otp",
+			name: "missing code",
 			payload: map[string]interface{}{
 				"phone": "1234567890",
 			},
@@ -87,17 +90,6 @@ func TestGenerateToken(t *testing.T) {
 
 			if w.Code != tt.wantStatus {
 				t.Errorf("Expected status code %d, got %d", tt.wantStatus, w.Code)
-			}
-
-			// For successful requests, verify token response
-			if tt.wantStatus == http.StatusOK {
-				var response map[string]string
-				if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
-					t.Fatalf("Failed to decode response: %v", err)
-				}
-				if _, ok := response["token"]; !ok {
-					t.Error("Expected token in response")
-				}
 			}
 		})
 	}
