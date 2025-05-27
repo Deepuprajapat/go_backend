@@ -10,7 +10,13 @@ run:
 
 # Run tests
 test:
-	go test ./...
+	@if ! docker ps --format '{{.Names}}' | grep -q '^im_mysql$$'; then \
+		echo 'Starting MySQL with docker-compose...'; \
+		docker-compose up -d; \
+	else \
+		echo 'MySQL container already running.'; \
+	fi
+	go test -v
 
 # Clean build artifacts
 clean:
