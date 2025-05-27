@@ -8,13 +8,55 @@ import (
 )
 
 var (
+	// OtPsColumns holds the columns for the "ot_ps" table.
+	OtPsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "phone", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "is_used", Type: field.TypeBool, Default: false},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "user_otps", Type: field.TypeInt, Nullable: true},
+	}
+	// OtPsTable holds the schema information for the "ot_ps" table.
+	OtPsTable = &schema.Table{
+		Name:       "ot_ps",
+		Columns:    OtPsColumns,
+		PrimaryKey: []*schema.Column{OtPsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ot_ps_users_otps",
+				Columns:    []*schema.Column{OtPsColumns[7]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PermissionsColumns holds the columns for the "permissions" table.
+	PermissionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// PermissionsTable holds the schema information for the "permissions" table.
+	PermissionsTable = &schema.Table{
+		Name:       "permissions",
+		Columns:    PermissionsColumns,
+		PrimaryKey: []*schema.Column{PermissionsColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
-		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "phone", Type: field.TypeString, Unique: true},
+		{Name: "is_admin", Type: field.TypeBool, Default: false},
+		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "last_login_at", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -22,11 +64,42 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserPermissionsColumns holds the columns for the "user_permissions" table.
+	UserPermissionsColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "permission_id", Type: field.TypeInt},
+	}
+	// UserPermissionsTable holds the schema information for the "user_permissions" table.
+	UserPermissionsTable = &schema.Table{
+		Name:       "user_permissions",
+		Columns:    UserPermissionsColumns,
+		PrimaryKey: []*schema.Column{UserPermissionsColumns[0], UserPermissionsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_permissions_user_id",
+				Columns:    []*schema.Column{UserPermissionsColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_permissions_permission_id",
+				Columns:    []*schema.Column{UserPermissionsColumns[1]},
+				RefColumns: []*schema.Column{PermissionsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		OtPsTable,
+		PermissionsTable,
 		UsersTable,
+		UserPermissionsTable,
 	}
 )
 
 func init() {
+	OtPsTable.ForeignKeys[0].RefTable = UsersTable
+	UserPermissionsTable.ForeignKeys[0].RefTable = UsersTable
+	UserPermissionsTable.ForeignKeys[1].RefTable = PermissionsTable
 }

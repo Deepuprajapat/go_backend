@@ -6,5 +6,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// OTP is the predicate function for otp builders.
+type OTP func(*sql.Selector)
+
+// Permission is the predicate function for permission builders.
+type Permission func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

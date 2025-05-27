@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/VI-IM/im_backend_go/ent/otp"
+	"github.com/VI-IM/im_backend_go/ent/permission"
 	"github.com/VI-IM/im_backend_go/ent/predicate"
 	"github.com/VI-IM/im_backend_go/ent/user"
 )
@@ -42,16 +44,44 @@ func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	return uu
 }
 
-// SetEmail sets the "email" field.
-func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
-	uu.mutation.SetEmail(s)
+// SetPhone sets the "phone" field.
+func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
+	uu.mutation.SetPhone(s)
 	return uu
 }
 
-// SetNillableEmail sets the "email" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableEmail(s *string) *UserUpdate {
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetEmail(*s)
+		uu.SetPhone(*s)
+	}
+	return uu
+}
+
+// SetIsAdmin sets the "is_admin" field.
+func (uu *UserUpdate) SetIsAdmin(b bool) *UserUpdate {
+	uu.mutation.SetIsAdmin(b)
+	return uu
+}
+
+// SetNillableIsAdmin sets the "is_admin" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableIsAdmin(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetIsAdmin(*b)
+	}
+	return uu
+}
+
+// SetIsActive sets the "is_active" field.
+func (uu *UserUpdate) SetIsActive(b bool) *UserUpdate {
+	uu.mutation.SetIsActive(b)
+	return uu
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableIsActive(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetIsActive(*b)
 	}
 	return uu
 }
@@ -84,9 +114,101 @@ func (uu *UserUpdate) SetNillableUpdatedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
+// SetLastLoginAt sets the "last_login_at" field.
+func (uu *UserUpdate) SetLastLoginAt(t time.Time) *UserUpdate {
+	uu.mutation.SetLastLoginAt(t)
+	return uu
+}
+
+// SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableLastLoginAt(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetLastLoginAt(*t)
+	}
+	return uu
+}
+
+// ClearLastLoginAt clears the value of the "last_login_at" field.
+func (uu *UserUpdate) ClearLastLoginAt() *UserUpdate {
+	uu.mutation.ClearLastLoginAt()
+	return uu
+}
+
+// AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
+func (uu *UserUpdate) AddPermissionIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddPermissionIDs(ids...)
+	return uu
+}
+
+// AddPermissions adds the "permissions" edges to the Permission entity.
+func (uu *UserUpdate) AddPermissions(p ...*Permission) *UserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.AddPermissionIDs(ids...)
+}
+
+// AddOtpIDs adds the "otps" edge to the OTP entity by IDs.
+func (uu *UserUpdate) AddOtpIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddOtpIDs(ids...)
+	return uu
+}
+
+// AddOtps adds the "otps" edges to the OTP entity.
+func (uu *UserUpdate) AddOtps(o ...*OTP) *UserUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return uu.AddOtpIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearPermissions clears all "permissions" edges to the Permission entity.
+func (uu *UserUpdate) ClearPermissions() *UserUpdate {
+	uu.mutation.ClearPermissions()
+	return uu
+}
+
+// RemovePermissionIDs removes the "permissions" edge to Permission entities by IDs.
+func (uu *UserUpdate) RemovePermissionIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemovePermissionIDs(ids...)
+	return uu
+}
+
+// RemovePermissions removes "permissions" edges to Permission entities.
+func (uu *UserUpdate) RemovePermissions(p ...*Permission) *UserUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uu.RemovePermissionIDs(ids...)
+}
+
+// ClearOtps clears all "otps" edges to the OTP entity.
+func (uu *UserUpdate) ClearOtps() *UserUpdate {
+	uu.mutation.ClearOtps()
+	return uu
+}
+
+// RemoveOtpIDs removes the "otps" edge to OTP entities by IDs.
+func (uu *UserUpdate) RemoveOtpIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveOtpIDs(ids...)
+	return uu
+}
+
+// RemoveOtps removes "otps" edges to OTP entities.
+func (uu *UserUpdate) RemoveOtps(o ...*OTP) *UserUpdate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return uu.RemoveOtpIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -128,14 +250,116 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	if value, ok := uu.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.IsAdmin(); ok {
+		_spec.SetField(user.FieldIsAdmin, field.TypeBool, value)
+	}
+	if value, ok := uu.mutation.IsActive(); ok {
+		_spec.SetField(user.FieldIsActive, field.TypeBool, value)
 	}
 	if value, ok := uu.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uu.mutation.LastLoginAt(); ok {
+		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)
+	}
+	if uu.mutation.LastLoginAtCleared() {
+		_spec.ClearField(user.FieldLastLoginAt, field.TypeTime)
+	}
+	if uu.mutation.PermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PermissionsTable,
+			Columns: user.PermissionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedPermissionsIDs(); len(nodes) > 0 && !uu.mutation.PermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PermissionsTable,
+			Columns: user.PermissionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.PermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PermissionsTable,
+			Columns: user.PermissionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.OtpsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OtpsTable,
+			Columns: []string{user.OtpsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(otp.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedOtpsIDs(); len(nodes) > 0 && !uu.mutation.OtpsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OtpsTable,
+			Columns: []string{user.OtpsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(otp.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.OtpsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OtpsTable,
+			Columns: []string{user.OtpsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(otp.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -171,16 +395,44 @@ func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	return uuo
 }
 
-// SetEmail sets the "email" field.
-func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
-	uuo.mutation.SetEmail(s)
+// SetPhone sets the "phone" field.
+func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
+	uuo.mutation.SetPhone(s)
 	return uuo
 }
 
-// SetNillableEmail sets the "email" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableEmail(s *string) *UserUpdateOne {
+// SetNillablePhone sets the "phone" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetEmail(*s)
+		uuo.SetPhone(*s)
+	}
+	return uuo
+}
+
+// SetIsAdmin sets the "is_admin" field.
+func (uuo *UserUpdateOne) SetIsAdmin(b bool) *UserUpdateOne {
+	uuo.mutation.SetIsAdmin(b)
+	return uuo
+}
+
+// SetNillableIsAdmin sets the "is_admin" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableIsAdmin(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetIsAdmin(*b)
+	}
+	return uuo
+}
+
+// SetIsActive sets the "is_active" field.
+func (uuo *UserUpdateOne) SetIsActive(b bool) *UserUpdateOne {
+	uuo.mutation.SetIsActive(b)
+	return uuo
+}
+
+// SetNillableIsActive sets the "is_active" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableIsActive(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetIsActive(*b)
 	}
 	return uuo
 }
@@ -213,9 +465,101 @@ func (uuo *UserUpdateOne) SetNillableUpdatedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetLastLoginAt sets the "last_login_at" field.
+func (uuo *UserUpdateOne) SetLastLoginAt(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetLastLoginAt(t)
+	return uuo
+}
+
+// SetNillableLastLoginAt sets the "last_login_at" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableLastLoginAt(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetLastLoginAt(*t)
+	}
+	return uuo
+}
+
+// ClearLastLoginAt clears the value of the "last_login_at" field.
+func (uuo *UserUpdateOne) ClearLastLoginAt() *UserUpdateOne {
+	uuo.mutation.ClearLastLoginAt()
+	return uuo
+}
+
+// AddPermissionIDs adds the "permissions" edge to the Permission entity by IDs.
+func (uuo *UserUpdateOne) AddPermissionIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddPermissionIDs(ids...)
+	return uuo
+}
+
+// AddPermissions adds the "permissions" edges to the Permission entity.
+func (uuo *UserUpdateOne) AddPermissions(p ...*Permission) *UserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.AddPermissionIDs(ids...)
+}
+
+// AddOtpIDs adds the "otps" edge to the OTP entity by IDs.
+func (uuo *UserUpdateOne) AddOtpIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddOtpIDs(ids...)
+	return uuo
+}
+
+// AddOtps adds the "otps" edges to the OTP entity.
+func (uuo *UserUpdateOne) AddOtps(o ...*OTP) *UserUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return uuo.AddOtpIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearPermissions clears all "permissions" edges to the Permission entity.
+func (uuo *UserUpdateOne) ClearPermissions() *UserUpdateOne {
+	uuo.mutation.ClearPermissions()
+	return uuo
+}
+
+// RemovePermissionIDs removes the "permissions" edge to Permission entities by IDs.
+func (uuo *UserUpdateOne) RemovePermissionIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemovePermissionIDs(ids...)
+	return uuo
+}
+
+// RemovePermissions removes "permissions" edges to Permission entities.
+func (uuo *UserUpdateOne) RemovePermissions(p ...*Permission) *UserUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return uuo.RemovePermissionIDs(ids...)
+}
+
+// ClearOtps clears all "otps" edges to the OTP entity.
+func (uuo *UserUpdateOne) ClearOtps() *UserUpdateOne {
+	uuo.mutation.ClearOtps()
+	return uuo
+}
+
+// RemoveOtpIDs removes the "otps" edge to OTP entities by IDs.
+func (uuo *UserUpdateOne) RemoveOtpIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveOtpIDs(ids...)
+	return uuo
+}
+
+// RemoveOtps removes "otps" edges to OTP entities.
+func (uuo *UserUpdateOne) RemoveOtps(o ...*OTP) *UserUpdateOne {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return uuo.RemoveOtpIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -287,14 +631,116 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	if value, ok := uuo.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Email(); ok {
-		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	if value, ok := uuo.mutation.Phone(); ok {
+		_spec.SetField(user.FieldPhone, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.IsAdmin(); ok {
+		_spec.SetField(user.FieldIsAdmin, field.TypeBool, value)
+	}
+	if value, ok := uuo.mutation.IsActive(); ok {
+		_spec.SetField(user.FieldIsActive, field.TypeBool, value)
 	}
 	if value, ok := uuo.mutation.CreatedAt(); ok {
 		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := uuo.mutation.LastLoginAt(); ok {
+		_spec.SetField(user.FieldLastLoginAt, field.TypeTime, value)
+	}
+	if uuo.mutation.LastLoginAtCleared() {
+		_spec.ClearField(user.FieldLastLoginAt, field.TypeTime)
+	}
+	if uuo.mutation.PermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PermissionsTable,
+			Columns: user.PermissionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedPermissionsIDs(); len(nodes) > 0 && !uuo.mutation.PermissionsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PermissionsTable,
+			Columns: user.PermissionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.PermissionsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.PermissionsTable,
+			Columns: user.PermissionsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(permission.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.OtpsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OtpsTable,
+			Columns: []string{user.OtpsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(otp.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedOtpsIDs(); len(nodes) > 0 && !uuo.mutation.OtpsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OtpsTable,
+			Columns: []string{user.OtpsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(otp.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.OtpsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.OtpsTable,
+			Columns: []string{user.OtpsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(otp.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues
