@@ -67,6 +67,7 @@ func TestGenerateToken(t *testing.T) {
 			name: "missing otp",
 			payload: map[string]interface{}{
 				"phone": "1234567890",
+				"otp": "",
 			},
 			wantStatus: http.StatusBadRequest,
 		},
@@ -78,7 +79,6 @@ func TestGenerateToken(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to marshal request body: %v", err)
 			}
-
 			req := httptest.NewRequest(http.MethodPost, "/auth/token", bytes.NewBuffer(body))
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()

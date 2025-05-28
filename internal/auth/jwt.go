@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"time"
-
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -27,7 +26,6 @@ func GenerateToken(userID int, isAdmin bool, phone string) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(config.DefaultConfig.JWTSecret))
 }

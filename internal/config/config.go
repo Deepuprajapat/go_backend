@@ -10,7 +10,7 @@ type Config struct {
 }
 
 var DefaultConfig = Config{
-	JWTSecret:          "your-secret-key", // Should be overridden via environment
+	JWTSecret:          "MY_KEY", // Should be overridden via environment
 	JWTExpirationHours: 24 * 7,            // 7 days
 	JWTCookieName:      "auth_token",
 	JWTCookieDomain:    "localhost",

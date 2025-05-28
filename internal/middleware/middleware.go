@@ -31,7 +31,7 @@ func Recover(next http.Handler) http.Handler {
 // Auth middleware for protected routes
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Implement proper authentication
+	// TODO: Implement proper authentication
 		next.ServeHTTP(w, r)
 	})
 }
