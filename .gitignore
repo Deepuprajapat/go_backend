@@ -13,6 +13,10 @@
 # Go modules
 /go.sum
 
+/ent/*
+!/ent/schema/
+
+
 # IDE/editor configs
 .vscode/
 .idea/

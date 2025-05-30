@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"time"
+
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -15,7 +16,7 @@ type Claims struct {
 }
 
 func GenerateToken(userID int, isAdmin bool, phone string) (string, error) {
-	expirationTime := time.Now().Add(time.Duration(config.DefaultConfig.JWTExpirationHours) * time.Hour)
+	expirationTime := time.Now().Add(time.Duration(config.GetConfig().ExpiresInDuration) * time.Hour)
 
 	claims := &Claims{
 		UserID:  userID,
@@ -27,13 +28,13 @@ func GenerateToken(userID int, isAdmin bool, phone string) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.DefaultConfig.JWTSecret))
+	return token.SignedString([]byte(config.GetConfig().AuthSecret))
 }
 
 func ValidateToken(tokenString string) (*Claims, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.DefaultConfig.JWTSecret), nil
+		return []byte(config.GetConfig().AuthSecret), nil
 	})
 
 	if err != nil {
