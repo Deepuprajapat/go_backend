@@ -12,8 +12,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/VI-IM/im_backend_go/ent/otp"
-	"github.com/VI-IM/im_backend_go/ent/permission"
+	"github.com/VI-IM/im_backend_go/ent/blogs"
+	"github.com/VI-IM/im_backend_go/ent/developer"
+	"github.com/VI-IM/im_backend_go/ent/leads"
+	"github.com/VI-IM/im_backend_go/ent/location"
+	"github.com/VI-IM/im_backend_go/ent/project"
+	"github.com/VI-IM/im_backend_go/ent/property"
+	"github.com/VI-IM/im_backend_go/ent/staticsitedata"
 	"github.com/VI-IM/im_backend_go/ent/user"
 )
 
@@ -75,9 +80,14 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			otp.Table:        otp.ValidColumn,
-			permission.Table: permission.ValidColumn,
-			user.Table:       user.ValidColumn,
+			blogs.Table:          blogs.ValidColumn,
+			developer.Table:      developer.ValidColumn,
+			leads.Table:          leads.ValidColumn,
+			location.Table:       location.ValidColumn,
+			project.Table:        project.ValidColumn,
+			property.Table:       property.ValidColumn,
+			staticsitedata.Table: staticsitedata.ValidColumn,
+			user.Table:           user.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

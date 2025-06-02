@@ -12,8 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/VI-IM/im_backend_go/ent/otp"
-	"github.com/VI-IM/im_backend_go/ent/permission"
+	"github.com/VI-IM/im_backend_go/ent/blogs"
 	"github.com/VI-IM/im_backend_go/ent/predicate"
 	"github.com/VI-IM/im_backend_go/ent/user"
 )
@@ -21,12 +20,16 @@ import (
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx             *QueryContext
-	order           []user.OrderOption
-	inters          []Interceptor
-	predicates      []predicate.User
-	withPermissions *PermissionQuery
-	withOtps        *OTPQuery
+	ctx               *QueryContext
+	order             []user.OrderOption
+	inters            []Interceptor
+	predicates        []predicate.User
+	withUpdatedBlogs  *BlogsQuery
+	withCreatedByUser *UserQuery
+	withCreatedUsers  *UserQuery
+	withUpdatedByUser *UserQuery
+	withUpdatedUsers  *UserQuery
+	withFKs           bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,9 +66,9 @@ func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
 	return uq
 }
 
-// QueryPermissions chains the current query on the "permissions" edge.
-func (uq *UserQuery) QueryPermissions() *PermissionQuery {
-	query := (&PermissionClient{config: uq.config}).Query()
+// QueryUpdatedBlogs chains the current query on the "updated_blogs" edge.
+func (uq *UserQuery) QueryUpdatedBlogs() *BlogsQuery {
+	query := (&BlogsClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -76,8 +79,8 @@ func (uq *UserQuery) QueryPermissions() *PermissionQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(permission.Table, permission.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.PermissionsTable, user.PermissionsPrimaryKey...),
+			sqlgraph.To(blogs.Table, blogs.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UpdatedBlogsTable, user.UpdatedBlogsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -85,9 +88,9 @@ func (uq *UserQuery) QueryPermissions() *PermissionQuery {
 	return query
 }
 
-// QueryOtps chains the current query on the "otps" edge.
-func (uq *UserQuery) QueryOtps() *OTPQuery {
-	query := (&OTPClient{config: uq.config}).Query()
+// QueryCreatedByUser chains the current query on the "created_by_user" edge.
+func (uq *UserQuery) QueryCreatedByUser() *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -98,8 +101,74 @@ func (uq *UserQuery) QueryOtps() *OTPQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(otp.Table, otp.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.OtpsTable, user.OtpsColumn),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.CreatedByUserTable, user.CreatedByUserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCreatedUsers chains the current query on the "created_users" edge.
+func (uq *UserQuery) QueryCreatedUsers() *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.CreatedUsersTable, user.CreatedUsersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUpdatedByUser chains the current query on the "updated_by_user" edge.
+func (uq *UserQuery) QueryUpdatedByUser() *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.UpdatedByUserTable, user.UpdatedByUserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUpdatedUsers chains the current query on the "updated_users" edge.
+func (uq *UserQuery) QueryUpdatedUsers() *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.UpdatedUsersTable, user.UpdatedUsersColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,38 +363,74 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:          uq.config,
-		ctx:             uq.ctx.Clone(),
-		order:           append([]user.OrderOption{}, uq.order...),
-		inters:          append([]Interceptor{}, uq.inters...),
-		predicates:      append([]predicate.User{}, uq.predicates...),
-		withPermissions: uq.withPermissions.Clone(),
-		withOtps:        uq.withOtps.Clone(),
+		config:            uq.config,
+		ctx:               uq.ctx.Clone(),
+		order:             append([]user.OrderOption{}, uq.order...),
+		inters:            append([]Interceptor{}, uq.inters...),
+		predicates:        append([]predicate.User{}, uq.predicates...),
+		withUpdatedBlogs:  uq.withUpdatedBlogs.Clone(),
+		withCreatedByUser: uq.withCreatedByUser.Clone(),
+		withCreatedUsers:  uq.withCreatedUsers.Clone(),
+		withUpdatedByUser: uq.withUpdatedByUser.Clone(),
+		withUpdatedUsers:  uq.withUpdatedUsers.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
 }
 
-// WithPermissions tells the query-builder to eager-load the nodes that are connected to
-// the "permissions" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithPermissions(opts ...func(*PermissionQuery)) *UserQuery {
-	query := (&PermissionClient{config: uq.config}).Query()
+// WithUpdatedBlogs tells the query-builder to eager-load the nodes that are connected to
+// the "updated_blogs" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithUpdatedBlogs(opts ...func(*BlogsQuery)) *UserQuery {
+	query := (&BlogsClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withPermissions = query
+	uq.withUpdatedBlogs = query
 	return uq
 }
 
-// WithOtps tells the query-builder to eager-load the nodes that are connected to
-// the "otps" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithOtps(opts ...func(*OTPQuery)) *UserQuery {
-	query := (&OTPClient{config: uq.config}).Query()
+// WithCreatedByUser tells the query-builder to eager-load the nodes that are connected to
+// the "created_by_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCreatedByUser(opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withOtps = query
+	uq.withCreatedByUser = query
+	return uq
+}
+
+// WithCreatedUsers tells the query-builder to eager-load the nodes that are connected to
+// the "created_users" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCreatedUsers(opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCreatedUsers = query
+	return uq
+}
+
+// WithUpdatedByUser tells the query-builder to eager-load the nodes that are connected to
+// the "updated_by_user" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithUpdatedByUser(opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withUpdatedByUser = query
+	return uq
+}
+
+// WithUpdatedUsers tells the query-builder to eager-load the nodes that are connected to
+// the "updated_users" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithUpdatedUsers(opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withUpdatedUsers = query
 	return uq
 }
 
@@ -335,12 +440,12 @@ func (uq *UserQuery) WithOtps(opts ...func(*OTPQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Username string `json:"username,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		GroupBy(user.FieldName).
+//		GroupBy(user.FieldUsername).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
@@ -358,11 +463,11 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Username string `json:"username,omitempty"`
 //	}
 //
 //	client.User.Query().
-//		Select(user.FieldName).
+//		Select(user.FieldUsername).
 //		Scan(ctx, &v)
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
@@ -406,12 +511,22 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	var (
 		nodes       = []*User{}
+		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
-			uq.withPermissions != nil,
-			uq.withOtps != nil,
+		loadedTypes = [5]bool{
+			uq.withUpdatedBlogs != nil,
+			uq.withCreatedByUser != nil,
+			uq.withCreatedUsers != nil,
+			uq.withUpdatedByUser != nil,
+			uq.withUpdatedUsers != nil,
 		}
 	)
+	if uq.withCreatedByUser != nil || uq.withUpdatedByUser != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
 	}
@@ -430,85 +545,43 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := uq.withPermissions; query != nil {
-		if err := uq.loadPermissions(ctx, query, nodes,
-			func(n *User) { n.Edges.Permissions = []*Permission{} },
-			func(n *User, e *Permission) { n.Edges.Permissions = append(n.Edges.Permissions, e) }); err != nil {
+	if query := uq.withUpdatedBlogs; query != nil {
+		if err := uq.loadUpdatedBlogs(ctx, query, nodes,
+			func(n *User) { n.Edges.UpdatedBlogs = []*Blogs{} },
+			func(n *User, e *Blogs) { n.Edges.UpdatedBlogs = append(n.Edges.UpdatedBlogs, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withOtps; query != nil {
-		if err := uq.loadOtps(ctx, query, nodes,
-			func(n *User) { n.Edges.Otps = []*OTP{} },
-			func(n *User, e *OTP) { n.Edges.Otps = append(n.Edges.Otps, e) }); err != nil {
+	if query := uq.withCreatedByUser; query != nil {
+		if err := uq.loadCreatedByUser(ctx, query, nodes, nil,
+			func(n *User, e *User) { n.Edges.CreatedByUser = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withCreatedUsers; query != nil {
+		if err := uq.loadCreatedUsers(ctx, query, nodes,
+			func(n *User) { n.Edges.CreatedUsers = []*User{} },
+			func(n *User, e *User) { n.Edges.CreatedUsers = append(n.Edges.CreatedUsers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withUpdatedByUser; query != nil {
+		if err := uq.loadUpdatedByUser(ctx, query, nodes, nil,
+			func(n *User, e *User) { n.Edges.UpdatedByUser = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withUpdatedUsers; query != nil {
+		if err := uq.loadUpdatedUsers(ctx, query, nodes,
+			func(n *User) { n.Edges.UpdatedUsers = []*User{} },
+			func(n *User, e *User) { n.Edges.UpdatedUsers = append(n.Edges.UpdatedUsers, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (uq *UserQuery) loadPermissions(ctx context.Context, query *PermissionQuery, nodes []*User, init func(*User), assign func(*User, *Permission)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*User)
-	nids := make(map[int]map[*User]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(user.PermissionsTable)
-		s.Join(joinT).On(s.C(permission.FieldID), joinT.C(user.PermissionsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(user.PermissionsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(user.PermissionsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Permission](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "permissions" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
-}
-func (uq *UserQuery) loadOtps(ctx context.Context, query *OTPQuery, nodes []*User, init func(*User), assign func(*User, *OTP)) error {
+func (uq *UserQuery) loadUpdatedBlogs(ctx context.Context, query *BlogsQuery, nodes []*User, init func(*User), assign func(*User, *Blogs)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
@@ -519,21 +592,147 @@ func (uq *UserQuery) loadOtps(ctx context.Context, query *OTPQuery, nodes []*Use
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.OTP(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(user.OtpsColumn), fks...))
+	query.Where(predicate.Blogs(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.UpdatedBlogsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_otps
+		fk := n.user_updated_blogs
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_otps" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "user_updated_blogs" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "user_otps" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "user_updated_blogs" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadCreatedByUser(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		if nodes[i].user_created_users == nil {
+			continue
+		}
+		fk := *nodes[i].user_created_users
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_created_users" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (uq *UserQuery) loadCreatedUsers(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.CreatedUsersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_created_users
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_created_users" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_created_users" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadUpdatedByUser(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*User)
+	for i := range nodes {
+		if nodes[i].user_updated_users == nil {
+			continue
+		}
+		fk := *nodes[i].user_updated_users
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(user.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "user_updated_users" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (uq *UserQuery) loadUpdatedUsers(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.User(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(user.UpdatedUsersColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.user_updated_users
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "user_updated_users" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "user_updated_users" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

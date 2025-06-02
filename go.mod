@@ -10,7 +10,8 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/mux v1.8.1
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/projectdiscovery/gologger v1.1.54
+	github.com/rs/zerolog v1.34.0
+	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
 )
 
 require (
@@ -27,7 +28,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect

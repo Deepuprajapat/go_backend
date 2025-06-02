@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/VI-IM/im_backend_go/internal/config"
+	"github.com/VI-IM/im_backend_go/internal/controller"
 	"github.com/VI-IM/im_backend_go/internal/database"
+	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -27,8 +29,11 @@ func main() {
 	client := database.NewClient(os.Getenv("DB_DSN"))
 	defer client.Close()
 
+	repo := repository.NewRepository(client)
+	controller := controller.NewController(repo)
+
 	// Initialize router
-	router.Init()
+	router.Init(controller)
 
 	// Start server
 	log.Info().Msgf("Server starting on port %d", config.GetConfig().Port)

@@ -3,6 +3,8 @@
 package user
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -12,57 +14,117 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
-	// FieldPhone holds the string denoting the phone field in the database.
-	FieldPhone = "phone"
-	// FieldIsAdmin holds the string denoting the is_admin field in the database.
-	FieldIsAdmin = "is_admin"
+	// FieldUsername holds the string denoting the username field in the database.
+	FieldUsername = "username"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldFirstName holds the string denoting the first_name field in the database.
+	FieldFirstName = "first_name"
+	// FieldLastName holds the string denoting the last_name field in the database.
+	FieldLastName = "last_name"
+	// FieldDateOfBirth holds the string denoting the date_of_birth field in the database.
+	FieldDateOfBirth = "date_of_birth"
+	// FieldGender holds the string denoting the gender field in the database.
+	FieldGender = "gender"
+	// FieldPhoneNumber holds the string denoting the phone_number field in the database.
+	FieldPhoneNumber = "phone_number"
+	// FieldCurrentAddress holds the string denoting the current_address field in the database.
+	FieldCurrentAddress = "current_address"
+	// FieldPermanentAddress holds the string denoting the permanent_address field in the database.
+	FieldPermanentAddress = "permanent_address"
 	// FieldIsActive holds the string denoting the is_active field in the database.
 	FieldIsActive = "is_active"
+	// FieldIsDeleted holds the string denoting the is_deleted field in the database.
+	FieldIsDeleted = "is_deleted"
+	// FieldIsEmailVerified holds the string denoting the is_email_verified field in the database.
+	FieldIsEmailVerified = "is_email_verified"
+	// FieldIsVerified holds the string denoting the is_verified field in the database.
+	FieldIsVerified = "is_verified"
+	// FieldLastLoginTime holds the string denoting the last_login_time field in the database.
+	FieldLastLoginTime = "last_login_time"
+	// FieldParentID holds the string denoting the parent_id field in the database.
+	FieldParentID = "parent_id"
+	// FieldPhotoURL holds the string denoting the photo_url field in the database.
+	FieldPhotoURL = "photo_url"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// FieldLastLoginAt holds the string denoting the last_login_at field in the database.
-	FieldLastLoginAt = "last_login_at"
-	// EdgePermissions holds the string denoting the permissions edge name in mutations.
-	EdgePermissions = "permissions"
-	// EdgeOtps holds the string denoting the otps edge name in mutations.
-	EdgeOtps = "otps"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
+	// FieldUpdatedBy holds the string denoting the updated_by field in the database.
+	FieldUpdatedBy = "updated_by"
+	// EdgeUpdatedBlogs holds the string denoting the updated_blogs edge name in mutations.
+	EdgeUpdatedBlogs = "updated_blogs"
+	// EdgeCreatedByUser holds the string denoting the created_by_user edge name in mutations.
+	EdgeCreatedByUser = "created_by_user"
+	// EdgeCreatedUsers holds the string denoting the created_users edge name in mutations.
+	EdgeCreatedUsers = "created_users"
+	// EdgeUpdatedByUser holds the string denoting the updated_by_user edge name in mutations.
+	EdgeUpdatedByUser = "updated_by_user"
+	// EdgeUpdatedUsers holds the string denoting the updated_users edge name in mutations.
+	EdgeUpdatedUsers = "updated_users"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PermissionsTable is the table that holds the permissions relation/edge. The primary key declared below.
-	PermissionsTable = "user_permissions"
-	// PermissionsInverseTable is the table name for the Permission entity.
-	// It exists in this package in order to avoid circular dependency with the "permission" package.
-	PermissionsInverseTable = "permissions"
-	// OtpsTable is the table that holds the otps relation/edge.
-	OtpsTable = "ot_ps"
-	// OtpsInverseTable is the table name for the OTP entity.
-	// It exists in this package in order to avoid circular dependency with the "otp" package.
-	OtpsInverseTable = "ot_ps"
-	// OtpsColumn is the table column denoting the otps relation/edge.
-	OtpsColumn = "user_otps"
+	// UpdatedBlogsTable is the table that holds the updated_blogs relation/edge.
+	UpdatedBlogsTable = "blogs"
+	// UpdatedBlogsInverseTable is the table name for the Blogs entity.
+	// It exists in this package in order to avoid circular dependency with the "blogs" package.
+	UpdatedBlogsInverseTable = "blogs"
+	// UpdatedBlogsColumn is the table column denoting the updated_blogs relation/edge.
+	UpdatedBlogsColumn = "user_updated_blogs"
+	// CreatedByUserTable is the table that holds the created_by_user relation/edge.
+	CreatedByUserTable = "users"
+	// CreatedByUserColumn is the table column denoting the created_by_user relation/edge.
+	CreatedByUserColumn = "user_created_users"
+	// CreatedUsersTable is the table that holds the created_users relation/edge.
+	CreatedUsersTable = "users"
+	// CreatedUsersColumn is the table column denoting the created_users relation/edge.
+	CreatedUsersColumn = "user_created_users"
+	// UpdatedByUserTable is the table that holds the updated_by_user relation/edge.
+	UpdatedByUserTable = "users"
+	// UpdatedByUserColumn is the table column denoting the updated_by_user relation/edge.
+	UpdatedByUserColumn = "user_updated_users"
+	// UpdatedUsersTable is the table that holds the updated_users relation/edge.
+	UpdatedUsersTable = "users"
+	// UpdatedUsersColumn is the table column denoting the updated_users relation/edge.
+	UpdatedUsersColumn = "user_updated_users"
 )
 
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldName,
-	FieldPhone,
-	FieldIsAdmin,
+	FieldUsername,
+	FieldPassword,
+	FieldEmail,
+	FieldFirstName,
+	FieldLastName,
+	FieldDateOfBirth,
+	FieldGender,
+	FieldPhoneNumber,
+	FieldCurrentAddress,
+	FieldPermanentAddress,
 	FieldIsActive,
+	FieldIsDeleted,
+	FieldIsEmailVerified,
+	FieldIsVerified,
+	FieldLastLoginTime,
+	FieldParentID,
+	FieldPhotoURL,
 	FieldCreatedAt,
 	FieldUpdatedAt,
-	FieldLastLoginAt,
+	FieldCreatedBy,
+	FieldUpdatedBy,
 }
 
-var (
-	// PermissionsPrimaryKey and PermissionsColumn2 are the table columns denoting the
-	// primary key for the permissions relation (M2M).
-	PermissionsPrimaryKey = []string{"user_id", "permission_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "users"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"user_created_users",
+	"user_updated_users",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -71,14 +133,29 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
-	// DefaultIsAdmin holds the default value on creation for the "is_admin" field.
-	DefaultIsAdmin bool
 	// DefaultIsActive holds the default value on creation for the "is_active" field.
 	DefaultIsActive bool
+	// DefaultIsDeleted holds the default value on creation for the "is_deleted" field.
+	DefaultIsDeleted bool
+	// DefaultIsEmailVerified holds the default value on creation for the "is_email_verified" field.
+	DefaultIsEmailVerified bool
+	// DefaultIsVerified holds the default value on creation for the "is_verified" field.
+	DefaultIsVerified bool
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 )
 
 // OrderOption defines the ordering options for the User queries.
@@ -89,24 +166,89 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByUsername orders the results by the username field.
+func ByUsername(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUsername, opts...).ToFunc()
 }
 
-// ByPhone orders the results by the phone field.
-func ByPhone(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPhone, opts...).ToFunc()
+// ByPassword orders the results by the password field.
+func ByPassword(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassword, opts...).ToFunc()
 }
 
-// ByIsAdmin orders the results by the is_admin field.
-func ByIsAdmin(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldIsAdmin, opts...).ToFunc()
+// ByEmail orders the results by the email field.
+func ByEmail(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldEmail, opts...).ToFunc()
+}
+
+// ByFirstName orders the results by the first_name field.
+func ByFirstName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFirstName, opts...).ToFunc()
+}
+
+// ByLastName orders the results by the last_name field.
+func ByLastName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastName, opts...).ToFunc()
+}
+
+// ByDateOfBirth orders the results by the date_of_birth field.
+func ByDateOfBirth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDateOfBirth, opts...).ToFunc()
+}
+
+// ByGender orders the results by the gender field.
+func ByGender(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGender, opts...).ToFunc()
+}
+
+// ByPhoneNumber orders the results by the phone_number field.
+func ByPhoneNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhoneNumber, opts...).ToFunc()
+}
+
+// ByCurrentAddress orders the results by the current_address field.
+func ByCurrentAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentAddress, opts...).ToFunc()
+}
+
+// ByPermanentAddress orders the results by the permanent_address field.
+func ByPermanentAddress(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPermanentAddress, opts...).ToFunc()
 }
 
 // ByIsActive orders the results by the is_active field.
 func ByIsActive(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsActive, opts...).ToFunc()
+}
+
+// ByIsDeleted orders the results by the is_deleted field.
+func ByIsDeleted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsDeleted, opts...).ToFunc()
+}
+
+// ByIsEmailVerified orders the results by the is_email_verified field.
+func ByIsEmailVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsEmailVerified, opts...).ToFunc()
+}
+
+// ByIsVerified orders the results by the is_verified field.
+func ByIsVerified(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIsVerified, opts...).ToFunc()
+}
+
+// ByLastLoginTime orders the results by the last_login_time field.
+func ByLastLoginTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastLoginTime, opts...).ToFunc()
+}
+
+// ByParentID orders the results by the parent_id field.
+func ByParentID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldParentID, opts...).ToFunc()
+}
+
+// ByPhotoURL orders the results by the photo_url field.
+func ByPhotoURL(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPhotoURL, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
@@ -119,49 +261,103 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByLastLoginAt orders the results by the last_login_at field.
-func ByLastLoginAt(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldLastLoginAt, opts...).ToFunc()
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
 }
 
-// ByPermissionsCount orders the results by permissions count.
-func ByPermissionsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByUpdatedBy orders the results by the updated_by field.
+func ByUpdatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedBy, opts...).ToFunc()
+}
+
+// ByUpdatedBlogsCount orders the results by updated_blogs count.
+func ByUpdatedBlogsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPermissionsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newUpdatedBlogsStep(), opts...)
 	}
 }
 
-// ByPermissions orders the results by permissions terms.
-func ByPermissions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByUpdatedBlogs orders the results by updated_blogs terms.
+func ByUpdatedBlogs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPermissionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newUpdatedBlogsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByOtpsCount orders the results by otps count.
-func ByOtpsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByCreatedByUserField orders the results by created_by_user field.
+func ByCreatedByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newOtpsStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newCreatedByUserStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByOtps orders the results by otps terms.
-func ByOtps(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByCreatedUsersCount orders the results by created_users count.
+func ByCreatedUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOtpsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborsCount(s, newCreatedUsersStep(), opts...)
 	}
 }
-func newPermissionsStep() *sqlgraph.Step {
+
+// ByCreatedUsers orders the results by created_users terms.
+func ByCreatedUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCreatedUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByUpdatedByUserField orders the results by updated_by_user field.
+func ByUpdatedByUserField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUpdatedByUserStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByUpdatedUsersCount orders the results by updated_users count.
+func ByUpdatedUsersCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newUpdatedUsersStep(), opts...)
+	}
+}
+
+// ByUpdatedUsers orders the results by updated_users terms.
+func ByUpdatedUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newUpdatedUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newUpdatedBlogsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PermissionsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PermissionsTable, PermissionsPrimaryKey...),
+		sqlgraph.To(UpdatedBlogsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UpdatedBlogsTable, UpdatedBlogsColumn),
 	)
 }
-func newOtpsStep() *sqlgraph.Step {
+func newCreatedByUserStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(OtpsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, OtpsTable, OtpsColumn),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CreatedByUserTable, CreatedByUserColumn),
+	)
+}
+func newCreatedUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, CreatedUsersTable, CreatedUsersColumn),
+	)
+}
+func newUpdatedByUserStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, UpdatedByUserTable, UpdatedByUserColumn),
+	)
+}
+func newUpdatedUsersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, UpdatedUsersTable, UpdatedUsersColumn),
 	)
 }

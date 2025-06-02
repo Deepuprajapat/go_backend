@@ -9,28 +9,88 @@ import (
 	"github.com/VI-IM/im_backend_go/ent"
 )
 
-// The OTPFunc type is an adapter to allow the use of ordinary
-// function as OTP mutator.
-type OTPFunc func(context.Context, *ent.OTPMutation) (ent.Value, error)
+// The BlogsFunc type is an adapter to allow the use of ordinary
+// function as Blogs mutator.
+type BlogsFunc func(context.Context, *ent.BlogsMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f OTPFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.OTPMutation); ok {
+func (f BlogsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BlogsMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OTPMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlogsMutation", m)
 }
 
-// The PermissionFunc type is an adapter to allow the use of ordinary
-// function as Permission mutator.
-type PermissionFunc func(context.Context, *ent.PermissionMutation) (ent.Value, error)
+// The DeveloperFunc type is an adapter to allow the use of ordinary
+// function as Developer mutator.
+type DeveloperFunc func(context.Context, *ent.DeveloperMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f PermissionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.PermissionMutation); ok {
+func (f DeveloperFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.DeveloperMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PermissionMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DeveloperMutation", m)
+}
+
+// The LeadsFunc type is an adapter to allow the use of ordinary
+// function as Leads mutator.
+type LeadsFunc func(context.Context, *ent.LeadsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LeadsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LeadsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LeadsMutation", m)
+}
+
+// The LocationFunc type is an adapter to allow the use of ordinary
+// function as Location mutator.
+type LocationFunc func(context.Context, *ent.LocationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LocationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LocationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LocationMutation", m)
+}
+
+// The ProjectFunc type is an adapter to allow the use of ordinary
+// function as Project mutator.
+type ProjectFunc func(context.Context, *ent.ProjectMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProjectFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProjectMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProjectMutation", m)
+}
+
+// The PropertyFunc type is an adapter to allow the use of ordinary
+// function as Property mutator.
+type PropertyFunc func(context.Context, *ent.PropertyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PropertyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PropertyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PropertyMutation", m)
+}
+
+// The StaticSiteDataFunc type is an adapter to allow the use of ordinary
+// function as StaticSiteData mutator.
+type StaticSiteDataFunc func(context.Context, *ent.StaticSiteDataMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StaticSiteDataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StaticSiteDataMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StaticSiteDataMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary

@@ -6,11 +6,26 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// OTP is the predicate function for otp builders.
-type OTP func(*sql.Selector)
+// Blogs is the predicate function for blogs builders.
+type Blogs func(*sql.Selector)
 
-// Permission is the predicate function for permission builders.
-type Permission func(*sql.Selector)
+// Developer is the predicate function for developer builders.
+type Developer func(*sql.Selector)
+
+// Leads is the predicate function for leads builders.
+type Leads func(*sql.Selector)
+
+// Location is the predicate function for location builders.
+type Location func(*sql.Selector)
+
+// Project is the predicate function for project builders.
+type Project func(*sql.Selector)
+
+// Property is the predicate function for property builders.
+type Property func(*sql.Selector)
+
+// StaticSiteData is the predicate function for staticsitedata builders.
+type StaticSiteData func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

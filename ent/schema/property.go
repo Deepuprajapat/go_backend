@@ -27,13 +27,14 @@ func (Property) Fields() []ent.Field {
 		field.JSON("property_video_presentation", PropertyVideoPresentation{}),
 		field.JSON("property_know_about", PropertyKnowAbout{}),
 		field.JSON("property_specifications", PropertySpecifications{}),
-		field.JSON("pricing_details", PropertyPricingDetails{}),
+		field.JSON("pricing_details", PropertyPricingDetails{}).Optional(),
 	}
 }
 
 func (Property) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("project", Project.Type).Ref("properties").Unique(),
+		edge.To("leads", Leads.Type),
 	}
 }
 

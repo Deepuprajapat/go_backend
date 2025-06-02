@@ -15,6 +15,7 @@
 
 /ent/*
 !/ent/schema/
+!/ent/generate.go
 
 
 # IDE/editor configs
