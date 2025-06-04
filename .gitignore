@@ -18,6 +18,8 @@
 !/ent/generate.go
 
 
+
+
 # IDE/editor configs
 .vscode/
 .idea/
@@ -27,14 +29,7 @@
 
 # Ent generated files (keep schema, ignore generated code if needed)
 # Uncomment below if you want to ignore generated ent code
-# /ent/ent.go
-# /ent/client.go
-# /ent/migrate/
-# /ent/user/
-# /ent/hook/
-# /ent/predicate/
-# /ent/runtime/
-# /ent/enttest/
+
 
 # Atlas migration files
 dev.db

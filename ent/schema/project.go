@@ -1,15 +1,13 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
 type Project struct {
-	ent.Schema
+	Base
 }
 
 func (Project) Fields() []ent.Field {
@@ -17,15 +15,14 @@ func (Project) Fields() []ent.Field {
 		field.Int("id").Unique(),
 		field.JSON("basic_info", BasicInfo{}),
 		field.JSON("timeline_info", TimelineInfo{}),
-		field.JSON("seo_meta", SEOMeta{}),
-		field.JSON("website_cards", WebsiteCards{}),
+		field.JSON("seo_meta_info", SEOMeta{}),
+		field.JSON("web_cards", ProjectWebCards{}),
+		field.JSON("location_info", LocationInfo{}),
 		field.Bool("is_featured").Default(false),
 		field.Bool("is_premium").Default(false),
 		field.Bool("is_priority").Default(false),
 		field.Bool("is_deleted").Default(false),
 		field.JSON("search_context", []string{}),
-		field.Time("updated_at"),
-		field.Time("created_at").Default(time.Now()),
 	}
 }
 
@@ -37,11 +34,14 @@ func (Project) Edges() []ent.Edge {
 	}
 }
 
-// website cards
-type WebsiteCards struct {
-	Images            Images            `json:"images"`
+// web cards
+type ProjectWebCards struct {
+	Images []struct {
+		Order int    `json:"order"`
+		Url   string `json:"url"`
+	} `json:"images"`
 	ReraInfo          ReraInfo          `json:"rera_info"`
-	Details           Details           `json:"details"`
+	Details           ProjectDetails    `json:"project_details"`
 	WhyToChoose       WhyToChoose       `json:"why_to_choose"`
 	KnowAbout         KnowAbout         `json:"know_about"`
 	FloorPlan         FloorPlan         `json:"floor_plan"`
@@ -49,62 +49,57 @@ type WebsiteCards struct {
 	Amenities         Amenities         `json:"amenities"`
 	VideoPresentation VideoPresentation `json:"video_presentation"`
 	PaymentPlans      PaymentPlans      `json:"payment_plans"`
-	SitePlan          SitePlan          `json:"site_plan"`
-	About             About             `json:"about"`
-	Faqs              Faqs              `json:"faqs"`
+	SitePlan          struct {
+		HTMLContent string `json:"html_content"`
+		Image       string `json:"image"`
+	} `json:"site_plan"`
+	About About `json:"about"`
+	Faqs  []struct {
+		Question string `json:"question"`
+		Answer   string `json:"answer"`
+	} `json:"faqs"`
 }
 
 // project details
-type Details struct {
+type ProjectDetails struct {
 	ProjectArea struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"project_area"`
 	Sizes struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"sizes"`
 	ProjectUnits struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"project_units"`
 	LaunchDate struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"launch_date"`
 	PossessionDate struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"possession_date"`
 	TotalTowers struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"total_towers"`
 	TotalFloors struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"total_floors"`
 	ProjectStatus struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"project_status"`
 	PropertyType struct {
-		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"property_type"`
 }
 
 // Rera info
 type ReraInfo struct {
-	CreatedOn       time.Time `json:"created_on"`
-	Phase           string    `json:"phase"`
-	ProjectReraName string    `json:"project_rera_name"`
-	QRImages        struct {
-		Url string `json:"url"`
-	} `json:"qr_images"`
-	ReraNumber string    `json:"rera_number"`
-	Status     string    `json:"status"`
-	UpdatedOn  time.Time `json:"updated_on"`
+	WebsiteLink string `json:"website_link"`
+	ReraList    []struct {
+		Phase      string `json:"phase"`
+		ReraQR     string `json:"rera_qr"`
+		ReraNumber string `json:"rera_number"`
+		Status     string `json:"status"`
+	} `json:"rera_list"`
 }
 
 // why to choose
@@ -113,25 +108,17 @@ type WhyToChoose struct {
 		Order int    `json:"order"`
 		Url   string `json:"url"`
 	} `json:"images"`
-	Usps []struct {
-		Icon  string `json:"icon"`
-		Value string `json:"value"`
-	} `json:"usps"`
+	USP_List []struct {
+		Icon        string `json:"icon"`
+		HtmlContent string `json:"html_content"`
+	} `json:"usp_list"`
 	ExpertLink  string `json:"expert_link"`
 	BookingLink string `json:"booking_link"`
 }
 
-// project images
-type Images struct {
-	Images []struct {
-		Order int    `json:"order"`
-		Url   string `json:"url"`
-	} `json:"images"`
-}
-
 // know about
 type KnowAbout struct {
-	HtmlText     string `json:"html_text"`
+	HtmlContent  string `json:"html_content"`
 	DownloadLink string `json:"download_link"`
 }
 
@@ -160,13 +147,11 @@ type PriceList struct {
 
 // amenities
 type Amenities struct {
-	Title         string `json:"title"`
-	AmenitiesList []struct {
-		AmenityType []struct {
-			Icon string `json:"icon"`
-			Text string `json:"value"`
-		} `json:"amenity_type"`
-	} `json:"amenities_list"`
+	Title                   string `json:"title"`
+	AmenitiesWithCategories map[string]struct {
+		Icon  string `json:"icon"`
+		Value string `json:"value"`
+	} `json:"amenities_with_categories"`
 }
 
 // video presentation
@@ -191,12 +176,6 @@ type About struct {
 	} `json:"contact_details"`
 }
 
-// site plan
-type SitePlan struct {
-	Title string `json:"title"`
-	Image string `json:"image"`
-}
-
 // payment plans
 type PaymentPlans struct {
 	Title string `json:"title"`
@@ -206,23 +185,20 @@ type PaymentPlans struct {
 	} `json:"plans"`
 }
 
-// faqs
-type Faqs struct {
-	Faqs []struct {
-		Question string `json:"question"`
-		Answer   string `json:"answer"`
-	} `json:"faqs"`
-}
-
 // basic project information
 type BasicInfo struct {
+	ProjectName           string `json:"project_name"`
 	ProjectDescription    string `json:"project_description"`
 	ProjectArea           string `json:"project_area"`
 	ProjectUnits          string `json:"project_units"`
 	ProjectConfigurations string `json:"project_configurations"`
 	AvailableUnit         string `json:"available_unit"`
+	ProjectGroup          string `json:"project_group"`
 	TotalFloor            string `json:"total_floor"`
 	TotalTowers           string `json:"total_towers"`
+	ProjectType           string `json:"project_type"`
+	MinPrice              string `json:"min_price"`
+	MaxPrice              string `json:"max_price"`
 	Status                string `json:"status"`
 }
 
@@ -238,4 +214,13 @@ type SEOMeta struct {
 	MetaDescription string `json:"meta_description"`
 	MetaKeywords    string `json:"meta_keywords"`
 	ProjectUrl      string `json:"project_url"`
+	ProjectSchema   string `json:"project_schema"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
+}
+
+type LocationInfo struct {
+	Title         string `json:"title"`
+	Longitude     string `json:"longitude"`
+	Latitude      string `json:"latitude"`
+	GoogleMapLink string `json:"google_map_link"`
+	Description   string `json:"description"`
 }

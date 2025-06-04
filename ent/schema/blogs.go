@@ -1,15 +1,13 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
 type Blogs struct {
-	ent.Schema
+	Base
 }
 
 func (Blogs) Fields() []ent.Field {
@@ -19,8 +17,6 @@ func (Blogs) Fields() []ent.Field {
 		field.String("blog_url"),
 		field.JSON("blog_content", BlogContent{}),
 		field.Bool("is_priority").Default(false),
-		field.Time("created_at").Default(time.Now()),
-		field.Time("updated_at"),
 	}
 }
 

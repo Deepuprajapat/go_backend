@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// BasesColumns holds the columns for the "bases" table.
+	BasesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "deleted_at", Type: field.TypeBool, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// BasesTable holds the schema information for the "bases" table.
+	BasesTable = &schema.Table{
+		Name:       "bases",
+		Columns:    BasesColumns,
+		PrimaryKey: []*schema.Column{BasesColumns[0]},
+	}
 	// BlogsColumns holds the columns for the "blogs" table.
 	BlogsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -15,8 +28,6 @@ var (
 		{Name: "blog_url", Type: field.TypeString},
 		{Name: "blog_content", Type: field.TypeJSON},
 		{Name: "is_priority", Type: field.TypeBool, Default: false},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "user_updated_blogs", Type: field.TypeInt, Nullable: true},
 	}
 	// BlogsTable holds the schema information for the "blogs" table.
@@ -27,7 +38,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "blogs_users_updated_blogs",
-				Columns:    []*schema.Column{BlogsColumns[7]},
+				Columns:    []*schema.Column{BlogsColumns[5]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -38,17 +49,10 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "legal_name", Type: field.TypeString},
-		{Name: "url", Type: field.TypeString},
+		{Name: "identifier", Type: field.TypeString},
 		{Name: "established_year", Type: field.TypeInt},
-		{Name: "project_count", Type: field.TypeInt},
-		{Name: "contact_info", Type: field.TypeJSON},
 		{Name: "media_content", Type: field.TypeJSON},
-		{Name: "seo_meta", Type: field.TypeJSON},
-		{Name: "is_active", Type: field.TypeBool, Default: false},
 		{Name: "is_verified", Type: field.TypeBool, Default: false},
-		{Name: "search_context", Type: field.TypeString},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// DevelopersTable holds the schema information for the "developers" table.
 	DevelopersTable = &schema.Table{
@@ -103,12 +107,6 @@ var (
 		{Name: "country", Type: field.TypeString, Default: "India"},
 		{Name: "pincode", Type: field.TypeString},
 		{Name: "area_type", Type: field.TypeString},
-		{Name: "latitude", Type: field.TypeFloat64, Nullable: true},
-		{Name: "longitude", Type: field.TypeFloat64, Nullable: true},
-		{Name: "google_map_link", Type: field.TypeString, Nullable: true},
-		{Name: "location_description", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "nearby_landmarks", Type: field.TypeJSON},
-		{Name: "connectivity", Type: field.TypeJSON},
 		{Name: "is_active", Type: field.TypeBool, Default: true},
 		{Name: "slug", Type: field.TypeString},
 		{Name: "created_at", Type: field.TypeTime},
@@ -125,15 +123,14 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "basic_info", Type: field.TypeJSON},
 		{Name: "timeline_info", Type: field.TypeJSON},
-		{Name: "seo_meta", Type: field.TypeJSON},
-		{Name: "website_cards", Type: field.TypeJSON},
+		{Name: "seo_meta_info", Type: field.TypeJSON},
+		{Name: "web_cards", Type: field.TypeJSON},
+		{Name: "location_info", Type: field.TypeJSON},
 		{Name: "is_featured", Type: field.TypeBool, Default: false},
 		{Name: "is_premium", Type: field.TypeBool, Default: false},
 		{Name: "is_priority", Type: field.TypeBool, Default: false},
 		{Name: "is_deleted", Type: field.TypeBool, Default: false},
 		{Name: "search_context", Type: field.TypeJSON},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "created_at", Type: field.TypeTime},
 		{Name: "developer_projects", Type: field.TypeInt, Nullable: true},
 		{Name: "location_projects", Type: field.TypeInt, Nullable: true},
 	}
@@ -145,13 +142,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "projects_developers_projects",
-				Columns:    []*schema.Column{ProjectsColumns[12]},
+				Columns:    []*schema.Column{ProjectsColumns[11]},
 				RefColumns: []*schema.Column{DevelopersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "projects_locations_projects",
-				Columns:    []*schema.Column{ProjectsColumns[13]},
+				Columns:    []*schema.Column{ProjectsColumns[12]},
 				RefColumns: []*schema.Column{LocationsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -162,19 +159,13 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString, Size: 2147483647},
+		{Name: "property_images", Type: field.TypeJSON},
+		{Name: "web_cards", Type: field.TypeJSON},
 		{Name: "basic_info", Type: field.TypeJSON},
-		{Name: "area_details", Type: field.TypeJSON},
 		{Name: "location_details", Type: field.TypeJSON},
 		{Name: "pricing_info", Type: field.TypeJSON},
-		{Name: "features", Type: field.TypeJSON},
-		{Name: "status_info", Type: field.TypeJSON},
-		{Name: "property_images", Type: field.TypeJSON},
-		{Name: "property_details", Type: field.TypeJSON},
-		{Name: "property_amenities", Type: field.TypeJSON},
-		{Name: "property_video_presentation", Type: field.TypeJSON},
-		{Name: "property_know_about", Type: field.TypeJSON},
-		{Name: "property_specifications", Type: field.TypeJSON},
-		{Name: "pricing_details", Type: field.TypeJSON, Nullable: true},
+		{Name: "property_rera_info", Type: field.TypeJSON},
+		{Name: "search_context", Type: field.TypeJSON},
 		{Name: "project_properties", Type: field.TypeInt, Nullable: true},
 	}
 	// PropertiesTable holds the schema information for the "properties" table.
@@ -185,7 +176,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "properties_projects_properties",
-				Columns:    []*schema.Column{PropertiesColumns[16]},
+				Columns:    []*schema.Column{PropertiesColumns[10]},
 				RefColumns: []*schema.Column{ProjectsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -257,6 +248,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		BasesTable,
 		BlogsTable,
 		DevelopersTable,
 		LeadsTable,

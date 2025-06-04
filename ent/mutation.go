@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/VI-IM/im_backend_go/ent/base"
 	"github.com/VI-IM/im_backend_go/ent/blogs"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/leads"
@@ -32,6 +33,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeBase           = "Base"
 	TypeBlogs          = "Blogs"
 	TypeDeveloper      = "Developer"
 	TypeLeads          = "Leads"
@@ -41,6 +43,462 @@ const (
 	TypeStaticSiteData = "StaticSiteData"
 	TypeUser           = "User"
 )
+
+// BaseMutation represents an operation that mutates the Base nodes in the graph.
+type BaseMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	deleted_at    *bool
+	created_at    *time.Time
+	updated_at    *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Base, error)
+	predicates    []predicate.Base
+}
+
+var _ ent.Mutation = (*BaseMutation)(nil)
+
+// baseOption allows management of the mutation configuration using functional options.
+type baseOption func(*BaseMutation)
+
+// newBaseMutation creates new mutation for the Base entity.
+func newBaseMutation(c config, op Op, opts ...baseOption) *BaseMutation {
+	m := &BaseMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeBase,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withBaseID sets the ID field of the mutation.
+func withBaseID(id int) baseOption {
+	return func(m *BaseMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Base
+		)
+		m.oldValue = func(ctx context.Context) (*Base, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Base.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withBase sets the old Base of the mutation.
+func withBase(node *Base) baseOption {
+	return func(m *BaseMutation) {
+		m.oldValue = func(context.Context) (*Base, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m BaseMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m BaseMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *BaseMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *BaseMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Base.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *BaseMutation) SetDeletedAt(b bool) {
+	m.deleted_at = &b
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *BaseMutation) DeletedAt() (r bool, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Base entity.
+// If the Base object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BaseMutation) OldDeletedAt(ctx context.Context) (v *bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *BaseMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[base.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *BaseMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[base.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *BaseMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, base.FieldDeletedAt)
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *BaseMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *BaseMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Base entity.
+// If the Base object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BaseMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *BaseMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *BaseMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *BaseMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Base entity.
+// If the Base object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *BaseMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *BaseMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
+// Where appends a list predicates to the BaseMutation builder.
+func (m *BaseMutation) Where(ps ...predicate.Base) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the BaseMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *BaseMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Base, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *BaseMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *BaseMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Base).
+func (m *BaseMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *BaseMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.deleted_at != nil {
+		fields = append(fields, base.FieldDeletedAt)
+	}
+	if m.created_at != nil {
+		fields = append(fields, base.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, base.FieldUpdatedAt)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *BaseMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case base.FieldDeletedAt:
+		return m.DeletedAt()
+	case base.FieldCreatedAt:
+		return m.CreatedAt()
+	case base.FieldUpdatedAt:
+		return m.UpdatedAt()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *BaseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case base.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case base.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case base.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	}
+	return nil, fmt.Errorf("unknown Base field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BaseMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case base.FieldDeletedAt:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case base.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case base.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Base field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *BaseMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *BaseMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *BaseMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Base numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *BaseMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(base.FieldDeletedAt) {
+		fields = append(fields, base.FieldDeletedAt)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *BaseMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *BaseMutation) ClearField(name string) error {
+	switch name {
+	case base.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Base nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *BaseMutation) ResetField(name string) error {
+	switch name {
+	case base.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case base.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case base.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	}
+	return fmt.Errorf("unknown Base field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *BaseMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *BaseMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *BaseMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *BaseMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *BaseMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *BaseMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *BaseMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Base unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *BaseMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Base edge %s", name)
+}
 
 // BlogsMutation represents an operation that mutates the Blogs nodes in the graph.
 type BlogsMutation struct {
@@ -52,8 +510,6 @@ type BlogsMutation struct {
 	blog_url          *string
 	blog_content      *schema.BlogContent
 	is_priority       *bool
-	created_at        *time.Time
-	updated_at        *time.Time
 	clearedFields     map[string]struct{}
 	updated_by        *int
 	clearedupdated_by bool
@@ -310,78 +766,6 @@ func (m *BlogsMutation) ResetIsPriority() {
 	m.is_priority = nil
 }
 
-// SetCreatedAt sets the "created_at" field.
-func (m *BlogsMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *BlogsMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Blogs entity.
-// If the Blogs object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BlogsMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *BlogsMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *BlogsMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *BlogsMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Blogs entity.
-// If the Blogs object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *BlogsMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *BlogsMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
 // SetUpdatedByID sets the "updated_by" edge to the User entity by id.
 func (m *BlogsMutation) SetUpdatedByID(id int) {
 	m.updated_by = &id
@@ -455,7 +839,7 @@ func (m *BlogsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *BlogsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 4)
 	if m.seo_meta_info != nil {
 		fields = append(fields, blogs.FieldSeoMetaInfo)
 	}
@@ -467,12 +851,6 @@ func (m *BlogsMutation) Fields() []string {
 	}
 	if m.is_priority != nil {
 		fields = append(fields, blogs.FieldIsPriority)
-	}
-	if m.created_at != nil {
-		fields = append(fields, blogs.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, blogs.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -490,10 +868,6 @@ func (m *BlogsMutation) Field(name string) (ent.Value, bool) {
 		return m.BlogContent()
 	case blogs.FieldIsPriority:
 		return m.IsPriority()
-	case blogs.FieldCreatedAt:
-		return m.CreatedAt()
-	case blogs.FieldUpdatedAt:
-		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -511,10 +885,6 @@ func (m *BlogsMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldBlogContent(ctx)
 	case blogs.FieldIsPriority:
 		return m.OldIsPriority(ctx)
-	case blogs.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case blogs.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Blogs field %s", name)
 }
@@ -551,20 +921,6 @@ func (m *BlogsMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsPriority(v)
-		return nil
-	case blogs.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case blogs.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Blogs field %s", name)
@@ -626,12 +982,6 @@ func (m *BlogsMutation) ResetField(name string) error {
 		return nil
 	case blogs.FieldIsPriority:
 		m.ResetIsPriority()
-		return nil
-	case blogs.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case blogs.FieldUpdatedAt:
-		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Blogs field %s", name)
@@ -719,19 +1069,11 @@ type DeveloperMutation struct {
 	id                  *int
 	name                *string
 	legal_name          *string
-	url                 *string
+	identifier          *string
 	established_year    *int
 	addestablished_year *int
-	project_count       *int
-	addproject_count    *int
-	contact_info        *schema.DeveloperContactInfo
 	media_content       *schema.DeveloperMediaContent
-	seo_meta            *schema.DeveloperSEOMeta
-	is_active           *bool
 	is_verified         *bool
-	search_context      *string
-	created_at          *time.Time
-	updated_at          *time.Time
 	clearedFields       map[string]struct{}
 	projects            map[int]struct{}
 	removedprojects     map[int]struct{}
@@ -917,40 +1259,40 @@ func (m *DeveloperMutation) ResetLegalName() {
 	m.legal_name = nil
 }
 
-// SetURL sets the "url" field.
-func (m *DeveloperMutation) SetURL(s string) {
-	m.url = &s
+// SetIdentifier sets the "identifier" field.
+func (m *DeveloperMutation) SetIdentifier(s string) {
+	m.identifier = &s
 }
 
-// URL returns the value of the "url" field in the mutation.
-func (m *DeveloperMutation) URL() (r string, exists bool) {
-	v := m.url
+// Identifier returns the value of the "identifier" field in the mutation.
+func (m *DeveloperMutation) Identifier() (r string, exists bool) {
+	v := m.identifier
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldURL returns the old "url" field's value of the Developer entity.
+// OldIdentifier returns the old "identifier" field's value of the Developer entity.
 // If the Developer object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldURL(ctx context.Context) (v string, err error) {
+func (m *DeveloperMutation) OldIdentifier(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldURL is only allowed on UpdateOne operations")
+		return v, errors.New("OldIdentifier is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldURL requires an ID field in the mutation")
+		return v, errors.New("OldIdentifier requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldURL: %w", err)
+		return v, fmt.Errorf("querying old value for OldIdentifier: %w", err)
 	}
-	return oldValue.URL, nil
+	return oldValue.Identifier, nil
 }
 
-// ResetURL resets all changes to the "url" field.
-func (m *DeveloperMutation) ResetURL() {
-	m.url = nil
+// ResetIdentifier resets all changes to the "identifier" field.
+func (m *DeveloperMutation) ResetIdentifier() {
+	m.identifier = nil
 }
 
 // SetEstablishedYear sets the "established_year" field.
@@ -1009,98 +1351,6 @@ func (m *DeveloperMutation) ResetEstablishedYear() {
 	m.addestablished_year = nil
 }
 
-// SetProjectCount sets the "project_count" field.
-func (m *DeveloperMutation) SetProjectCount(i int) {
-	m.project_count = &i
-	m.addproject_count = nil
-}
-
-// ProjectCount returns the value of the "project_count" field in the mutation.
-func (m *DeveloperMutation) ProjectCount() (r int, exists bool) {
-	v := m.project_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProjectCount returns the old "project_count" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldProjectCount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProjectCount is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProjectCount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProjectCount: %w", err)
-	}
-	return oldValue.ProjectCount, nil
-}
-
-// AddProjectCount adds i to the "project_count" field.
-func (m *DeveloperMutation) AddProjectCount(i int) {
-	if m.addproject_count != nil {
-		*m.addproject_count += i
-	} else {
-		m.addproject_count = &i
-	}
-}
-
-// AddedProjectCount returns the value that was added to the "project_count" field in this mutation.
-func (m *DeveloperMutation) AddedProjectCount() (r int, exists bool) {
-	v := m.addproject_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetProjectCount resets all changes to the "project_count" field.
-func (m *DeveloperMutation) ResetProjectCount() {
-	m.project_count = nil
-	m.addproject_count = nil
-}
-
-// SetContactInfo sets the "contact_info" field.
-func (m *DeveloperMutation) SetContactInfo(sci schema.DeveloperContactInfo) {
-	m.contact_info = &sci
-}
-
-// ContactInfo returns the value of the "contact_info" field in the mutation.
-func (m *DeveloperMutation) ContactInfo() (r schema.DeveloperContactInfo, exists bool) {
-	v := m.contact_info
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldContactInfo returns the old "contact_info" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldContactInfo(ctx context.Context) (v schema.DeveloperContactInfo, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldContactInfo is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldContactInfo requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContactInfo: %w", err)
-	}
-	return oldValue.ContactInfo, nil
-}
-
-// ResetContactInfo resets all changes to the "contact_info" field.
-func (m *DeveloperMutation) ResetContactInfo() {
-	m.contact_info = nil
-}
-
 // SetMediaContent sets the "media_content" field.
 func (m *DeveloperMutation) SetMediaContent(smc schema.DeveloperMediaContent) {
 	m.media_content = &smc
@@ -1137,78 +1387,6 @@ func (m *DeveloperMutation) ResetMediaContent() {
 	m.media_content = nil
 }
 
-// SetSeoMeta sets the "seo_meta" field.
-func (m *DeveloperMutation) SetSeoMeta(ssm schema.DeveloperSEOMeta) {
-	m.seo_meta = &ssm
-}
-
-// SeoMeta returns the value of the "seo_meta" field in the mutation.
-func (m *DeveloperMutation) SeoMeta() (r schema.DeveloperSEOMeta, exists bool) {
-	v := m.seo_meta
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSeoMeta returns the old "seo_meta" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldSeoMeta(ctx context.Context) (v schema.DeveloperSEOMeta, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSeoMeta is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSeoMeta requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSeoMeta: %w", err)
-	}
-	return oldValue.SeoMeta, nil
-}
-
-// ResetSeoMeta resets all changes to the "seo_meta" field.
-func (m *DeveloperMutation) ResetSeoMeta() {
-	m.seo_meta = nil
-}
-
-// SetIsActive sets the "is_active" field.
-func (m *DeveloperMutation) SetIsActive(b bool) {
-	m.is_active = &b
-}
-
-// IsActive returns the value of the "is_active" field in the mutation.
-func (m *DeveloperMutation) IsActive() (r bool, exists bool) {
-	v := m.is_active
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsActive returns the old "is_active" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldIsActive(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsActive is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsActive requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsActive: %w", err)
-	}
-	return oldValue.IsActive, nil
-}
-
-// ResetIsActive resets all changes to the "is_active" field.
-func (m *DeveloperMutation) ResetIsActive() {
-	m.is_active = nil
-}
-
 // SetIsVerified sets the "is_verified" field.
 func (m *DeveloperMutation) SetIsVerified(b bool) {
 	m.is_verified = &b
@@ -1243,114 +1421,6 @@ func (m *DeveloperMutation) OldIsVerified(ctx context.Context) (v bool, err erro
 // ResetIsVerified resets all changes to the "is_verified" field.
 func (m *DeveloperMutation) ResetIsVerified() {
 	m.is_verified = nil
-}
-
-// SetSearchContext sets the "search_context" field.
-func (m *DeveloperMutation) SetSearchContext(s string) {
-	m.search_context = &s
-}
-
-// SearchContext returns the value of the "search_context" field in the mutation.
-func (m *DeveloperMutation) SearchContext() (r string, exists bool) {
-	v := m.search_context
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSearchContext returns the old "search_context" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldSearchContext(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSearchContext is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSearchContext requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSearchContext: %w", err)
-	}
-	return oldValue.SearchContext, nil
-}
-
-// ResetSearchContext resets all changes to the "search_context" field.
-func (m *DeveloperMutation) ResetSearchContext() {
-	m.search_context = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *DeveloperMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *DeveloperMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *DeveloperMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the "updated_at" field.
-func (m *DeveloperMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *DeveloperMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Developer entity.
-// If the Developer object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *DeveloperMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *DeveloperMutation) ResetUpdatedAt() {
-	m.updated_at = nil
 }
 
 // AddProjectIDs adds the "projects" edge to the Project entity by ids.
@@ -1441,45 +1511,24 @@ func (m *DeveloperMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DeveloperMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, developer.FieldName)
 	}
 	if m.legal_name != nil {
 		fields = append(fields, developer.FieldLegalName)
 	}
-	if m.url != nil {
-		fields = append(fields, developer.FieldURL)
+	if m.identifier != nil {
+		fields = append(fields, developer.FieldIdentifier)
 	}
 	if m.established_year != nil {
 		fields = append(fields, developer.FieldEstablishedYear)
 	}
-	if m.project_count != nil {
-		fields = append(fields, developer.FieldProjectCount)
-	}
-	if m.contact_info != nil {
-		fields = append(fields, developer.FieldContactInfo)
-	}
 	if m.media_content != nil {
 		fields = append(fields, developer.FieldMediaContent)
 	}
-	if m.seo_meta != nil {
-		fields = append(fields, developer.FieldSeoMeta)
-	}
-	if m.is_active != nil {
-		fields = append(fields, developer.FieldIsActive)
-	}
 	if m.is_verified != nil {
 		fields = append(fields, developer.FieldIsVerified)
-	}
-	if m.search_context != nil {
-		fields = append(fields, developer.FieldSearchContext)
-	}
-	if m.created_at != nil {
-		fields = append(fields, developer.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, developer.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -1493,28 +1542,14 @@ func (m *DeveloperMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case developer.FieldLegalName:
 		return m.LegalName()
-	case developer.FieldURL:
-		return m.URL()
+	case developer.FieldIdentifier:
+		return m.Identifier()
 	case developer.FieldEstablishedYear:
 		return m.EstablishedYear()
-	case developer.FieldProjectCount:
-		return m.ProjectCount()
-	case developer.FieldContactInfo:
-		return m.ContactInfo()
 	case developer.FieldMediaContent:
 		return m.MediaContent()
-	case developer.FieldSeoMeta:
-		return m.SeoMeta()
-	case developer.FieldIsActive:
-		return m.IsActive()
 	case developer.FieldIsVerified:
 		return m.IsVerified()
-	case developer.FieldSearchContext:
-		return m.SearchContext()
-	case developer.FieldCreatedAt:
-		return m.CreatedAt()
-	case developer.FieldUpdatedAt:
-		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -1528,28 +1563,14 @@ func (m *DeveloperMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldName(ctx)
 	case developer.FieldLegalName:
 		return m.OldLegalName(ctx)
-	case developer.FieldURL:
-		return m.OldURL(ctx)
+	case developer.FieldIdentifier:
+		return m.OldIdentifier(ctx)
 	case developer.FieldEstablishedYear:
 		return m.OldEstablishedYear(ctx)
-	case developer.FieldProjectCount:
-		return m.OldProjectCount(ctx)
-	case developer.FieldContactInfo:
-		return m.OldContactInfo(ctx)
 	case developer.FieldMediaContent:
 		return m.OldMediaContent(ctx)
-	case developer.FieldSeoMeta:
-		return m.OldSeoMeta(ctx)
-	case developer.FieldIsActive:
-		return m.OldIsActive(ctx)
 	case developer.FieldIsVerified:
 		return m.OldIsVerified(ctx)
-	case developer.FieldSearchContext:
-		return m.OldSearchContext(ctx)
-	case developer.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case developer.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Developer field %s", name)
 }
@@ -1573,12 +1594,12 @@ func (m *DeveloperMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLegalName(v)
 		return nil
-	case developer.FieldURL:
+	case developer.FieldIdentifier:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetURL(v)
+		m.SetIdentifier(v)
 		return nil
 	case developer.FieldEstablishedYear:
 		v, ok := value.(int)
@@ -1587,20 +1608,6 @@ func (m *DeveloperMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEstablishedYear(v)
 		return nil
-	case developer.FieldProjectCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProjectCount(v)
-		return nil
-	case developer.FieldContactInfo:
-		v, ok := value.(schema.DeveloperContactInfo)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetContactInfo(v)
-		return nil
 	case developer.FieldMediaContent:
 		v, ok := value.(schema.DeveloperMediaContent)
 		if !ok {
@@ -1608,47 +1615,12 @@ func (m *DeveloperMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMediaContent(v)
 		return nil
-	case developer.FieldSeoMeta:
-		v, ok := value.(schema.DeveloperSEOMeta)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSeoMeta(v)
-		return nil
-	case developer.FieldIsActive:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsActive(v)
-		return nil
 	case developer.FieldIsVerified:
 		v, ok := value.(bool)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIsVerified(v)
-		return nil
-	case developer.FieldSearchContext:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSearchContext(v)
-		return nil
-	case developer.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case developer.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Developer field %s", name)
@@ -1661,9 +1633,6 @@ func (m *DeveloperMutation) AddedFields() []string {
 	if m.addestablished_year != nil {
 		fields = append(fields, developer.FieldEstablishedYear)
 	}
-	if m.addproject_count != nil {
-		fields = append(fields, developer.FieldProjectCount)
-	}
 	return fields
 }
 
@@ -1674,8 +1643,6 @@ func (m *DeveloperMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case developer.FieldEstablishedYear:
 		return m.AddedEstablishedYear()
-	case developer.FieldProjectCount:
-		return m.AddedProjectCount()
 	}
 	return nil, false
 }
@@ -1691,13 +1658,6 @@ func (m *DeveloperMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddEstablishedYear(v)
-		return nil
-	case developer.FieldProjectCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddProjectCount(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Developer numeric field %s", name)
@@ -1732,38 +1692,17 @@ func (m *DeveloperMutation) ResetField(name string) error {
 	case developer.FieldLegalName:
 		m.ResetLegalName()
 		return nil
-	case developer.FieldURL:
-		m.ResetURL()
+	case developer.FieldIdentifier:
+		m.ResetIdentifier()
 		return nil
 	case developer.FieldEstablishedYear:
 		m.ResetEstablishedYear()
 		return nil
-	case developer.FieldProjectCount:
-		m.ResetProjectCount()
-		return nil
-	case developer.FieldContactInfo:
-		m.ResetContactInfo()
-		return nil
 	case developer.FieldMediaContent:
 		m.ResetMediaContent()
 		return nil
-	case developer.FieldSeoMeta:
-		m.ResetSeoMeta()
-		return nil
-	case developer.FieldIsActive:
-		m.ResetIsActive()
-		return nil
 	case developer.FieldIsVerified:
 		m.ResetIsVerified()
-		return nil
-	case developer.FieldSearchContext:
-		m.ResetSearchContext()
-		return nil
-	case developer.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case developer.FieldUpdatedAt:
-		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Developer field %s", name)
@@ -2912,35 +2851,27 @@ func (m *LeadsMutation) ResetEdge(name string) error {
 // LocationMutation represents an operation that mutates the Location nodes in the graph.
 type LocationMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *int
-	locality_name        *string
-	city                 *string
-	state                *string
-	phone_number         *string
-	country              *string
-	pincode              *string
-	area_type            *string
-	latitude             *float64
-	addlatitude          *float64
-	longitude            *float64
-	addlongitude         *float64
-	google_map_link      *string
-	location_description *string
-	nearby_landmarks     *schema.NearbyLandmarks
-	connectivity         *schema.LocationConnectivity
-	is_active            *bool
-	slug                 *string
-	created_at           *time.Time
-	updated_at           *time.Time
-	clearedFields        map[string]struct{}
-	projects             map[int]struct{}
-	removedprojects      map[int]struct{}
-	clearedprojects      bool
-	done                 bool
-	oldValue             func(context.Context) (*Location, error)
-	predicates           []predicate.Location
+	op              Op
+	typ             string
+	id              *int
+	locality_name   *string
+	city            *string
+	state           *string
+	phone_number    *string
+	country         *string
+	pincode         *string
+	area_type       *string
+	is_active       *bool
+	slug            *string
+	created_at      *time.Time
+	updated_at      *time.Time
+	clearedFields   map[string]struct{}
+	projects        map[int]struct{}
+	removedprojects map[int]struct{}
+	clearedprojects bool
+	done            bool
+	oldValue        func(context.Context) (*Location, error)
+	predicates      []predicate.Location
 }
 
 var _ ent.Mutation = (*LocationMutation)(nil)
@@ -3299,316 +3230,6 @@ func (m *LocationMutation) ResetAreaType() {
 	m.area_type = nil
 }
 
-// SetLatitude sets the "latitude" field.
-func (m *LocationMutation) SetLatitude(f float64) {
-	m.latitude = &f
-	m.addlatitude = nil
-}
-
-// Latitude returns the value of the "latitude" field in the mutation.
-func (m *LocationMutation) Latitude() (r float64, exists bool) {
-	v := m.latitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLatitude returns the old "latitude" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldLatitude(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLatitude is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLatitude requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLatitude: %w", err)
-	}
-	return oldValue.Latitude, nil
-}
-
-// AddLatitude adds f to the "latitude" field.
-func (m *LocationMutation) AddLatitude(f float64) {
-	if m.addlatitude != nil {
-		*m.addlatitude += f
-	} else {
-		m.addlatitude = &f
-	}
-}
-
-// AddedLatitude returns the value that was added to the "latitude" field in this mutation.
-func (m *LocationMutation) AddedLatitude() (r float64, exists bool) {
-	v := m.addlatitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearLatitude clears the value of the "latitude" field.
-func (m *LocationMutation) ClearLatitude() {
-	m.latitude = nil
-	m.addlatitude = nil
-	m.clearedFields[location.FieldLatitude] = struct{}{}
-}
-
-// LatitudeCleared returns if the "latitude" field was cleared in this mutation.
-func (m *LocationMutation) LatitudeCleared() bool {
-	_, ok := m.clearedFields[location.FieldLatitude]
-	return ok
-}
-
-// ResetLatitude resets all changes to the "latitude" field.
-func (m *LocationMutation) ResetLatitude() {
-	m.latitude = nil
-	m.addlatitude = nil
-	delete(m.clearedFields, location.FieldLatitude)
-}
-
-// SetLongitude sets the "longitude" field.
-func (m *LocationMutation) SetLongitude(f float64) {
-	m.longitude = &f
-	m.addlongitude = nil
-}
-
-// Longitude returns the value of the "longitude" field in the mutation.
-func (m *LocationMutation) Longitude() (r float64, exists bool) {
-	v := m.longitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLongitude returns the old "longitude" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldLongitude(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLongitude is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLongitude requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLongitude: %w", err)
-	}
-	return oldValue.Longitude, nil
-}
-
-// AddLongitude adds f to the "longitude" field.
-func (m *LocationMutation) AddLongitude(f float64) {
-	if m.addlongitude != nil {
-		*m.addlongitude += f
-	} else {
-		m.addlongitude = &f
-	}
-}
-
-// AddedLongitude returns the value that was added to the "longitude" field in this mutation.
-func (m *LocationMutation) AddedLongitude() (r float64, exists bool) {
-	v := m.addlongitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearLongitude clears the value of the "longitude" field.
-func (m *LocationMutation) ClearLongitude() {
-	m.longitude = nil
-	m.addlongitude = nil
-	m.clearedFields[location.FieldLongitude] = struct{}{}
-}
-
-// LongitudeCleared returns if the "longitude" field was cleared in this mutation.
-func (m *LocationMutation) LongitudeCleared() bool {
-	_, ok := m.clearedFields[location.FieldLongitude]
-	return ok
-}
-
-// ResetLongitude resets all changes to the "longitude" field.
-func (m *LocationMutation) ResetLongitude() {
-	m.longitude = nil
-	m.addlongitude = nil
-	delete(m.clearedFields, location.FieldLongitude)
-}
-
-// SetGoogleMapLink sets the "google_map_link" field.
-func (m *LocationMutation) SetGoogleMapLink(s string) {
-	m.google_map_link = &s
-}
-
-// GoogleMapLink returns the value of the "google_map_link" field in the mutation.
-func (m *LocationMutation) GoogleMapLink() (r string, exists bool) {
-	v := m.google_map_link
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldGoogleMapLink returns the old "google_map_link" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldGoogleMapLink(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldGoogleMapLink is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldGoogleMapLink requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldGoogleMapLink: %w", err)
-	}
-	return oldValue.GoogleMapLink, nil
-}
-
-// ClearGoogleMapLink clears the value of the "google_map_link" field.
-func (m *LocationMutation) ClearGoogleMapLink() {
-	m.google_map_link = nil
-	m.clearedFields[location.FieldGoogleMapLink] = struct{}{}
-}
-
-// GoogleMapLinkCleared returns if the "google_map_link" field was cleared in this mutation.
-func (m *LocationMutation) GoogleMapLinkCleared() bool {
-	_, ok := m.clearedFields[location.FieldGoogleMapLink]
-	return ok
-}
-
-// ResetGoogleMapLink resets all changes to the "google_map_link" field.
-func (m *LocationMutation) ResetGoogleMapLink() {
-	m.google_map_link = nil
-	delete(m.clearedFields, location.FieldGoogleMapLink)
-}
-
-// SetLocationDescription sets the "location_description" field.
-func (m *LocationMutation) SetLocationDescription(s string) {
-	m.location_description = &s
-}
-
-// LocationDescription returns the value of the "location_description" field in the mutation.
-func (m *LocationMutation) LocationDescription() (r string, exists bool) {
-	v := m.location_description
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLocationDescription returns the old "location_description" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldLocationDescription(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLocationDescription is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLocationDescription requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLocationDescription: %w", err)
-	}
-	return oldValue.LocationDescription, nil
-}
-
-// ClearLocationDescription clears the value of the "location_description" field.
-func (m *LocationMutation) ClearLocationDescription() {
-	m.location_description = nil
-	m.clearedFields[location.FieldLocationDescription] = struct{}{}
-}
-
-// LocationDescriptionCleared returns if the "location_description" field was cleared in this mutation.
-func (m *LocationMutation) LocationDescriptionCleared() bool {
-	_, ok := m.clearedFields[location.FieldLocationDescription]
-	return ok
-}
-
-// ResetLocationDescription resets all changes to the "location_description" field.
-func (m *LocationMutation) ResetLocationDescription() {
-	m.location_description = nil
-	delete(m.clearedFields, location.FieldLocationDescription)
-}
-
-// SetNearbyLandmarks sets the "nearby_landmarks" field.
-func (m *LocationMutation) SetNearbyLandmarks(sl schema.NearbyLandmarks) {
-	m.nearby_landmarks = &sl
-}
-
-// NearbyLandmarks returns the value of the "nearby_landmarks" field in the mutation.
-func (m *LocationMutation) NearbyLandmarks() (r schema.NearbyLandmarks, exists bool) {
-	v := m.nearby_landmarks
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldNearbyLandmarks returns the old "nearby_landmarks" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldNearbyLandmarks(ctx context.Context) (v schema.NearbyLandmarks, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNearbyLandmarks is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNearbyLandmarks requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNearbyLandmarks: %w", err)
-	}
-	return oldValue.NearbyLandmarks, nil
-}
-
-// ResetNearbyLandmarks resets all changes to the "nearby_landmarks" field.
-func (m *LocationMutation) ResetNearbyLandmarks() {
-	m.nearby_landmarks = nil
-}
-
-// SetConnectivity sets the "connectivity" field.
-func (m *LocationMutation) SetConnectivity(sc schema.LocationConnectivity) {
-	m.connectivity = &sc
-}
-
-// Connectivity returns the value of the "connectivity" field in the mutation.
-func (m *LocationMutation) Connectivity() (r schema.LocationConnectivity, exists bool) {
-	v := m.connectivity
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldConnectivity returns the old "connectivity" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldConnectivity(ctx context.Context) (v schema.LocationConnectivity, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldConnectivity is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldConnectivity requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldConnectivity: %w", err)
-	}
-	return oldValue.Connectivity, nil
-}
-
-// ResetConnectivity resets all changes to the "connectivity" field.
-func (m *LocationMutation) ResetConnectivity() {
-	m.connectivity = nil
-}
-
 // SetIsActive sets the "is_active" field.
 func (m *LocationMutation) SetIsActive(b bool) {
 	m.is_active = &b
@@ -3841,7 +3462,7 @@ func (m *LocationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LocationMutation) Fields() []string {
-	fields := make([]string, 0, 17)
+	fields := make([]string, 0, 11)
 	if m.locality_name != nil {
 		fields = append(fields, location.FieldLocalityName)
 	}
@@ -3862,24 +3483,6 @@ func (m *LocationMutation) Fields() []string {
 	}
 	if m.area_type != nil {
 		fields = append(fields, location.FieldAreaType)
-	}
-	if m.latitude != nil {
-		fields = append(fields, location.FieldLatitude)
-	}
-	if m.longitude != nil {
-		fields = append(fields, location.FieldLongitude)
-	}
-	if m.google_map_link != nil {
-		fields = append(fields, location.FieldGoogleMapLink)
-	}
-	if m.location_description != nil {
-		fields = append(fields, location.FieldLocationDescription)
-	}
-	if m.nearby_landmarks != nil {
-		fields = append(fields, location.FieldNearbyLandmarks)
-	}
-	if m.connectivity != nil {
-		fields = append(fields, location.FieldConnectivity)
 	}
 	if m.is_active != nil {
 		fields = append(fields, location.FieldIsActive)
@@ -3915,18 +3518,6 @@ func (m *LocationMutation) Field(name string) (ent.Value, bool) {
 		return m.Pincode()
 	case location.FieldAreaType:
 		return m.AreaType()
-	case location.FieldLatitude:
-		return m.Latitude()
-	case location.FieldLongitude:
-		return m.Longitude()
-	case location.FieldGoogleMapLink:
-		return m.GoogleMapLink()
-	case location.FieldLocationDescription:
-		return m.LocationDescription()
-	case location.FieldNearbyLandmarks:
-		return m.NearbyLandmarks()
-	case location.FieldConnectivity:
-		return m.Connectivity()
 	case location.FieldIsActive:
 		return m.IsActive()
 	case location.FieldSlug:
@@ -3958,18 +3549,6 @@ func (m *LocationMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldPincode(ctx)
 	case location.FieldAreaType:
 		return m.OldAreaType(ctx)
-	case location.FieldLatitude:
-		return m.OldLatitude(ctx)
-	case location.FieldLongitude:
-		return m.OldLongitude(ctx)
-	case location.FieldGoogleMapLink:
-		return m.OldGoogleMapLink(ctx)
-	case location.FieldLocationDescription:
-		return m.OldLocationDescription(ctx)
-	case location.FieldNearbyLandmarks:
-		return m.OldNearbyLandmarks(ctx)
-	case location.FieldConnectivity:
-		return m.OldConnectivity(ctx)
 	case location.FieldIsActive:
 		return m.OldIsActive(ctx)
 	case location.FieldSlug:
@@ -4036,48 +3615,6 @@ func (m *LocationMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAreaType(v)
 		return nil
-	case location.FieldLatitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLatitude(v)
-		return nil
-	case location.FieldLongitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLongitude(v)
-		return nil
-	case location.FieldGoogleMapLink:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetGoogleMapLink(v)
-		return nil
-	case location.FieldLocationDescription:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLocationDescription(v)
-		return nil
-	case location.FieldNearbyLandmarks:
-		v, ok := value.(schema.NearbyLandmarks)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetNearbyLandmarks(v)
-		return nil
-	case location.FieldConnectivity:
-		v, ok := value.(schema.LocationConnectivity)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetConnectivity(v)
-		return nil
 	case location.FieldIsActive:
 		v, ok := value.(bool)
 		if !ok {
@@ -4113,26 +3650,13 @@ func (m *LocationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *LocationMutation) AddedFields() []string {
-	var fields []string
-	if m.addlatitude != nil {
-		fields = append(fields, location.FieldLatitude)
-	}
-	if m.addlongitude != nil {
-		fields = append(fields, location.FieldLongitude)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *LocationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case location.FieldLatitude:
-		return m.AddedLatitude()
-	case location.FieldLongitude:
-		return m.AddedLongitude()
-	}
 	return nil, false
 }
 
@@ -4141,20 +3665,6 @@ func (m *LocationMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *LocationMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case location.FieldLatitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLatitude(v)
-		return nil
-	case location.FieldLongitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLongitude(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Location numeric field %s", name)
 }
@@ -4162,20 +3672,7 @@ func (m *LocationMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *LocationMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(location.FieldLatitude) {
-		fields = append(fields, location.FieldLatitude)
-	}
-	if m.FieldCleared(location.FieldLongitude) {
-		fields = append(fields, location.FieldLongitude)
-	}
-	if m.FieldCleared(location.FieldGoogleMapLink) {
-		fields = append(fields, location.FieldGoogleMapLink)
-	}
-	if m.FieldCleared(location.FieldLocationDescription) {
-		fields = append(fields, location.FieldLocationDescription)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -4188,20 +3685,6 @@ func (m *LocationMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *LocationMutation) ClearField(name string) error {
-	switch name {
-	case location.FieldLatitude:
-		m.ClearLatitude()
-		return nil
-	case location.FieldLongitude:
-		m.ClearLongitude()
-		return nil
-	case location.FieldGoogleMapLink:
-		m.ClearGoogleMapLink()
-		return nil
-	case location.FieldLocationDescription:
-		m.ClearLocationDescription()
-		return nil
-	}
 	return fmt.Errorf("unknown Location nullable field %s", name)
 }
 
@@ -4229,24 +3712,6 @@ func (m *LocationMutation) ResetField(name string) error {
 		return nil
 	case location.FieldAreaType:
 		m.ResetAreaType()
-		return nil
-	case location.FieldLatitude:
-		m.ResetLatitude()
-		return nil
-	case location.FieldLongitude:
-		m.ResetLongitude()
-		return nil
-	case location.FieldGoogleMapLink:
-		m.ResetGoogleMapLink()
-		return nil
-	case location.FieldLocationDescription:
-		m.ResetLocationDescription()
-		return nil
-	case location.FieldNearbyLandmarks:
-		m.ResetNearbyLandmarks()
-		return nil
-	case location.FieldConnectivity:
-		m.ResetConnectivity()
 		return nil
 	case location.FieldIsActive:
 		m.ResetIsActive()
@@ -4356,16 +3821,15 @@ type ProjectMutation struct {
 	id                   *int
 	basic_info           *schema.BasicInfo
 	timeline_info        *schema.TimelineInfo
-	seo_meta             *schema.SEOMeta
-	website_cards        *schema.WebsiteCards
+	seo_meta_info        *schema.SEOMeta
+	web_cards            *schema.ProjectWebCards
+	location_info        *schema.LocationInfo
 	is_featured          *bool
 	is_premium           *bool
 	is_priority          *bool
 	is_deleted           *bool
 	search_context       *[]string
 	appendsearch_context []string
-	updated_at           *time.Time
-	created_at           *time.Time
 	clearedFields        map[string]struct{}
 	properties           map[int]struct{}
 	removedproperties    map[int]struct{}
@@ -4555,76 +4019,112 @@ func (m *ProjectMutation) ResetTimelineInfo() {
 	m.timeline_info = nil
 }
 
-// SetSeoMeta sets the "seo_meta" field.
-func (m *ProjectMutation) SetSeoMeta(sm schema.SEOMeta) {
-	m.seo_meta = &sm
+// SetSeoMetaInfo sets the "seo_meta_info" field.
+func (m *ProjectMutation) SetSeoMetaInfo(sm schema.SEOMeta) {
+	m.seo_meta_info = &sm
 }
 
-// SeoMeta returns the value of the "seo_meta" field in the mutation.
-func (m *ProjectMutation) SeoMeta() (r schema.SEOMeta, exists bool) {
-	v := m.seo_meta
+// SeoMetaInfo returns the value of the "seo_meta_info" field in the mutation.
+func (m *ProjectMutation) SeoMetaInfo() (r schema.SEOMeta, exists bool) {
+	v := m.seo_meta_info
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldSeoMeta returns the old "seo_meta" field's value of the Project entity.
+// OldSeoMetaInfo returns the old "seo_meta_info" field's value of the Project entity.
 // If the Project object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectMutation) OldSeoMeta(ctx context.Context) (v schema.SEOMeta, err error) {
+func (m *ProjectMutation) OldSeoMetaInfo(ctx context.Context) (v schema.SEOMeta, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSeoMeta is only allowed on UpdateOne operations")
+		return v, errors.New("OldSeoMetaInfo is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSeoMeta requires an ID field in the mutation")
+		return v, errors.New("OldSeoMetaInfo requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSeoMeta: %w", err)
+		return v, fmt.Errorf("querying old value for OldSeoMetaInfo: %w", err)
 	}
-	return oldValue.SeoMeta, nil
+	return oldValue.SeoMetaInfo, nil
 }
 
-// ResetSeoMeta resets all changes to the "seo_meta" field.
-func (m *ProjectMutation) ResetSeoMeta() {
-	m.seo_meta = nil
+// ResetSeoMetaInfo resets all changes to the "seo_meta_info" field.
+func (m *ProjectMutation) ResetSeoMetaInfo() {
+	m.seo_meta_info = nil
 }
 
-// SetWebsiteCards sets the "website_cards" field.
-func (m *ProjectMutation) SetWebsiteCards(sc schema.WebsiteCards) {
-	m.website_cards = &sc
+// SetWebCards sets the "web_cards" field.
+func (m *ProjectMutation) SetWebCards(swc schema.ProjectWebCards) {
+	m.web_cards = &swc
 }
 
-// WebsiteCards returns the value of the "website_cards" field in the mutation.
-func (m *ProjectMutation) WebsiteCards() (r schema.WebsiteCards, exists bool) {
-	v := m.website_cards
+// WebCards returns the value of the "web_cards" field in the mutation.
+func (m *ProjectMutation) WebCards() (r schema.ProjectWebCards, exists bool) {
+	v := m.web_cards
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldWebsiteCards returns the old "website_cards" field's value of the Project entity.
+// OldWebCards returns the old "web_cards" field's value of the Project entity.
 // If the Project object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectMutation) OldWebsiteCards(ctx context.Context) (v schema.WebsiteCards, err error) {
+func (m *ProjectMutation) OldWebCards(ctx context.Context) (v schema.ProjectWebCards, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWebsiteCards is only allowed on UpdateOne operations")
+		return v, errors.New("OldWebCards is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWebsiteCards requires an ID field in the mutation")
+		return v, errors.New("OldWebCards requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWebsiteCards: %w", err)
+		return v, fmt.Errorf("querying old value for OldWebCards: %w", err)
 	}
-	return oldValue.WebsiteCards, nil
+	return oldValue.WebCards, nil
 }
 
-// ResetWebsiteCards resets all changes to the "website_cards" field.
-func (m *ProjectMutation) ResetWebsiteCards() {
-	m.website_cards = nil
+// ResetWebCards resets all changes to the "web_cards" field.
+func (m *ProjectMutation) ResetWebCards() {
+	m.web_cards = nil
+}
+
+// SetLocationInfo sets the "location_info" field.
+func (m *ProjectMutation) SetLocationInfo(si schema.LocationInfo) {
+	m.location_info = &si
+}
+
+// LocationInfo returns the value of the "location_info" field in the mutation.
+func (m *ProjectMutation) LocationInfo() (r schema.LocationInfo, exists bool) {
+	v := m.location_info
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocationInfo returns the old "location_info" field's value of the Project entity.
+// If the Project object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ProjectMutation) OldLocationInfo(ctx context.Context) (v schema.LocationInfo, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocationInfo is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocationInfo requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocationInfo: %w", err)
+	}
+	return oldValue.LocationInfo, nil
+}
+
+// ResetLocationInfo resets all changes to the "location_info" field.
+func (m *ProjectMutation) ResetLocationInfo() {
+	m.location_info = nil
 }
 
 // SetIsFeatured sets the "is_featured" field.
@@ -4822,78 +4322,6 @@ func (m *ProjectMutation) ResetSearchContext() {
 	m.appendsearch_context = nil
 }
 
-// SetUpdatedAt sets the "updated_at" field.
-func (m *ProjectMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the value of the "updated_at" field in the mutation.
-func (m *ProjectMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old "updated_at" field's value of the Project entity.
-// If the Project object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt resets all changes to the "updated_at" field.
-func (m *ProjectMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetCreatedAt sets the "created_at" field.
-func (m *ProjectMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the value of the "created_at" field in the mutation.
-func (m *ProjectMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old "created_at" field's value of the Project entity.
-// If the Project object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProjectMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt resets all changes to the "created_at" field.
-func (m *ProjectMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
 // AddPropertyIDs adds the "properties" edge to the Property entity by ids.
 func (m *ProjectMutation) AddPropertyIDs(ids ...int) {
 	if m.properties == nil {
@@ -5060,18 +4488,21 @@ func (m *ProjectMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProjectMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 10)
 	if m.basic_info != nil {
 		fields = append(fields, project.FieldBasicInfo)
 	}
 	if m.timeline_info != nil {
 		fields = append(fields, project.FieldTimelineInfo)
 	}
-	if m.seo_meta != nil {
-		fields = append(fields, project.FieldSeoMeta)
+	if m.seo_meta_info != nil {
+		fields = append(fields, project.FieldSeoMetaInfo)
 	}
-	if m.website_cards != nil {
-		fields = append(fields, project.FieldWebsiteCards)
+	if m.web_cards != nil {
+		fields = append(fields, project.FieldWebCards)
+	}
+	if m.location_info != nil {
+		fields = append(fields, project.FieldLocationInfo)
 	}
 	if m.is_featured != nil {
 		fields = append(fields, project.FieldIsFeatured)
@@ -5088,12 +4519,6 @@ func (m *ProjectMutation) Fields() []string {
 	if m.search_context != nil {
 		fields = append(fields, project.FieldSearchContext)
 	}
-	if m.updated_at != nil {
-		fields = append(fields, project.FieldUpdatedAt)
-	}
-	if m.created_at != nil {
-		fields = append(fields, project.FieldCreatedAt)
-	}
 	return fields
 }
 
@@ -5106,10 +4531,12 @@ func (m *ProjectMutation) Field(name string) (ent.Value, bool) {
 		return m.BasicInfo()
 	case project.FieldTimelineInfo:
 		return m.TimelineInfo()
-	case project.FieldSeoMeta:
-		return m.SeoMeta()
-	case project.FieldWebsiteCards:
-		return m.WebsiteCards()
+	case project.FieldSeoMetaInfo:
+		return m.SeoMetaInfo()
+	case project.FieldWebCards:
+		return m.WebCards()
+	case project.FieldLocationInfo:
+		return m.LocationInfo()
 	case project.FieldIsFeatured:
 		return m.IsFeatured()
 	case project.FieldIsPremium:
@@ -5120,10 +4547,6 @@ func (m *ProjectMutation) Field(name string) (ent.Value, bool) {
 		return m.IsDeleted()
 	case project.FieldSearchContext:
 		return m.SearchContext()
-	case project.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case project.FieldCreatedAt:
-		return m.CreatedAt()
 	}
 	return nil, false
 }
@@ -5137,10 +4560,12 @@ func (m *ProjectMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldBasicInfo(ctx)
 	case project.FieldTimelineInfo:
 		return m.OldTimelineInfo(ctx)
-	case project.FieldSeoMeta:
-		return m.OldSeoMeta(ctx)
-	case project.FieldWebsiteCards:
-		return m.OldWebsiteCards(ctx)
+	case project.FieldSeoMetaInfo:
+		return m.OldSeoMetaInfo(ctx)
+	case project.FieldWebCards:
+		return m.OldWebCards(ctx)
+	case project.FieldLocationInfo:
+		return m.OldLocationInfo(ctx)
 	case project.FieldIsFeatured:
 		return m.OldIsFeatured(ctx)
 	case project.FieldIsPremium:
@@ -5151,10 +4576,6 @@ func (m *ProjectMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldIsDeleted(ctx)
 	case project.FieldSearchContext:
 		return m.OldSearchContext(ctx)
-	case project.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case project.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Project field %s", name)
 }
@@ -5178,19 +4599,26 @@ func (m *ProjectMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTimelineInfo(v)
 		return nil
-	case project.FieldSeoMeta:
+	case project.FieldSeoMetaInfo:
 		v, ok := value.(schema.SEOMeta)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSeoMeta(v)
+		m.SetSeoMetaInfo(v)
 		return nil
-	case project.FieldWebsiteCards:
-		v, ok := value.(schema.WebsiteCards)
+	case project.FieldWebCards:
+		v, ok := value.(schema.ProjectWebCards)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetWebsiteCards(v)
+		m.SetWebCards(v)
+		return nil
+	case project.FieldLocationInfo:
+		v, ok := value.(schema.LocationInfo)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocationInfo(v)
 		return nil
 	case project.FieldIsFeatured:
 		v, ok := value.(bool)
@@ -5226,20 +4654,6 @@ func (m *ProjectMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSearchContext(v)
-		return nil
-	case project.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case project.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Project field %s", name)
@@ -5296,11 +4710,14 @@ func (m *ProjectMutation) ResetField(name string) error {
 	case project.FieldTimelineInfo:
 		m.ResetTimelineInfo()
 		return nil
-	case project.FieldSeoMeta:
-		m.ResetSeoMeta()
+	case project.FieldSeoMetaInfo:
+		m.ResetSeoMetaInfo()
 		return nil
-	case project.FieldWebsiteCards:
-		m.ResetWebsiteCards()
+	case project.FieldWebCards:
+		m.ResetWebCards()
+		return nil
+	case project.FieldLocationInfo:
+		m.ResetLocationInfo()
 		return nil
 	case project.FieldIsFeatured:
 		m.ResetIsFeatured()
@@ -5316,12 +4733,6 @@ func (m *ProjectMutation) ResetField(name string) error {
 		return nil
 	case project.FieldSearchContext:
 		m.ResetSearchContext()
-		return nil
-	case project.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case project.FieldCreatedAt:
-		m.ResetCreatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Project field %s", name)
@@ -5450,33 +4861,28 @@ func (m *ProjectMutation) ResetEdge(name string) error {
 // PropertyMutation represents an operation that mutates the Property nodes in the graph.
 type PropertyMutation struct {
 	config
-	op                          Op
-	typ                         string
-	id                          *int
-	name                        *string
-	description                 *string
-	basic_info                  *schema.PropertyBasicInfo
-	area_details                *schema.PropertyAreaDetails
-	location_details            *schema.PropertyLocationDetails
-	pricing_info                *schema.PropertyPricingInfo
-	features                    *schema.PropertyFeatures
-	status_info                 *schema.PropertyStatusInfo
-	property_images             *schema.PropertyImages
-	property_details            *schema.PropertyDetails
-	property_amenities          *schema.PropertyAmenities
-	property_video_presentation *schema.PropertyVideoPresentation
-	property_know_about         *schema.PropertyKnowAbout
-	property_specifications     *schema.PropertySpecifications
-	pricing_details             *schema.PropertyPricingDetails
-	clearedFields               map[string]struct{}
-	project                     *int
-	clearedproject              bool
-	leads                       map[int]struct{}
-	removedleads                map[int]struct{}
-	clearedleads                bool
-	done                        bool
-	oldValue                    func(context.Context) (*Property, error)
-	predicates                  []predicate.Property
+	op                   Op
+	typ                  string
+	id                   *int
+	name                 *string
+	description          *string
+	property_images      *schema.PropertyImages
+	web_cards            *schema.WebCards
+	basic_info           *schema.PropertyBasicInfo
+	location_details     *schema.PropertyLocationDetails
+	pricing_info         *schema.PropertyPricingInfo
+	property_rera_info   *schema.PropertyReraInfo
+	search_context       *[]string
+	appendsearch_context []string
+	clearedFields        map[string]struct{}
+	project              *int
+	clearedproject       bool
+	leads                map[int]struct{}
+	removedleads         map[int]struct{}
+	clearedleads         bool
+	done                 bool
+	oldValue             func(context.Context) (*Property, error)
+	predicates           []predicate.Property
 }
 
 var _ ent.Mutation = (*PropertyMutation)(nil)
@@ -5655,6 +5061,78 @@ func (m *PropertyMutation) ResetDescription() {
 	m.description = nil
 }
 
+// SetPropertyImages sets the "property_images" field.
+func (m *PropertyMutation) SetPropertyImages(si schema.PropertyImages) {
+	m.property_images = &si
+}
+
+// PropertyImages returns the value of the "property_images" field in the mutation.
+func (m *PropertyMutation) PropertyImages() (r schema.PropertyImages, exists bool) {
+	v := m.property_images
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPropertyImages returns the old "property_images" field's value of the Property entity.
+// If the Property object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PropertyMutation) OldPropertyImages(ctx context.Context) (v schema.PropertyImages, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPropertyImages is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPropertyImages requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPropertyImages: %w", err)
+	}
+	return oldValue.PropertyImages, nil
+}
+
+// ResetPropertyImages resets all changes to the "property_images" field.
+func (m *PropertyMutation) ResetPropertyImages() {
+	m.property_images = nil
+}
+
+// SetWebCards sets the "web_cards" field.
+func (m *PropertyMutation) SetWebCards(sc schema.WebCards) {
+	m.web_cards = &sc
+}
+
+// WebCards returns the value of the "web_cards" field in the mutation.
+func (m *PropertyMutation) WebCards() (r schema.WebCards, exists bool) {
+	v := m.web_cards
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWebCards returns the old "web_cards" field's value of the Property entity.
+// If the Property object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PropertyMutation) OldWebCards(ctx context.Context) (v schema.WebCards, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWebCards is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWebCards requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWebCards: %w", err)
+	}
+	return oldValue.WebCards, nil
+}
+
+// ResetWebCards resets all changes to the "web_cards" field.
+func (m *PropertyMutation) ResetWebCards() {
+	m.web_cards = nil
+}
+
 // SetBasicInfo sets the "basic_info" field.
 func (m *PropertyMutation) SetBasicInfo(sbi schema.PropertyBasicInfo) {
 	m.basic_info = &sbi
@@ -5689,42 +5167,6 @@ func (m *PropertyMutation) OldBasicInfo(ctx context.Context) (v schema.PropertyB
 // ResetBasicInfo resets all changes to the "basic_info" field.
 func (m *PropertyMutation) ResetBasicInfo() {
 	m.basic_info = nil
-}
-
-// SetAreaDetails sets the "area_details" field.
-func (m *PropertyMutation) SetAreaDetails(sad schema.PropertyAreaDetails) {
-	m.area_details = &sad
-}
-
-// AreaDetails returns the value of the "area_details" field in the mutation.
-func (m *PropertyMutation) AreaDetails() (r schema.PropertyAreaDetails, exists bool) {
-	v := m.area_details
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAreaDetails returns the old "area_details" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldAreaDetails(ctx context.Context) (v schema.PropertyAreaDetails, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAreaDetails is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAreaDetails requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAreaDetails: %w", err)
-	}
-	return oldValue.AreaDetails, nil
-}
-
-// ResetAreaDetails resets all changes to the "area_details" field.
-func (m *PropertyMutation) ResetAreaDetails() {
-	m.area_details = nil
 }
 
 // SetLocationDetails sets the "location_details" field.
@@ -5799,341 +5241,91 @@ func (m *PropertyMutation) ResetPricingInfo() {
 	m.pricing_info = nil
 }
 
-// SetFeatures sets the "features" field.
-func (m *PropertyMutation) SetFeatures(sf schema.PropertyFeatures) {
-	m.features = &sf
+// SetPropertyReraInfo sets the "property_rera_info" field.
+func (m *PropertyMutation) SetPropertyReraInfo(sri schema.PropertyReraInfo) {
+	m.property_rera_info = &sri
 }
 
-// Features returns the value of the "features" field in the mutation.
-func (m *PropertyMutation) Features() (r schema.PropertyFeatures, exists bool) {
-	v := m.features
+// PropertyReraInfo returns the value of the "property_rera_info" field in the mutation.
+func (m *PropertyMutation) PropertyReraInfo() (r schema.PropertyReraInfo, exists bool) {
+	v := m.property_rera_info
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFeatures returns the old "features" field's value of the Property entity.
+// OldPropertyReraInfo returns the old "property_rera_info" field's value of the Property entity.
 // If the Property object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldFeatures(ctx context.Context) (v schema.PropertyFeatures, err error) {
+func (m *PropertyMutation) OldPropertyReraInfo(ctx context.Context) (v schema.PropertyReraInfo, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFeatures is only allowed on UpdateOne operations")
+		return v, errors.New("OldPropertyReraInfo is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFeatures requires an ID field in the mutation")
+		return v, errors.New("OldPropertyReraInfo requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFeatures: %w", err)
+		return v, fmt.Errorf("querying old value for OldPropertyReraInfo: %w", err)
 	}
-	return oldValue.Features, nil
+	return oldValue.PropertyReraInfo, nil
 }
 
-// ResetFeatures resets all changes to the "features" field.
-func (m *PropertyMutation) ResetFeatures() {
-	m.features = nil
+// ResetPropertyReraInfo resets all changes to the "property_rera_info" field.
+func (m *PropertyMutation) ResetPropertyReraInfo() {
+	m.property_rera_info = nil
 }
 
-// SetStatusInfo sets the "status_info" field.
-func (m *PropertyMutation) SetStatusInfo(ssi schema.PropertyStatusInfo) {
-	m.status_info = &ssi
+// SetSearchContext sets the "search_context" field.
+func (m *PropertyMutation) SetSearchContext(s []string) {
+	m.search_context = &s
+	m.appendsearch_context = nil
 }
 
-// StatusInfo returns the value of the "status_info" field in the mutation.
-func (m *PropertyMutation) StatusInfo() (r schema.PropertyStatusInfo, exists bool) {
-	v := m.status_info
+// SearchContext returns the value of the "search_context" field in the mutation.
+func (m *PropertyMutation) SearchContext() (r []string, exists bool) {
+	v := m.search_context
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldStatusInfo returns the old "status_info" field's value of the Property entity.
+// OldSearchContext returns the old "search_context" field's value of the Property entity.
 // If the Property object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldStatusInfo(ctx context.Context) (v schema.PropertyStatusInfo, err error) {
+func (m *PropertyMutation) OldSearchContext(ctx context.Context) (v []string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStatusInfo is only allowed on UpdateOne operations")
+		return v, errors.New("OldSearchContext is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStatusInfo requires an ID field in the mutation")
+		return v, errors.New("OldSearchContext requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStatusInfo: %w", err)
+		return v, fmt.Errorf("querying old value for OldSearchContext: %w", err)
 	}
-	return oldValue.StatusInfo, nil
+	return oldValue.SearchContext, nil
 }
 
-// ResetStatusInfo resets all changes to the "status_info" field.
-func (m *PropertyMutation) ResetStatusInfo() {
-	m.status_info = nil
+// AppendSearchContext adds s to the "search_context" field.
+func (m *PropertyMutation) AppendSearchContext(s []string) {
+	m.appendsearch_context = append(m.appendsearch_context, s...)
 }
 
-// SetPropertyImages sets the "property_images" field.
-func (m *PropertyMutation) SetPropertyImages(si schema.PropertyImages) {
-	m.property_images = &si
-}
-
-// PropertyImages returns the value of the "property_images" field in the mutation.
-func (m *PropertyMutation) PropertyImages() (r schema.PropertyImages, exists bool) {
-	v := m.property_images
-	if v == nil {
-		return
+// AppendedSearchContext returns the list of values that were appended to the "search_context" field in this mutation.
+func (m *PropertyMutation) AppendedSearchContext() ([]string, bool) {
+	if len(m.appendsearch_context) == 0 {
+		return nil, false
 	}
-	return *v, true
+	return m.appendsearch_context, true
 }
 
-// OldPropertyImages returns the old "property_images" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPropertyImages(ctx context.Context) (v schema.PropertyImages, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPropertyImages is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPropertyImages requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPropertyImages: %w", err)
-	}
-	return oldValue.PropertyImages, nil
-}
-
-// ResetPropertyImages resets all changes to the "property_images" field.
-func (m *PropertyMutation) ResetPropertyImages() {
-	m.property_images = nil
-}
-
-// SetPropertyDetails sets the "property_details" field.
-func (m *PropertyMutation) SetPropertyDetails(sd schema.PropertyDetails) {
-	m.property_details = &sd
-}
-
-// PropertyDetails returns the value of the "property_details" field in the mutation.
-func (m *PropertyMutation) PropertyDetails() (r schema.PropertyDetails, exists bool) {
-	v := m.property_details
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPropertyDetails returns the old "property_details" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPropertyDetails(ctx context.Context) (v schema.PropertyDetails, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPropertyDetails is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPropertyDetails requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPropertyDetails: %w", err)
-	}
-	return oldValue.PropertyDetails, nil
-}
-
-// ResetPropertyDetails resets all changes to the "property_details" field.
-func (m *PropertyMutation) ResetPropertyDetails() {
-	m.property_details = nil
-}
-
-// SetPropertyAmenities sets the "property_amenities" field.
-func (m *PropertyMutation) SetPropertyAmenities(sa schema.PropertyAmenities) {
-	m.property_amenities = &sa
-}
-
-// PropertyAmenities returns the value of the "property_amenities" field in the mutation.
-func (m *PropertyMutation) PropertyAmenities() (r schema.PropertyAmenities, exists bool) {
-	v := m.property_amenities
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPropertyAmenities returns the old "property_amenities" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPropertyAmenities(ctx context.Context) (v schema.PropertyAmenities, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPropertyAmenities is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPropertyAmenities requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPropertyAmenities: %w", err)
-	}
-	return oldValue.PropertyAmenities, nil
-}
-
-// ResetPropertyAmenities resets all changes to the "property_amenities" field.
-func (m *PropertyMutation) ResetPropertyAmenities() {
-	m.property_amenities = nil
-}
-
-// SetPropertyVideoPresentation sets the "property_video_presentation" field.
-func (m *PropertyMutation) SetPropertyVideoPresentation(svp schema.PropertyVideoPresentation) {
-	m.property_video_presentation = &svp
-}
-
-// PropertyVideoPresentation returns the value of the "property_video_presentation" field in the mutation.
-func (m *PropertyMutation) PropertyVideoPresentation() (r schema.PropertyVideoPresentation, exists bool) {
-	v := m.property_video_presentation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPropertyVideoPresentation returns the old "property_video_presentation" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPropertyVideoPresentation(ctx context.Context) (v schema.PropertyVideoPresentation, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPropertyVideoPresentation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPropertyVideoPresentation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPropertyVideoPresentation: %w", err)
-	}
-	return oldValue.PropertyVideoPresentation, nil
-}
-
-// ResetPropertyVideoPresentation resets all changes to the "property_video_presentation" field.
-func (m *PropertyMutation) ResetPropertyVideoPresentation() {
-	m.property_video_presentation = nil
-}
-
-// SetPropertyKnowAbout sets the "property_know_about" field.
-func (m *PropertyMutation) SetPropertyKnowAbout(ska schema.PropertyKnowAbout) {
-	m.property_know_about = &ska
-}
-
-// PropertyKnowAbout returns the value of the "property_know_about" field in the mutation.
-func (m *PropertyMutation) PropertyKnowAbout() (r schema.PropertyKnowAbout, exists bool) {
-	v := m.property_know_about
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPropertyKnowAbout returns the old "property_know_about" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPropertyKnowAbout(ctx context.Context) (v schema.PropertyKnowAbout, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPropertyKnowAbout is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPropertyKnowAbout requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPropertyKnowAbout: %w", err)
-	}
-	return oldValue.PropertyKnowAbout, nil
-}
-
-// ResetPropertyKnowAbout resets all changes to the "property_know_about" field.
-func (m *PropertyMutation) ResetPropertyKnowAbout() {
-	m.property_know_about = nil
-}
-
-// SetPropertySpecifications sets the "property_specifications" field.
-func (m *PropertyMutation) SetPropertySpecifications(ss schema.PropertySpecifications) {
-	m.property_specifications = &ss
-}
-
-// PropertySpecifications returns the value of the "property_specifications" field in the mutation.
-func (m *PropertyMutation) PropertySpecifications() (r schema.PropertySpecifications, exists bool) {
-	v := m.property_specifications
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPropertySpecifications returns the old "property_specifications" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPropertySpecifications(ctx context.Context) (v schema.PropertySpecifications, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPropertySpecifications is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPropertySpecifications requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPropertySpecifications: %w", err)
-	}
-	return oldValue.PropertySpecifications, nil
-}
-
-// ResetPropertySpecifications resets all changes to the "property_specifications" field.
-func (m *PropertyMutation) ResetPropertySpecifications() {
-	m.property_specifications = nil
-}
-
-// SetPricingDetails sets the "pricing_details" field.
-func (m *PropertyMutation) SetPricingDetails(spd schema.PropertyPricingDetails) {
-	m.pricing_details = &spd
-}
-
-// PricingDetails returns the value of the "pricing_details" field in the mutation.
-func (m *PropertyMutation) PricingDetails() (r schema.PropertyPricingDetails, exists bool) {
-	v := m.pricing_details
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPricingDetails returns the old "pricing_details" field's value of the Property entity.
-// If the Property object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PropertyMutation) OldPricingDetails(ctx context.Context) (v schema.PropertyPricingDetails, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPricingDetails is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPricingDetails requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPricingDetails: %w", err)
-	}
-	return oldValue.PricingDetails, nil
-}
-
-// ClearPricingDetails clears the value of the "pricing_details" field.
-func (m *PropertyMutation) ClearPricingDetails() {
-	m.pricing_details = nil
-	m.clearedFields[property.FieldPricingDetails] = struct{}{}
-}
-
-// PricingDetailsCleared returns if the "pricing_details" field was cleared in this mutation.
-func (m *PropertyMutation) PricingDetailsCleared() bool {
-	_, ok := m.clearedFields[property.FieldPricingDetails]
-	return ok
-}
-
-// ResetPricingDetails resets all changes to the "pricing_details" field.
-func (m *PropertyMutation) ResetPricingDetails() {
-	m.pricing_details = nil
-	delete(m.clearedFields, property.FieldPricingDetails)
+// ResetSearchContext resets all changes to the "search_context" field.
+func (m *PropertyMutation) ResetSearchContext() {
+	m.search_context = nil
+	m.appendsearch_context = nil
 }
 
 // SetProjectID sets the "project" edge to the Project entity by id.
@@ -6263,18 +5455,21 @@ func (m *PropertyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PropertyMutation) Fields() []string {
-	fields := make([]string, 0, 15)
+	fields := make([]string, 0, 9)
 	if m.name != nil {
 		fields = append(fields, property.FieldName)
 	}
 	if m.description != nil {
 		fields = append(fields, property.FieldDescription)
 	}
+	if m.property_images != nil {
+		fields = append(fields, property.FieldPropertyImages)
+	}
+	if m.web_cards != nil {
+		fields = append(fields, property.FieldWebCards)
+	}
 	if m.basic_info != nil {
 		fields = append(fields, property.FieldBasicInfo)
-	}
-	if m.area_details != nil {
-		fields = append(fields, property.FieldAreaDetails)
 	}
 	if m.location_details != nil {
 		fields = append(fields, property.FieldLocationDetails)
@@ -6282,32 +5477,11 @@ func (m *PropertyMutation) Fields() []string {
 	if m.pricing_info != nil {
 		fields = append(fields, property.FieldPricingInfo)
 	}
-	if m.features != nil {
-		fields = append(fields, property.FieldFeatures)
+	if m.property_rera_info != nil {
+		fields = append(fields, property.FieldPropertyReraInfo)
 	}
-	if m.status_info != nil {
-		fields = append(fields, property.FieldStatusInfo)
-	}
-	if m.property_images != nil {
-		fields = append(fields, property.FieldPropertyImages)
-	}
-	if m.property_details != nil {
-		fields = append(fields, property.FieldPropertyDetails)
-	}
-	if m.property_amenities != nil {
-		fields = append(fields, property.FieldPropertyAmenities)
-	}
-	if m.property_video_presentation != nil {
-		fields = append(fields, property.FieldPropertyVideoPresentation)
-	}
-	if m.property_know_about != nil {
-		fields = append(fields, property.FieldPropertyKnowAbout)
-	}
-	if m.property_specifications != nil {
-		fields = append(fields, property.FieldPropertySpecifications)
-	}
-	if m.pricing_details != nil {
-		fields = append(fields, property.FieldPricingDetails)
+	if m.search_context != nil {
+		fields = append(fields, property.FieldSearchContext)
 	}
 	return fields
 }
@@ -6321,32 +5495,20 @@ func (m *PropertyMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case property.FieldDescription:
 		return m.Description()
+	case property.FieldPropertyImages:
+		return m.PropertyImages()
+	case property.FieldWebCards:
+		return m.WebCards()
 	case property.FieldBasicInfo:
 		return m.BasicInfo()
-	case property.FieldAreaDetails:
-		return m.AreaDetails()
 	case property.FieldLocationDetails:
 		return m.LocationDetails()
 	case property.FieldPricingInfo:
 		return m.PricingInfo()
-	case property.FieldFeatures:
-		return m.Features()
-	case property.FieldStatusInfo:
-		return m.StatusInfo()
-	case property.FieldPropertyImages:
-		return m.PropertyImages()
-	case property.FieldPropertyDetails:
-		return m.PropertyDetails()
-	case property.FieldPropertyAmenities:
-		return m.PropertyAmenities()
-	case property.FieldPropertyVideoPresentation:
-		return m.PropertyVideoPresentation()
-	case property.FieldPropertyKnowAbout:
-		return m.PropertyKnowAbout()
-	case property.FieldPropertySpecifications:
-		return m.PropertySpecifications()
-	case property.FieldPricingDetails:
-		return m.PricingDetails()
+	case property.FieldPropertyReraInfo:
+		return m.PropertyReraInfo()
+	case property.FieldSearchContext:
+		return m.SearchContext()
 	}
 	return nil, false
 }
@@ -6360,32 +5522,20 @@ func (m *PropertyMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldName(ctx)
 	case property.FieldDescription:
 		return m.OldDescription(ctx)
+	case property.FieldPropertyImages:
+		return m.OldPropertyImages(ctx)
+	case property.FieldWebCards:
+		return m.OldWebCards(ctx)
 	case property.FieldBasicInfo:
 		return m.OldBasicInfo(ctx)
-	case property.FieldAreaDetails:
-		return m.OldAreaDetails(ctx)
 	case property.FieldLocationDetails:
 		return m.OldLocationDetails(ctx)
 	case property.FieldPricingInfo:
 		return m.OldPricingInfo(ctx)
-	case property.FieldFeatures:
-		return m.OldFeatures(ctx)
-	case property.FieldStatusInfo:
-		return m.OldStatusInfo(ctx)
-	case property.FieldPropertyImages:
-		return m.OldPropertyImages(ctx)
-	case property.FieldPropertyDetails:
-		return m.OldPropertyDetails(ctx)
-	case property.FieldPropertyAmenities:
-		return m.OldPropertyAmenities(ctx)
-	case property.FieldPropertyVideoPresentation:
-		return m.OldPropertyVideoPresentation(ctx)
-	case property.FieldPropertyKnowAbout:
-		return m.OldPropertyKnowAbout(ctx)
-	case property.FieldPropertySpecifications:
-		return m.OldPropertySpecifications(ctx)
-	case property.FieldPricingDetails:
-		return m.OldPricingDetails(ctx)
+	case property.FieldPropertyReraInfo:
+		return m.OldPropertyReraInfo(ctx)
+	case property.FieldSearchContext:
+		return m.OldSearchContext(ctx)
 	}
 	return nil, fmt.Errorf("unknown Property field %s", name)
 }
@@ -6409,19 +5559,26 @@ func (m *PropertyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
+	case property.FieldPropertyImages:
+		v, ok := value.(schema.PropertyImages)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPropertyImages(v)
+		return nil
+	case property.FieldWebCards:
+		v, ok := value.(schema.WebCards)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWebCards(v)
+		return nil
 	case property.FieldBasicInfo:
 		v, ok := value.(schema.PropertyBasicInfo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBasicInfo(v)
-		return nil
-	case property.FieldAreaDetails:
-		v, ok := value.(schema.PropertyAreaDetails)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAreaDetails(v)
 		return nil
 	case property.FieldLocationDetails:
 		v, ok := value.(schema.PropertyLocationDetails)
@@ -6437,68 +5594,19 @@ func (m *PropertyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPricingInfo(v)
 		return nil
-	case property.FieldFeatures:
-		v, ok := value.(schema.PropertyFeatures)
+	case property.FieldPropertyReraInfo:
+		v, ok := value.(schema.PropertyReraInfo)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFeatures(v)
+		m.SetPropertyReraInfo(v)
 		return nil
-	case property.FieldStatusInfo:
-		v, ok := value.(schema.PropertyStatusInfo)
+	case property.FieldSearchContext:
+		v, ok := value.([]string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetStatusInfo(v)
-		return nil
-	case property.FieldPropertyImages:
-		v, ok := value.(schema.PropertyImages)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPropertyImages(v)
-		return nil
-	case property.FieldPropertyDetails:
-		v, ok := value.(schema.PropertyDetails)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPropertyDetails(v)
-		return nil
-	case property.FieldPropertyAmenities:
-		v, ok := value.(schema.PropertyAmenities)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPropertyAmenities(v)
-		return nil
-	case property.FieldPropertyVideoPresentation:
-		v, ok := value.(schema.PropertyVideoPresentation)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPropertyVideoPresentation(v)
-		return nil
-	case property.FieldPropertyKnowAbout:
-		v, ok := value.(schema.PropertyKnowAbout)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPropertyKnowAbout(v)
-		return nil
-	case property.FieldPropertySpecifications:
-		v, ok := value.(schema.PropertySpecifications)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPropertySpecifications(v)
-		return nil
-	case property.FieldPricingDetails:
-		v, ok := value.(schema.PropertyPricingDetails)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPricingDetails(v)
+		m.SetSearchContext(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Property field %s", name)
@@ -6529,11 +5637,7 @@ func (m *PropertyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PropertyMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(property.FieldPricingDetails) {
-		fields = append(fields, property.FieldPricingDetails)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -6546,11 +5650,6 @@ func (m *PropertyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PropertyMutation) ClearField(name string) error {
-	switch name {
-	case property.FieldPricingDetails:
-		m.ClearPricingDetails()
-		return nil
-	}
 	return fmt.Errorf("unknown Property nullable field %s", name)
 }
 
@@ -6564,11 +5663,14 @@ func (m *PropertyMutation) ResetField(name string) error {
 	case property.FieldDescription:
 		m.ResetDescription()
 		return nil
+	case property.FieldPropertyImages:
+		m.ResetPropertyImages()
+		return nil
+	case property.FieldWebCards:
+		m.ResetWebCards()
+		return nil
 	case property.FieldBasicInfo:
 		m.ResetBasicInfo()
-		return nil
-	case property.FieldAreaDetails:
-		m.ResetAreaDetails()
 		return nil
 	case property.FieldLocationDetails:
 		m.ResetLocationDetails()
@@ -6576,32 +5678,11 @@ func (m *PropertyMutation) ResetField(name string) error {
 	case property.FieldPricingInfo:
 		m.ResetPricingInfo()
 		return nil
-	case property.FieldFeatures:
-		m.ResetFeatures()
+	case property.FieldPropertyReraInfo:
+		m.ResetPropertyReraInfo()
 		return nil
-	case property.FieldStatusInfo:
-		m.ResetStatusInfo()
-		return nil
-	case property.FieldPropertyImages:
-		m.ResetPropertyImages()
-		return nil
-	case property.FieldPropertyDetails:
-		m.ResetPropertyDetails()
-		return nil
-	case property.FieldPropertyAmenities:
-		m.ResetPropertyAmenities()
-		return nil
-	case property.FieldPropertyVideoPresentation:
-		m.ResetPropertyVideoPresentation()
-		return nil
-	case property.FieldPropertyKnowAbout:
-		m.ResetPropertyKnowAbout()
-		return nil
-	case property.FieldPropertySpecifications:
-		m.ResetPropertySpecifications()
-		return nil
-	case property.FieldPricingDetails:
-		m.ResetPricingDetails()
+	case property.FieldSearchContext:
+		m.ResetSearchContext()
 		return nil
 	}
 	return fmt.Errorf("unknown Property field %s", name)

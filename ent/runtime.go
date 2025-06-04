@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/VI-IM/im_backend_go/ent/base"
 	"github.com/VI-IM/im_backend_go/ent/blogs"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/leads"
@@ -19,30 +20,24 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	baseFields := schema.Base{}.Fields()
+	_ = baseFields
+	// baseDescCreatedAt is the schema descriptor for created_at field.
+	baseDescCreatedAt := baseFields[1].Descriptor()
+	// base.DefaultCreatedAt holds the default value on creation for the created_at field.
+	base.DefaultCreatedAt = baseDescCreatedAt.Default.(time.Time)
 	blogsFields := schema.Blogs{}.Fields()
 	_ = blogsFields
 	// blogsDescIsPriority is the schema descriptor for is_priority field.
 	blogsDescIsPriority := blogsFields[4].Descriptor()
 	// blogs.DefaultIsPriority holds the default value on creation for the is_priority field.
 	blogs.DefaultIsPriority = blogsDescIsPriority.Default.(bool)
-	// blogsDescCreatedAt is the schema descriptor for created_at field.
-	blogsDescCreatedAt := blogsFields[5].Descriptor()
-	// blogs.DefaultCreatedAt holds the default value on creation for the created_at field.
-	blogs.DefaultCreatedAt = blogsDescCreatedAt.Default.(time.Time)
 	developerFields := schema.Developer{}.Fields()
 	_ = developerFields
-	// developerDescIsActive is the schema descriptor for is_active field.
-	developerDescIsActive := developerFields[9].Descriptor()
-	// developer.DefaultIsActive holds the default value on creation for the is_active field.
-	developer.DefaultIsActive = developerDescIsActive.Default.(bool)
 	// developerDescIsVerified is the schema descriptor for is_verified field.
-	developerDescIsVerified := developerFields[10].Descriptor()
+	developerDescIsVerified := developerFields[6].Descriptor()
 	// developer.DefaultIsVerified holds the default value on creation for the is_verified field.
 	developer.DefaultIsVerified = developerDescIsVerified.Default.(bool)
-	// developerDescCreatedAt is the schema descriptor for created_at field.
-	developerDescCreatedAt := developerFields[12].Descriptor()
-	// developer.DefaultCreatedAt holds the default value on creation for the created_at field.
-	developer.DefaultCreatedAt = developerDescCreatedAt.Default.(time.Time)
 	leadsFields := schema.Leads{}.Fields()
 	_ = leadsFields
 	// leadsDescEmail is the schema descriptor for email field.
@@ -74,35 +69,31 @@ func init() {
 	// location.DefaultCountry holds the default value on creation for the country field.
 	location.DefaultCountry = locationDescCountry.Default.(string)
 	// locationDescIsActive is the schema descriptor for is_active field.
-	locationDescIsActive := locationFields[14].Descriptor()
+	locationDescIsActive := locationFields[8].Descriptor()
 	// location.DefaultIsActive holds the default value on creation for the is_active field.
 	location.DefaultIsActive = locationDescIsActive.Default.(bool)
 	// locationDescCreatedAt is the schema descriptor for created_at field.
-	locationDescCreatedAt := locationFields[16].Descriptor()
+	locationDescCreatedAt := locationFields[10].Descriptor()
 	// location.DefaultCreatedAt holds the default value on creation for the created_at field.
 	location.DefaultCreatedAt = locationDescCreatedAt.Default.(time.Time)
 	projectFields := schema.Project{}.Fields()
 	_ = projectFields
 	// projectDescIsFeatured is the schema descriptor for is_featured field.
-	projectDescIsFeatured := projectFields[5].Descriptor()
+	projectDescIsFeatured := projectFields[6].Descriptor()
 	// project.DefaultIsFeatured holds the default value on creation for the is_featured field.
 	project.DefaultIsFeatured = projectDescIsFeatured.Default.(bool)
 	// projectDescIsPremium is the schema descriptor for is_premium field.
-	projectDescIsPremium := projectFields[6].Descriptor()
+	projectDescIsPremium := projectFields[7].Descriptor()
 	// project.DefaultIsPremium holds the default value on creation for the is_premium field.
 	project.DefaultIsPremium = projectDescIsPremium.Default.(bool)
 	// projectDescIsPriority is the schema descriptor for is_priority field.
-	projectDescIsPriority := projectFields[7].Descriptor()
+	projectDescIsPriority := projectFields[8].Descriptor()
 	// project.DefaultIsPriority holds the default value on creation for the is_priority field.
 	project.DefaultIsPriority = projectDescIsPriority.Default.(bool)
 	// projectDescIsDeleted is the schema descriptor for is_deleted field.
-	projectDescIsDeleted := projectFields[8].Descriptor()
+	projectDescIsDeleted := projectFields[9].Descriptor()
 	// project.DefaultIsDeleted holds the default value on creation for the is_deleted field.
 	project.DefaultIsDeleted = projectDescIsDeleted.Default.(bool)
-	// projectDescCreatedAt is the schema descriptor for created_at field.
-	projectDescCreatedAt := projectFields[11].Descriptor()
-	// project.DefaultCreatedAt holds the default value on creation for the created_at field.
-	project.DefaultCreatedAt = projectDescCreatedAt.Default.(time.Time)
 	staticsitedataFields := schema.StaticSiteData{}.Fields()
 	_ = staticsitedataFields
 	// staticsitedataDescCreatedAt is the schema descriptor for created_at field.

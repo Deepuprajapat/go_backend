@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/VI-IM/im_backend_go/ent/base"
 	"github.com/VI-IM/im_backend_go/ent/blogs"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/leads"
@@ -80,6 +81,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			base.Table:           base.ValidColumn,
 			blogs.Table:          blogs.ValidColumn,
 			developer.Table:      developer.ValidColumn,
 			leads.Table:          leads.ValidColumn,

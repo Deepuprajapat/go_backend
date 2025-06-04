@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Base is the predicate function for base builders.
+type Base func(*sql.Selector)
+
 // Blogs is the predicate function for blogs builders.
 type Blogs func(*sql.Selector)
 

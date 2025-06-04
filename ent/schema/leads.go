@@ -9,7 +9,7 @@ import (
 )
 
 type Leads struct {
-	ent.Schema
+	Base
 }
 
 func (Leads) Fields() []ent.Field {
