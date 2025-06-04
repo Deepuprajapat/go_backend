@@ -7,9 +7,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: im_db_dev
+      MYSQL_DATABASE: mydb
       MYSQL_USER: im_user
-      MYSQL_PASSWORD: im_pass
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:

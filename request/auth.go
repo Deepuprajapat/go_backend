@@ -1,0 +1,19 @@
+package request
+
+type GenerateTokenRequest struct {
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type SignupRequest struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required,min=6"`
+	Email    string `json:"email" validate:"required,email"`
+	FullName string `json:"full_name" validate:"required"`
+	Phone    string `json:"phone" validate:"required"`
+}

@@ -17,53 +17,120 @@ type User struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
-	// Phone holds the value of the "phone" field.
-	Phone string `json:"phone,omitempty"`
-	// IsAdmin holds the value of the "is_admin" field.
-	IsAdmin bool `json:"is_admin,omitempty"`
+	// Username holds the value of the "username" field.
+	Username string `json:"username,omitempty"`
+	// Password holds the value of the "password" field.
+	Password string `json:"password,omitempty"`
+	// Email holds the value of the "email" field.
+	Email string `json:"email,omitempty"`
+	// FirstName holds the value of the "first_name" field.
+	FirstName string `json:"first_name,omitempty"`
+	// LastName holds the value of the "last_name" field.
+	LastName string `json:"last_name,omitempty"`
+	// DateOfBirth holds the value of the "date_of_birth" field.
+	DateOfBirth time.Time `json:"date_of_birth,omitempty"`
+	// Gender holds the value of the "gender" field.
+	Gender string `json:"gender,omitempty"`
+	// PhoneNumber holds the value of the "phone_number" field.
+	PhoneNumber string `json:"phone_number,omitempty"`
+	// CurrentAddress holds the value of the "current_address" field.
+	CurrentAddress string `json:"current_address,omitempty"`
+	// PermanentAddress holds the value of the "permanent_address" field.
+	PermanentAddress string `json:"permanent_address,omitempty"`
 	// IsActive holds the value of the "is_active" field.
 	IsActive bool `json:"is_active,omitempty"`
+	// IsDeleted holds the value of the "is_deleted" field.
+	IsDeleted bool `json:"is_deleted,omitempty"`
+	// IsEmailVerified holds the value of the "is_email_verified" field.
+	IsEmailVerified bool `json:"is_email_verified,omitempty"`
+	// IsVerified holds the value of the "is_verified" field.
+	IsVerified bool `json:"is_verified,omitempty"`
+	// LastLoginTime holds the value of the "last_login_time" field.
+	LastLoginTime time.Time `json:"last_login_time,omitempty"`
+	// ParentID holds the value of the "parent_id" field.
+	ParentID int `json:"parent_id,omitempty"`
+	// PhotoURL holds the value of the "photo_url" field.
+	PhotoURL string `json:"photo_url,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
-	// LastLoginAt holds the value of the "last_login_at" field.
-	LastLoginAt time.Time `json:"last_login_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy int `json:"created_by,omitempty"`
+	// UpdatedBy holds the value of the "updated_by" field.
+	UpdatedBy int `json:"updated_by,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges        UserEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges              UserEdges `json:"edges"`
+	user_created_users *int
+	user_updated_users *int
+	selectValues       sql.SelectValues
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Permissions holds the value of the permissions edge.
-	Permissions []*Permission `json:"permissions,omitempty"`
-	// Otps holds the value of the otps edge.
-	Otps []*OTP `json:"otps,omitempty"`
+	// UpdatedBlogs holds the value of the updated_blogs edge.
+	UpdatedBlogs []*Blogs `json:"updated_blogs,omitempty"`
+	// CreatedByUser holds the value of the created_by_user edge.
+	CreatedByUser *User `json:"created_by_user,omitempty"`
+	// CreatedUsers holds the value of the created_users edge.
+	CreatedUsers []*User `json:"created_users,omitempty"`
+	// UpdatedByUser holds the value of the updated_by_user edge.
+	UpdatedByUser *User `json:"updated_by_user,omitempty"`
+	// UpdatedUsers holds the value of the updated_users edge.
+	UpdatedUsers []*User `json:"updated_users,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [5]bool
 }
 
-// PermissionsOrErr returns the Permissions value or an error if the edge
+// UpdatedBlogsOrErr returns the UpdatedBlogs value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) PermissionsOrErr() ([]*Permission, error) {
+func (e UserEdges) UpdatedBlogsOrErr() ([]*Blogs, error) {
 	if e.loadedTypes[0] {
-		return e.Permissions, nil
+		return e.UpdatedBlogs, nil
 	}
-	return nil, &NotLoadedError{edge: "permissions"}
+	return nil, &NotLoadedError{edge: "updated_blogs"}
 }
 
-// OtpsOrErr returns the Otps value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) OtpsOrErr() ([]*OTP, error) {
-	if e.loadedTypes[1] {
-		return e.Otps, nil
+// CreatedByUserOrErr returns the CreatedByUser value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) CreatedByUserOrErr() (*User, error) {
+	if e.CreatedByUser != nil {
+		return e.CreatedByUser, nil
+	} else if e.loadedTypes[1] {
+		return nil, &NotFoundError{label: user.Label}
 	}
-	return nil, &NotLoadedError{edge: "otps"}
+	return nil, &NotLoadedError{edge: "created_by_user"}
+}
+
+// CreatedUsersOrErr returns the CreatedUsers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) CreatedUsersOrErr() ([]*User, error) {
+	if e.loadedTypes[2] {
+		return e.CreatedUsers, nil
+	}
+	return nil, &NotLoadedError{edge: "created_users"}
+}
+
+// UpdatedByUserOrErr returns the UpdatedByUser value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) UpdatedByUserOrErr() (*User, error) {
+	if e.UpdatedByUser != nil {
+		return e.UpdatedByUser, nil
+	} else if e.loadedTypes[3] {
+		return nil, &NotFoundError{label: user.Label}
+	}
+	return nil, &NotLoadedError{edge: "updated_by_user"}
+}
+
+// UpdatedUsersOrErr returns the UpdatedUsers value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) UpdatedUsersOrErr() ([]*User, error) {
+	if e.loadedTypes[4] {
+		return e.UpdatedUsers, nil
+	}
+	return nil, &NotLoadedError{edge: "updated_users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -71,14 +138,18 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldIsAdmin, user.FieldIsActive:
+		case user.FieldIsActive, user.FieldIsDeleted, user.FieldIsEmailVerified, user.FieldIsVerified:
 			values[i] = new(sql.NullBool)
-		case user.FieldID:
+		case user.FieldID, user.FieldParentID, user.FieldCreatedBy, user.FieldUpdatedBy:
 			values[i] = new(sql.NullInt64)
-		case user.FieldName, user.FieldPhone:
+		case user.FieldUsername, user.FieldPassword, user.FieldEmail, user.FieldFirstName, user.FieldLastName, user.FieldGender, user.FieldPhoneNumber, user.FieldCurrentAddress, user.FieldPermanentAddress, user.FieldPhotoURL:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldLastLoginAt:
+		case user.FieldDateOfBirth, user.FieldLastLoginTime, user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
+		case user.ForeignKeys[0]: // user_created_users
+			values[i] = new(sql.NullInt64)
+		case user.ForeignKeys[1]: // user_updated_users
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -100,29 +171,107 @@ func (u *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			u.ID = int(value.Int64)
-		case user.FieldName:
+		case user.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
+				return fmt.Errorf("unexpected type %T for field username", values[i])
 			} else if value.Valid {
-				u.Name = value.String
+				u.Username = value.String
 			}
-		case user.FieldPhone:
+		case user.FieldPassword:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field phone", values[i])
+				return fmt.Errorf("unexpected type %T for field password", values[i])
 			} else if value.Valid {
-				u.Phone = value.String
+				u.Password = value.String
 			}
-		case user.FieldIsAdmin:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field is_admin", values[i])
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
-				u.IsAdmin = value.Bool
+				u.Email = value.String
+			}
+		case user.FieldFirstName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field first_name", values[i])
+			} else if value.Valid {
+				u.FirstName = value.String
+			}
+		case user.FieldLastName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field last_name", values[i])
+			} else if value.Valid {
+				u.LastName = value.String
+			}
+		case user.FieldDateOfBirth:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field date_of_birth", values[i])
+			} else if value.Valid {
+				u.DateOfBirth = value.Time
+			}
+		case user.FieldGender:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field gender", values[i])
+			} else if value.Valid {
+				u.Gender = value.String
+			}
+		case user.FieldPhoneNumber:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone_number", values[i])
+			} else if value.Valid {
+				u.PhoneNumber = value.String
+			}
+		case user.FieldCurrentAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field current_address", values[i])
+			} else if value.Valid {
+				u.CurrentAddress = value.String
+			}
+		case user.FieldPermanentAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field permanent_address", values[i])
+			} else if value.Valid {
+				u.PermanentAddress = value.String
 			}
 		case user.FieldIsActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field is_active", values[i])
 			} else if value.Valid {
 				u.IsActive = value.Bool
+			}
+		case user.FieldIsDeleted:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_deleted", values[i])
+			} else if value.Valid {
+				u.IsDeleted = value.Bool
+			}
+		case user.FieldIsEmailVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_email_verified", values[i])
+			} else if value.Valid {
+				u.IsEmailVerified = value.Bool
+			}
+		case user.FieldIsVerified:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field is_verified", values[i])
+			} else if value.Valid {
+				u.IsVerified = value.Bool
+			}
+		case user.FieldLastLoginTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_login_time", values[i])
+			} else if value.Valid {
+				u.LastLoginTime = value.Time
+			}
+		case user.FieldParentID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
+			} else if value.Valid {
+				u.ParentID = int(value.Int64)
+			}
+		case user.FieldPhotoURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field photo_url", values[i])
+			} else if value.Valid {
+				u.PhotoURL = value.String
 			}
 		case user.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -136,11 +285,31 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.UpdatedAt = value.Time
 			}
-		case user.FieldLastLoginAt:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field last_login_at", values[i])
+		case user.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
 			} else if value.Valid {
-				u.LastLoginAt = value.Time
+				u.CreatedBy = int(value.Int64)
+			}
+		case user.FieldUpdatedBy:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_by", values[i])
+			} else if value.Valid {
+				u.UpdatedBy = int(value.Int64)
+			}
+		case user.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_created_users", value)
+			} else if value.Valid {
+				u.user_created_users = new(int)
+				*u.user_created_users = int(value.Int64)
+			}
+		case user.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_updated_users", value)
+			} else if value.Valid {
+				u.user_updated_users = new(int)
+				*u.user_updated_users = int(value.Int64)
 			}
 		default:
 			u.selectValues.Set(columns[i], values[i])
@@ -155,14 +324,29 @@ func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
 }
 
-// QueryPermissions queries the "permissions" edge of the User entity.
-func (u *User) QueryPermissions() *PermissionQuery {
-	return NewUserClient(u.config).QueryPermissions(u)
+// QueryUpdatedBlogs queries the "updated_blogs" edge of the User entity.
+func (u *User) QueryUpdatedBlogs() *BlogsQuery {
+	return NewUserClient(u.config).QueryUpdatedBlogs(u)
 }
 
-// QueryOtps queries the "otps" edge of the User entity.
-func (u *User) QueryOtps() *OTPQuery {
-	return NewUserClient(u.config).QueryOtps(u)
+// QueryCreatedByUser queries the "created_by_user" edge of the User entity.
+func (u *User) QueryCreatedByUser() *UserQuery {
+	return NewUserClient(u.config).QueryCreatedByUser(u)
+}
+
+// QueryCreatedUsers queries the "created_users" edge of the User entity.
+func (u *User) QueryCreatedUsers() *UserQuery {
+	return NewUserClient(u.config).QueryCreatedUsers(u)
+}
+
+// QueryUpdatedByUser queries the "updated_by_user" edge of the User entity.
+func (u *User) QueryUpdatedByUser() *UserQuery {
+	return NewUserClient(u.config).QueryUpdatedByUser(u)
+}
+
+// QueryUpdatedUsers queries the "updated_users" edge of the User entity.
+func (u *User) QueryUpdatedUsers() *UserQuery {
+	return NewUserClient(u.config).QueryUpdatedUsers(u)
 }
 
 // Update returns a builder for updating this User.
@@ -188,17 +372,56 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
-	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString("username=")
+	builder.WriteString(u.Username)
 	builder.WriteString(", ")
-	builder.WriteString("phone=")
-	builder.WriteString(u.Phone)
+	builder.WriteString("password=")
+	builder.WriteString(u.Password)
 	builder.WriteString(", ")
-	builder.WriteString("is_admin=")
-	builder.WriteString(fmt.Sprintf("%v", u.IsAdmin))
+	builder.WriteString("email=")
+	builder.WriteString(u.Email)
+	builder.WriteString(", ")
+	builder.WriteString("first_name=")
+	builder.WriteString(u.FirstName)
+	builder.WriteString(", ")
+	builder.WriteString("last_name=")
+	builder.WriteString(u.LastName)
+	builder.WriteString(", ")
+	builder.WriteString("date_of_birth=")
+	builder.WriteString(u.DateOfBirth.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("gender=")
+	builder.WriteString(u.Gender)
+	builder.WriteString(", ")
+	builder.WriteString("phone_number=")
+	builder.WriteString(u.PhoneNumber)
+	builder.WriteString(", ")
+	builder.WriteString("current_address=")
+	builder.WriteString(u.CurrentAddress)
+	builder.WriteString(", ")
+	builder.WriteString("permanent_address=")
+	builder.WriteString(u.PermanentAddress)
 	builder.WriteString(", ")
 	builder.WriteString("is_active=")
 	builder.WriteString(fmt.Sprintf("%v", u.IsActive))
+	builder.WriteString(", ")
+	builder.WriteString("is_deleted=")
+	builder.WriteString(fmt.Sprintf("%v", u.IsDeleted))
+	builder.WriteString(", ")
+	builder.WriteString("is_email_verified=")
+	builder.WriteString(fmt.Sprintf("%v", u.IsEmailVerified))
+	builder.WriteString(", ")
+	builder.WriteString("is_verified=")
+	builder.WriteString(fmt.Sprintf("%v", u.IsVerified))
+	builder.WriteString(", ")
+	builder.WriteString("last_login_time=")
+	builder.WriteString(u.LastLoginTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("parent_id=")
+	builder.WriteString(fmt.Sprintf("%v", u.ParentID))
+	builder.WriteString(", ")
+	builder.WriteString("photo_url=")
+	builder.WriteString(u.PhotoURL)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
@@ -206,8 +429,11 @@ func (u *User) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("last_login_at=")
-	builder.WriteString(u.LastLoginAt.Format(time.ANSIC))
+	builder.WriteString("created_by=")
+	builder.WriteString(fmt.Sprintf("%v", u.CreatedBy))
+	builder.WriteString(", ")
+	builder.WriteString("updated_by=")
+	builder.WriteString(fmt.Sprintf("%v", u.UpdatedBy))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -3,8 +3,10 @@ package router
 import (
 	"net/http"
 
+	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
 	"github.com/VI-IM/im_backend_go/internal/middleware"
+	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
@@ -14,21 +16,20 @@ var (
 )
 
 // Init initializes the router with all routes and middleware
-func Init() {
+func Init(application application.ApplicationInterface) {
+	// Initialize handlers with controller
+	authHandler := handlers.NewAuthHandler(application)
+
 	// Apply middleware
 	Router.Use(middleware.Logging)
 	Router.Use(middleware.Recover)
+	Router.PathPrefix("/api").Subrouter()
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
-	Router.HandleFunc("/auth/token", handlers.GenerateToken).Methods(http.MethodPost)
 
-	// Protected routes
-	admin := Router.PathPrefix("/admin").Subrouter()
-	admin.Use(middleware.Auth)
-	// admin.HandleFunc("/users", handlers.CreateUser).Methods(http.MethodPost)
-	// admin.HandleFunc("/users", handlers.ListUsers).Methods(http.MethodGet)
-	// admin.HandleFunc("/users/{id}", handlers.GetUser).Methods(http.MethodGet)
-	// admin.HandleFunc("/users/{id}", handlers.UpdateUser).Methods(http.MethodPut)
-	// admin.HandleFunc("/users/{id}", handlers.DeleteUser).Methods(http.MethodDelete)
+	// auth routes
+	Router.Handle("/auth/signup", imhttp.AppHandler(authHandler.Signup)).Methods(http.MethodPost)
+	Router.Handle("/auth/generate-token", imhttp.AppHandler(authHandler.GenerateToken)).Methods(http.MethodPost)
+	Router.Handle("/auth/refresh-token", imhttp.AppHandler(authHandler.RefreshToken)).Methods(http.MethodPost)
 }
