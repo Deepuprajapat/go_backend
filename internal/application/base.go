@@ -1,4 +1,4 @@
-package controller
+package application
 
 import (
 	"github.com/VI-IM/im_backend_go/internal/repository"
@@ -6,16 +6,16 @@ import (
 	"github.com/VI-IM/im_backend_go/response"
 )
 
-type Controller struct {
+type Application struct {
 	repo repository.AppRepository
 }
 
-type ControllerInterface interface {
+type ApplicationInterface interface {
 	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error)
+	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error)
 	Signup(req *request.SignupRequest) (*response.SignupResponse, error)
-	InvalidateToken(token string) error
 }
 
-func NewController(repo repository.AppRepository) *Controller {
-	return &Controller{repo: repo}
+func NewApplication(repo repository.AppRepository) *Application {
+	return &Application{repo: repo}
 }

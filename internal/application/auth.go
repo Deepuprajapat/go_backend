@@ -1,4 +1,4 @@
-package controller
+package application
 
 import (
 	"context"
@@ -22,13 +22,13 @@ var (
 	ErrNoCredentials     = errors.New("no credentials provided")
 )
 
-func (c *Controller) GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error) {
+func (a *Application) GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error) {
 
 	if username == "" || password == "" {
 		return nil, ErrNoCredentials
 	}
 
-	user, err := c.repo.GetUserDetailsByUsername(username)
+	user, err := a.repo.GetUserDetailsByUsername(username)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (c *Controller) GetAccessToken(username string, password string) (*response
 	}, nil
 }
 
-func (c *Controller) RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error) {
+func (a *Application) RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error) {
 
 	if refreshToken == "" {
 		return nil, ErrRefreshTokenEmpty
@@ -70,7 +70,7 @@ func (c *Controller) RefreshToken(refreshToken string) (*response.GenerateTokenR
 		return nil, err
 	}
 
-	user, err := c.repo.GetUserDetailsByUsername(strconv.Itoa(userID))
+	user, err := a.repo.GetUserDetailsByUsername(strconv.Itoa(userID))
 	if err != nil {
 		return nil, err
 	}
@@ -92,12 +92,18 @@ func (c *Controller) RefreshToken(refreshToken string) (*response.GenerateTokenR
 		return nil, err
 	}
 
+	newRefreshToken, err := utils.GenerateRefreshToken(userID, time.Now().Add(time.Hour*24*7))
+	if err != nil {
+		return nil, err
+	}
+
 	return &response.GenerateTokenResponse{
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
 	}, nil
 }
 
-func (c *Controller) Signup(req *request.SignupRequest) (*response.SignupResponse, error) {
+func (a *Application) Signup(req *request.SignupRequest) (*response.SignupResponse, error) {
 	// Validate input
 	if req.Username == "" || req.Password == "" || req.Email == "" {
 		return nil, errors.New("username, password and email are required")
@@ -128,7 +134,7 @@ func (c *Controller) Signup(req *request.SignupRequest) (*response.SignupRespons
 	}
 
 	// Create user in database
-	user, err := c.repo.CreateUser(context.Background(), userInput)
+	user, err := a.repo.CreateUser(context.Background(), userInput)
 	if err != nil {
 		return nil, err
 	}
@@ -142,20 +148,4 @@ func (c *Controller) Signup(req *request.SignupRequest) (*response.SignupRespons
 		Phone:     user.PhoneNumber,
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 	}, nil
-}
-
-func (c *Controller) InvalidateToken(token string) error {
-	// Verify the token first
-	userID, err := utils.VerifyToken(token)
-	if err != nil {
-		return ErrInvalidToken
-	}
-
-	// Add token to blacklist in repository
-	err = c.repo.BlacklistToken(context.Background(), token, userID)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/VI-IM/im_backend_go/internal/controller"
+	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
 	"github.com/VI-IM/im_backend_go/internal/middleware"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -16,9 +16,9 @@ var (
 )
 
 // Init initializes the router with all routes and middleware
-func Init(ctrl controller.ControllerInterface) {
+func Init(application application.ApplicationInterface) {
 	// Initialize handlers with controller
-	authHandler := handlers.NewAuthHandler(ctrl)
+	authHandler := handlers.NewAuthHandler(application)
 
 	// Apply middleware
 	Router.Use(middleware.Logging)
@@ -31,6 +31,5 @@ func Init(ctrl controller.ControllerInterface) {
 	// auth routes
 	Router.Handle("/auth/signup", imhttp.AppHandler(authHandler.Signup)).Methods(http.MethodPost)
 	Router.Handle("/auth/generate-token", imhttp.AppHandler(authHandler.GenerateToken)).Methods(http.MethodPost)
-	Router.Handle("/auth/refresh-token", imhttp.AppHandler(handlers.RefreshToken)).Methods(http.MethodPost)
-	Router.Handle("/auth/signout", imhttp.AppHandler(authHandler.Signout)).Methods(http.MethodPost)
+	Router.Handle("/auth/refresh-token", imhttp.AppHandler(authHandler.RefreshToken)).Methods(http.MethodPost)
 }

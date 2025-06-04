@@ -134,9 +134,7 @@ type FloorPlan struct {
 		Price          string `json:"price"`
 		BuildingArea   string `json:"building_area"`
 		Image          string `json:"image"`
-		ExpertLink     string `json:"expert_link"`
-		BrochureLink   string `json:"brochure_link"`
-	} `json:"plans"`
+	} `json:"products"`
 }
 
 type PriceList struct {
@@ -150,13 +148,11 @@ type PriceList struct {
 
 // amenities
 type Amenities struct {
-	Discription   string `json:"title"`
-	AmenitiesList []struct {
-		AmenityType []struct {
-			Icon string `json:"icon"`
-			Text string `json:"value"`
-		} `json:"amenity_type"`
-	} `json:"amenities_list"`
+	Discription              string `json:"title"`
+	AmenitiesCategroryToList map[string][]struct {
+		Icon string `json:"icon"`
+		Text string `json:"value"`
+	} `json:"amenities_category_to_list"`
 }
 
 // video presentation
@@ -197,11 +193,9 @@ type PaymentPlans struct {
 }
 
 // faqs
-type Faqs struct {
-	Faqs []struct {
-		Question string `json:"question"`
-		Answer   string `json:"answer"`
-	} `json:"faqs"`
+type Faqs []struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
 }
 
 // basic project information
@@ -212,6 +206,7 @@ type BasicInfo struct {
 	ProjectUnits          string `json:"project_units"`
 	ProjectConfigurations string `json:"project_configurations"`
 	AvailableUnit         string `json:"available_unit"`
+	ShortAddress          string `json:"short_address"`
 	TotalFloor            string `json:"total_floor"`
 	TotalTowers           string `json:"total_towers"`
 	Status                string `json:"status"`
