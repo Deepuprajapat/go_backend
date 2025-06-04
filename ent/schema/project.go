@@ -117,14 +117,11 @@ type WhyToChoose struct {
 		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"usps"`
-	ExpertLink  string `json:"expert_link"`
-	BookingLink string `json:"booking_link"`
 }
 
 // project images
 type Images struct {
 	Images []struct {
-		Order int    `json:"order"`
 		Url   string `json:"url"`
 	} `json:"images"`
 }
@@ -137,20 +134,20 @@ type KnowAbout struct {
 
 // floor plan
 type FloorPlan struct {
-	Title string `json:"title"`
-	Plans []struct {
-		Title        string `json:"title"`
-		FlatType     string `json:"flat_type"`
-		Price        string `json:"price"`
-		BuildingArea string `json:"building_area"`
-		Image        string `json:"image"`
-		ExpertLink   string `json:"expert_link"`
-		BrochureLink string `json:"brochure_link"`
+	Discription string `json:"discription"`
+	Products    []struct {
+		Title          string `json:"title"`
+		Congfiguration string `json:"flat_type"`
+		Price          string `json:"price"`
+		BuildingArea   string `json:"building_area"`
+		Image          string `json:"image"`
+		ExpertLink     string `json:"expert_link"`
+		BrochureLink   string `json:"brochure_link"`
 	} `json:"plans"`
 }
 
 type PriceList struct {
-	Title                string `json:"title"`
+	Discription   string `json:"title"`
 	BHKOptionsWithPrices []struct {
 		BHKOption string `json:"bhk_option"`
 		Size      string `json:"size"`
@@ -160,7 +157,7 @@ type PriceList struct {
 
 // amenities
 type Amenities struct {
-	Title         string `json:"title"`
+	Discription         string `json:"title"`
 	AmenitiesList []struct {
 		AmenityType []struct {
 			Icon string `json:"icon"`
@@ -171,14 +168,14 @@ type Amenities struct {
 
 // video presentation
 type VideoPresentation struct {
-	Title    string `json:"title"`
-	VideoUrl string `json:"video_url"`
+	Discription    string `json:"title"`
+	URL string `json:"video_url"`
 }
 
 // about
 
 type About struct {
-	Title             string `json:"title"`
+	// Title             string `json:"title"`
 	LogoURL           string `json:"logo_url"`
 	EstablishmentYear string `json:"establishment_year"`
 	TotalProperties   string `json:"total_properties"`
@@ -193,16 +190,16 @@ type About struct {
 
 // site plan
 type SitePlan struct {
-	Title string `json:"title"`
+	Discription string `json:"discription"`
 	Image string `json:"image"`
 }
 
 // payment plans
 type PaymentPlans struct {
-	Title string `json:"title"`
+	Discription string `json:"discription"`
 	Plans []struct {
-		PlanName    string `json:"plan_name"`
-		PlanDetails string `json:"plan_details"`
+		Name    string `json:"name"`
+		Details string `json:"details"`
 	} `json:"plans"`
 }
 

@@ -4,7 +4,6 @@ import (
 	"log"
 	"strings"
 	"time"
-
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog"
 )
@@ -21,17 +20,17 @@ type (
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT"`
+		Port int    `envconfig:"PORT" default:"3000"`
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
-		DB_Port    int    `envconfig:"DB_PORT"`
+		DB_Port    int    `envconfig:"DB_PORT" default:"8080"`
 		DB_HOST    string `envconfig:"DB_HOST"`
 		ConnString string `envconfig:"CONN_STRG"`
 	}
 	JWTConfig struct {
 		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET" default:"MY_KEY"`
-		ExpiresIn         string        `envconfig:"JWT_EXPIRATION_DURATION"`
+		ExpiresIn         string        `envconfig:"JWT_EXPIRATION_DURATION" default:"15m"`
 		ExpiresInDuration time.Duration `envconfig:"-"`
 	}
 	Logger struct {

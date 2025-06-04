@@ -1,11 +1,44 @@
-# Binaries
-/bin/
+# Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+
+# Test binary, built with `go test -c`
 *.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+# Go workspace file
+go.work
+
+# Environment files
+.env
+.env.*
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Generated files
+ent/*
+!ent/schema/
 
 # Output of the go build command
 /server
@@ -17,25 +50,6 @@
 !/ent/schema/
 !/ent/generate.go
 
-
-# IDE/editor configs
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-
-# Ent generated files (keep schema, ignore generated code if needed)
-# Uncomment below if you want to ignore generated ent code
-# /ent/ent.go
-# /ent/client.go
-# /ent/migrate/
-# /ent/user/
-# /ent/hook/
-# /ent/predicate/
-# /ent/runtime/
-# /ent/enttest/
-
 # Atlas migration files
 dev.db
 atlas.sum
@@ -46,10 +60,6 @@ mysql_data/
 
 # Logs
 *.log
-
-# Env files
-.env
-.env.*
 
 # Misc
 *.out 

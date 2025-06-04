@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/VI-IM/im_backend_go/internal/repository"
+	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 )
 
@@ -11,6 +12,8 @@ type Controller struct {
 
 type ControllerInterface interface {
 	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error)
+	Signup(req *request.SignupRequest) (*response.SignupResponse, error)
+	InvalidateToken(token string) error
 }
 
 func NewController(repo repository.AppRepository) *Controller {

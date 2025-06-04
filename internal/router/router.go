@@ -29,7 +29,8 @@ func Init(ctrl controller.ControllerInterface) {
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
 
 	// auth routes
+	Router.Handle("/auth/signup", imhttp.AppHandler(authHandler.Signup)).Methods(http.MethodPost)
 	Router.Handle("/auth/generate-token", imhttp.AppHandler(authHandler.GenerateToken)).Methods(http.MethodPost)
 	Router.Handle("/auth/refresh-token", imhttp.AppHandler(handlers.RefreshToken)).Methods(http.MethodPost)
-
+	Router.Handle("/auth/signout", imhttp.AppHandler(authHandler.Signout)).Methods(http.MethodPost)
 }
