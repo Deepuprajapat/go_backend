@@ -39,7 +39,7 @@ func (Project) Edges() []ent.Edge {
 
 // website cards
 type WebsiteCards struct {
-	Images            Images            `json:"images"`
+	Images            []string          `json:"images"`
 	ReraInfo          ReraInfo          `json:"rera_info"`
 	Details           Details           `json:"details"`
 	WhyToChoose       WhyToChoose       `json:"why_to_choose"`
@@ -113,17 +113,10 @@ type WhyToChoose struct {
 		Order int    `json:"order"`
 		Url   string `json:"url"`
 	} `json:"images"`
-	Usps []struct {
-		Icon  string `json:"icon"`
-		Value string `json:"value"`
-	} `json:"usps"`
-}
-
-// project images
-type Images struct {
-	Images []struct {
-		Url   string `json:"url"`
-	} `json:"images"`
+	UspList []struct {
+		Icon        string `json:"icon"`
+		HtmlContent string `json:"html_content"`
+	} `json:"usp_list"`
 }
 
 // know about
@@ -147,7 +140,7 @@ type FloorPlan struct {
 }
 
 type PriceList struct {
-	Discription   string `json:"title"`
+	Discription          string `json:"title"`
 	BHKOptionsWithPrices []struct {
 		BHKOption string `json:"bhk_option"`
 		Size      string `json:"size"`
@@ -157,7 +150,7 @@ type PriceList struct {
 
 // amenities
 type Amenities struct {
-	Discription         string `json:"title"`
+	Discription   string `json:"title"`
 	AmenitiesList []struct {
 		AmenityType []struct {
 			Icon string `json:"icon"`
@@ -168,8 +161,8 @@ type Amenities struct {
 
 // video presentation
 type VideoPresentation struct {
-	Discription    string `json:"title"`
-	URL string `json:"video_url"`
+	Discription string `json:"title"`
+	URL         string `json:"video_url"`
 }
 
 // about
@@ -191,13 +184,13 @@ type About struct {
 // site plan
 type SitePlan struct {
 	Discription string `json:"discription"`
-	Image string `json:"image"`
+	Image       string `json:"image"`
 }
 
 // payment plans
 type PaymentPlans struct {
 	Discription string `json:"discription"`
-	Plans []struct {
+	Plans       []struct {
 		Name    string `json:"name"`
 		Details string `json:"details"`
 	} `json:"plans"`
@@ -215,6 +208,7 @@ type Faqs struct {
 type BasicInfo struct {
 	ProjectDescription    string `json:"project_description"`
 	ProjectArea           string `json:"project_area"`
+	ProjectLogoURL        string `json:"project_logo_url"`
 	ProjectUnits          string `json:"project_units"`
 	ProjectConfigurations string `json:"project_configurations"`
 	AvailableUnit         string `json:"available_unit"`

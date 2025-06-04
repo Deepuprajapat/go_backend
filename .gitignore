@@ -37,8 +37,11 @@ ehthumbs.db
 Thumbs.db
 
 # Generated files
-ent/*
+/ent/*
 !ent/schema/
+!ent/generate.go
+
+
 
 # Output of the go build command
 /server
@@ -63,3 +66,6 @@ mysql_data/
 
 # Misc
 *.out 
+
+/ent/client.go
+/ent/hook/hook.go
