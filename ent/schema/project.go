@@ -15,7 +15,7 @@ func (Project) Fields() []ent.Field {
 		field.Int("id").Unique(),
 		field.JSON("basic_info", BasicInfo{}),
 		field.JSON("timeline_info", TimelineInfo{}),
-		field.JSON("seo_meta_info", SEOMeta{}),
+		field.JSON("meta_info", SEOMeta{}),
 		field.JSON("web_cards", ProjectWebCards{}),
 		field.JSON("location_info", LocationInfo{}),
 		field.Bool("is_featured").Default(false),
@@ -62,15 +62,15 @@ type ProjectWebCards struct {
 
 // project details
 type ProjectDetails struct {
-	ProjectArea struct {
+	Area struct {
 		Value string `json:"value"`
-	} `json:"project_area"`
+	} `json:"area"`
 	Sizes struct {
 		Value string `json:"value"`
 	} `json:"sizes"`
-	ProjectUnits struct {
+	Units struct {
 		Value string `json:"value"`
-	} `json:"project_units"`
+	} `json:"units"`
 	LaunchDate struct {
 		Value string `json:"value"`
 	} `json:"launch_date"`
@@ -86,9 +86,9 @@ type ProjectDetails struct {
 	ProjectStatus struct {
 		Value string `json:"value"`
 	} `json:"project_status"`
-	PropertyType struct {
+	Type struct {
 		Value string `json:"value"`
-	} `json:"property_type"`
+	} `json:"type"`
 }
 
 // Rera info
@@ -104,16 +104,11 @@ type ReraInfo struct {
 
 // why to choose
 type WhyToChoose struct {
-	Images []struct {
-		Order int    `json:"order"`
-		Url   string `json:"url"`
-	} `json:"images"`
-	USP_List []struct {
+	ImageUrls []string `json:"image_urls"`
+	USP_List  []struct {
 		Icon        string `json:"icon"`
 		HtmlContent string `json:"html_content"`
 	} `json:"usp_list"`
-	ExpertLink  string `json:"expert_link"`
-	BookingLink string `json:"booking_link"`
 }
 
 // know about
@@ -137,7 +132,7 @@ type FloorPlan struct {
 }
 
 type PriceList struct {
-	Title                string `json:"title"`
+	Description          string `json:"description"`
 	BHKOptionsWithPrices []struct {
 		BHKOption string `json:"bhk_option"`
 		Size      string `json:"size"`
@@ -147,8 +142,8 @@ type PriceList struct {
 
 // amenities
 type Amenities struct {
-	Title                   string `json:"title"`
-	AmenitiesWithCategories map[string]struct {
+	Description             string `json:"description"`
+	AmenitiesWithCategories map[string][]struct {
 		Icon  string `json:"icon"`
 		Value string `json:"value"`
 	} `json:"amenities_with_categories"`
@@ -163,7 +158,7 @@ type VideoPresentation struct {
 // about
 
 type About struct {
-	Title             string `json:"title"`
+	Description       string `json:"description"`
 	LogoURL           string `json:"logo_url"`
 	EstablishmentYear string `json:"establishment_year"`
 	TotalProperties   string `json:"total_properties"`
@@ -178,10 +173,10 @@ type About struct {
 
 // payment plans
 type PaymentPlans struct {
-	Title string `json:"title"`
-	Plans []struct {
-		PlanName    string `json:"plan_name"`
-		PlanDetails string `json:"plan_details"`
+	Description string `json:"description"`
+	Plans       []struct {
+		Name    string `json:"name"`
+		Details string `json:"details"`
 	} `json:"plans"`
 }
 
@@ -213,14 +208,14 @@ type SEOMeta struct {
 	MetaTitle       string `json:"meta_title"`
 	MetaDescription string `json:"meta_description"`
 	MetaKeywords    string `json:"meta_keywords"`
-	ProjectUrl      string `json:"project_url"`
+	Canonical       string `json:"canonical"`
 	ProjectSchema   string `json:"project_schema"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
 }
 
 type LocationInfo struct {
-	Title         string `json:"title"`
+	ShortAddress  string `json:"short_address"`
 	Longitude     string `json:"longitude"`
 	Latitude      string `json:"latitude"`
 	GoogleMapLink string `json:"google_map_link"`
-	Description   string `json:"description"`
+	City          string `json:"city"`
 }

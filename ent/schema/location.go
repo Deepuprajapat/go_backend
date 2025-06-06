@@ -22,6 +22,7 @@ func (Location) Fields() []ent.Field {
 		field.String("country").Default("India"),
 		field.String("pincode"),
 		field.String("area_type"), // Sector, Phase, Block, etc.
+		field.JSON("area_name", []string{}),
 		field.Bool("is_active").Default(true),
 		field.String("slug"), // URL-friendly version of locality name
 		field.Time("created_at").Default(time.Now()),

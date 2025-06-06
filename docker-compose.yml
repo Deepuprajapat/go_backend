@@ -3,22 +3,32 @@ version: '3.8'
 services:
   mysql:
     image: mysql:8.0
-    container_name: im_mysql
-    restart: unless-stopped
+    container_name: im_mysql_db
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: im_db_dev
-      MYSQL_USER: im_user
-      MYSQL_PASSWORD: im_pass
+      MYSQL_DATABASE: im_schema
+      MYSQL_USER: im_db_dev
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
       timeout: 5s
-      retries: 5
+      retries: 10
+      interval: 10s
+      start_period: 30s
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - im_network
 
 volumes:
-  mysql_data: 
+  mysql_data:
+    driver: local
+
+networks:
+  im_network:
+    driver: bridge

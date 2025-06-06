@@ -13,6 +13,8 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 )
 
 func main() {
@@ -25,8 +27,8 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to load configuration")
 	}
 
-	// Initialize database
 	client := database.NewClient(os.Getenv("DB_DSN"))
+
 	defer client.Close()
 
 	repo := repository.NewRepository(client)
