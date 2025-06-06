@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -33,11 +31,6 @@ func (Leads) Fields() []ent.Field {
 			Optional(),
 		field.String("user_type").
 			Optional(),
-		field.Time("created_at").
-			Default(time.Now),
-		field.Time("updated_at").
-			Default(time.Now).
-			UpdateDefault(time.Now),
 	}
 }
 

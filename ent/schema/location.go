@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -24,9 +22,6 @@ func (Location) Fields() []ent.Field {
 		field.String("area_type"), // Sector, Phase, Block, etc.
 		field.JSON("area_name", []string{}),
 		field.Bool("is_active").Default(true),
-		field.String("slug"), // URL-friendly version of locality name
-		field.Time("created_at").Default(time.Now()),
-		field.Time("updated_at"),
 	}
 }
 

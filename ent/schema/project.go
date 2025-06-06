@@ -36,10 +36,7 @@ func (Project) Edges() []ent.Edge {
 
 // web cards
 type ProjectWebCards struct {
-	Images []struct {
-		Order int    `json:"order"`
-		Url   string `json:"url"`
-	} `json:"images"`
+	Images            []string          `json:"images"`
 	ReraInfo          ReraInfo          `json:"rera_info"`
 	Details           ProjectDetails    `json:"project_details"`
 	WhyToChoose       WhyToChoose       `json:"why_to_choose"`
@@ -107,28 +104,26 @@ type WhyToChoose struct {
 	ImageUrls []string `json:"image_urls"`
 	USP_List  []struct {
 		Icon        string `json:"icon"`
-		HtmlContent string `json:"html_content"`
+		Description string `json:"description"`
 	} `json:"usp_list"`
 }
 
 // know about
 type KnowAbout struct {
-	HtmlContent  string `json:"html_content"`
+	Description  string `json:"description"`
 	DownloadLink string `json:"download_link"`
 }
 
 // floor plan
 type FloorPlan struct {
-	Title string `json:"title"`
-	Plans []struct {
+	Title    string `json:"title"`
+	Products []struct {
 		Title        string `json:"title"`
 		FlatType     string `json:"flat_type"`
 		Price        string `json:"price"`
 		BuildingArea string `json:"building_area"`
 		Image        string `json:"image"`
-		ExpertLink   string `json:"expert_link"`
-		BrochureLink string `json:"brochure_link"`
-	} `json:"plans"`
+	} `json:"products"`
 }
 
 type PriceList struct {
@@ -143,16 +138,16 @@ type PriceList struct {
 // amenities
 type Amenities struct {
 	Description             string `json:"description"`
-	AmenitiesWithCategories map[string][]struct {
+	CategoriesWithAmenities map[string][]struct {
 		Icon  string `json:"icon"`
 		Value string `json:"value"`
-	} `json:"amenities_with_categories"`
+	} `json:"categories_with_amenities"`
 }
 
 // video presentation
 type VideoPresentation struct {
-	Title    string `json:"title"`
-	VideoUrl string `json:"video_url"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
 }
 
 // about
@@ -162,12 +157,11 @@ type About struct {
 	LogoURL           string `json:"logo_url"`
 	EstablishmentYear string `json:"establishment_year"`
 	TotalProperties   string `json:"total_properties"`
-	HTMLContent       string `json:"html_content"`
 	ContactDetails    struct {
-		Name        string `json:"name"`
-		Address     string `json:"address"`
-		Phone       string `json:"phone"`
-		BookingLink string `json:"booking_link"`
+		Name           string `json:"name"`
+		ProjectAddress string `json:"project_address"`
+		Phone          string `json:"phone"`
+		BookingLink    string `json:"booking_link"`
 	} `json:"contact_details"`
 }
 
@@ -188,7 +182,6 @@ type BasicInfo struct {
 	ProjectUnits          string `json:"project_units"`
 	ProjectConfigurations string `json:"project_configurations"`
 	AvailableUnit         string `json:"available_unit"`
-	ProjectGroup          string `json:"project_group"`
 	TotalFloor            string `json:"total_floor"`
 	TotalTowers           string `json:"total_towers"`
 	ProjectType           string `json:"project_type"`
@@ -205,11 +198,11 @@ type TimelineInfo struct {
 
 // SEO and meta information
 type SEOMeta struct {
-	MetaTitle       string `json:"meta_title"`
-	MetaDescription string `json:"meta_description"`
-	MetaKeywords    string `json:"meta_keywords"`
-	Canonical       string `json:"canonical"`
-	ProjectSchema   string `json:"project_schema"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
+	Title         string `json:"title"`
+	Description   string `json:"description"`
+	Keywords      string `json:"keywords"`
+	Canonical     string `json:"canonical"`
+	ProjectSchema string `json:"project_schema"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
 }
 
 type LocationInfo struct {
