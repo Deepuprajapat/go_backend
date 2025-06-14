@@ -20,14 +20,18 @@ import (
 func main() {
 	// Initialize zerolog
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC3339,
+		NoColor:    true,
+	})
 
 	// Load configuration
 	if err := config.LoadConfig(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to load configuration")
 	}
 
-	client := database.NewClient(os.Getenv("DB_DSN"))
+	client := database.NewClient("root:password@tcp(127.0.0.1:3306)/mydb?parseTime=true")
 
 	defer client.Close()
 
