@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/VI-IM/im_backend_go/internal/controller"
+	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/rs/zerolog/log"
 )
 
 type AuthHandler struct {
-	controller controller.ControllerInterface
+	controller application.ApplicationInterface
 }
 
 // NewAuthHandler creates a new AuthHandler instance
-func NewAuthHandler(controller controller.ControllerInterface) *AuthHandler {
+func NewAuthHandler(controller application.ApplicationInterface) *AuthHandler {
 	return &AuthHandler{
 		controller: controller,
 	}

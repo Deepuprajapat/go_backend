@@ -4,17 +4,17 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/VI-IM/im_backend_go/internal/controller"
+	"github.com/VI-IM/im_backend_go/internal/application"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
 type ProjectHandler struct {
-	ctrl controller.ControllerInterface
+	app application.ApplicationInterface
 }
 
-func NewProjectHandler(ctrl controller.ControllerInterface) *ProjectHandler {
-	return &ProjectHandler{ctrl: ctrl}
+func NewProjectHandler(app application.ApplicationInterface) *ProjectHandler {
+	return &ProjectHandler{app: app}
 }
 
 func (h *ProjectHandler) GetProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
@@ -24,7 +24,7 @@ func (h *ProjectHandler) GetProject(r *http.Request) (*imhttp.Response, *imhttp.
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid project ID", err.Error())
 	}
 
-	response, err := h.ctrl.GetProjectByID(projectID)
+	response, err := h.app.GetProjectByID(projectID)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project", err.Error())
 	}

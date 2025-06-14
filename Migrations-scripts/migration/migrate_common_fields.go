@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"project-schema/ent"
-	"project-schema/ent/developer"
-	"project-schema/ent/project"
-	"project-schema/ent/property"
-	"project-schema/ent/schema"
 	"regexp"
 	"strings"
+
+	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/developer"
+	"github.com/VI-IM/im_backend_go/ent/project"
+	"github.com/VI-IM/im_backend_go/ent/property"
+	"github.com/VI-IM/im_backend_go/ent/schema"
 )
 
 // Helper function to generate URL-friendly identifier
@@ -572,6 +573,20 @@ func MigrateCommonFields(ctx context.Context, client *ent.Client, legacyProjects
 					},
 				}).
 				SetWebCards(schema.WebCards{
+					PropertyDetails: schema.PropertyDetails{
+						PropertyType:      "", // Not available in legacy data
+						FurnishingType:    stringOrEmpty(lp.FurnishingType),
+						ListingType:       stringOrEmpty(lp.ListingType),
+						PossessionStatus:  stringOrEmpty(lp.PossessionStatus),
+						AgeOfProperty:     stringOrEmpty(lp.AgeOfProperty),
+						FloorPara:         stringOrEmpty(lp.FloorPara),
+						LocationPara:      stringOrEmpty(lp.LocationPara),
+						LocationAdvantage: stringOrEmpty(lp.LocationAdvantage),
+						OverviewPara:      stringOrEmpty(lp.OverviewPara),
+						Floors:            stringOrEmpty(lp.Floors),
+						Images:            stringOrEmpty(lp.Images),
+						Latlong:           stringOrEmpty(lp.Latlong),
+					},
 					PropertyFloorPlan: []struct {
 						Title string `json:"title"`
 						Plans []struct {
@@ -597,6 +612,35 @@ func MigrateCommonFields(ctx context.Context, client *ent.Client, legacyProjects
 						VideoUrl: stringOrEmpty(lp.PropertyVideo),
 					},
 					GoogleMapLink: stringOrEmpty(lp.LocationMap),
+				}).
+				SetBasicInfo(schema.PropertyBasicInfo{
+					PropertyType: "", // Not available in legacy data
+					BHKType:      "", // Not available in legacy data
+					Bedrooms:     stringToInt(lp.Bedrooms),
+					Bathrooms:    stringToInt(lp.Bathrooms),
+				}).
+				SetLocationDetails(schema.PropertyLocationDetails{
+					FloorNumber: 0, // Not available in legacy data
+					Facing:      stringOrEmpty(lp.Facing),
+					Tower:       "", // Not available in legacy data
+					Wing:        "", // Not available in legacy data
+				}).
+				SetPricingInfo(schema.PropertyPricingInfo{
+					StartingPrice: fmt.Sprintf("%.2f", lp.Price),
+					Price:         fmt.Sprintf("%.2f", lp.Price),
+				}).
+				SetPropertyReraInfo(schema.PropertyReraInfo{
+					Phase:      "", // Not available in legacy data
+					Status:     "", // Not available in legacy data
+					ReraNumber: stringOrEmpty(lp.Rera),
+					ReraQR:     "", // Not available in legacy data
+				}).
+				SetSearchContext([]string{
+					stringOrEmpty(lp.PropertyName),
+					stringOrEmpty(lp.About),
+					stringOrEmpty(lp.PropertyAddress),
+					stringOrEmpty(lp.Facing),
+					fmt.Sprintf("%.2f", lp.Price),
 				})
 
 			// Add all project images to property images
@@ -636,154 +680,6 @@ func MigrateCommonFields(ctx context.Context, client *ent.Client, legacyProjects
 			}
 
 			propertyCreate.SetPropertyImages(propertyImages)
-
-			// Set basic info
-			propertyCreate.SetBasicInfo(schema.PropertyBasicInfo{
-				PropertyType: "", // Not available in legacy data
-				BHKType:      "", // Not available in legacy data
-				Bedrooms:     stringToInt(lp.Bedrooms),
-				Bathrooms:    stringToInt(lp.Bathrooms),
-			})
-
-			// Set location details
-			propertyCreate.SetLocationDetails(schema.PropertyLocationDetails{
-				FloorNumber: 0, // Not available in legacy data
-				Facing:      stringOrEmpty(lp.Facing),
-				Tower:       "", // Not available in legacy data
-				Wing:        "", // Not available in legacy data
-			})
-
-			// Set pricing info
-			propertyCreate.SetPricingInfo(schema.PropertyPricingInfo{
-				StartingPrice:      fmt.Sprintf("%.2f", lp.Price),
-				Price:              fmt.Sprintf("%.2f", lp.Price),
-				PricePerSqft:       "", // Not available in legacy data
-				MaintenanceCharges: "", // Not available in legacy data
-				BookingAmount:      "", // Not available in legacy data
-				StampDuty:          "", // Not available in legacy data
-				RegistrationFee:    "", // Not available in legacy data
-			})
-
-			// Set property rarer info
-			propertyCreate.SetPropertyReraInfo(schema.PropertyReraInfo{
-				Phase:      "", // Not available in legacy data
-				Status:     "", // Not available in legacy data
-				ReraNumber: stringOrEmpty(lp.Rera),
-				ReraQR:     "", // Not available in legacy data
-			})
-
-			// Set area details
-			propertyCreate.SetAreaDetails(schema.PropertyAreaDetails{
-				CarpetArea:       stringOrEmpty(lp.BuiltupArea), // Using builtup area as carpet area since carpet area is not available
-				BuiltUpArea:      stringOrEmpty(lp.BuiltupArea),
-				SuperBuiltUpArea: stringOrEmpty(lp.BuiltupArea), // Using builtup area as super built-up area since it's not available
-			})
-
-			// Set features
-			propertyCreate.SetFeatures(schema.PropertyFeatures{
-				Amenities:  amenities,
-				Highlights: strings.Split(stringOrEmpty(lp.Highlights), ","),
-			})
-
-			// Set status info
-			propertyCreate.SetStatusInfo(schema.PropertyStatusInfo{
-				IsDeleted:  lp.IsDeleted,
-				IsFeatured: lp.IsFeatured,
-				Status:     stringOrEmpty(lp.PossessionStatus), // Using possession status as status
-			})
-
-			// Set property details
-			propertyCreate.SetPropertyDetails(schema.PropertyDetails{
-				PropertyType:      "", // Not available in legacy data
-				FurnishingType:    stringOrEmpty(lp.FurnishingType),
-				ListingType:       stringOrEmpty(lp.ListingType),
-				PossessionStatus:  stringOrEmpty(lp.PossessionStatus),
-				AgeOfProperty:     stringOrEmpty(lp.AgeOfProperty),
-				FloorPara:         stringOrEmpty(lp.FloorPara),
-				LocationPara:      stringOrEmpty(lp.LocationPara),
-				LocationAdvantage: stringOrEmpty(lp.LocationAdvantage),
-				OverviewPara:      stringOrEmpty(lp.OverviewPara),
-				Floors:            stringOrEmpty(lp.Floors),
-				Images:            stringOrEmpty(lp.Images),
-				Latlong:           stringOrEmpty(lp.Latlong),
-			})
-
-			// Set property video presentation
-			propertyCreate.SetPropertyVideoPresentation(schema.PropertyVideoPresentation{
-				Title:       "",
-				Description: stringOrEmpty(lp.VideoPara),
-				VideoURL:    stringOrEmpty(lp.PropertyVideo),
-			})
-
-			// Set property know about
-			propertyCreate.SetPropertyKnowAbout(schema.PropertyKnowAbout{
-				Description:  stringOrEmpty(lp.About),
-				DownloadLink: "", // Not available in legacy data
-			})
-
-			// Set property specifications
-			propertyCreate.SetPropertySpecifications(schema.PropertySpecifications{
-				Categories: []struct {
-					Name  string "json:\"name\""
-					Items []struct {
-						Label string "json:\"label\""
-						Value string "json:\"value\""
-					} "json:\"items\""
-				}{
-					{
-						Name: "Basic Details",
-						Items: []struct {
-							Label string "json:\"label\""
-							Value string "json:\"value\""
-						}{
-							{Label: "Bedrooms", Value: stringOrEmpty(lp.Bedrooms)},
-							{Label: "Bathrooms", Value: stringOrEmpty(lp.Bathrooms)},
-							{Label: "Balcony", Value: stringOrEmpty(lp.Balcony)},
-						},
-					},
-					{
-						Name: "Area Details",
-						Items: []struct {
-							Label string "json:\"label\""
-							Value string "json:\"value\""
-						}{
-							{Label: "Built-up Area", Value: stringOrEmpty(lp.BuiltupArea)},
-							{Label: "Carpet Area", Value: stringOrEmpty(lp.BuiltupArea)}, // Using built-up area as carpet area is not available
-						},
-					},
-					{
-						Name: "Parking",
-						Items: []struct {
-							Label string "json:\"label\""
-							Value string "json:\"value\""
-						}{
-							{Label: "Covered Parking", Value: stringOrEmpty(lp.CoveredParking)},
-							{Label: "Open Parking", Value: stringOrEmpty(lp.OpenParking)},
-						},
-					},
-				},
-			})
-
-			// Set property amenities
-			propertyCreate.SetPropertyAmenities(schema.PropertyAmenities{
-				UnitAmenities: []struct {
-					Icon string "json:\"icon\""
-					Name string "json:\"name\""
-				}{},
-				FloorAmenities: []struct {
-					Icon string "json:\"icon\""
-					Name string "json:\"name\""
-				}{},
-			})
-
-			// Set search context
-			propertyCreate.SetSearchContext([]string{
-				stringOrEmpty(lp.PropertyName),
-				stringOrEmpty(lp.About),
-				stringOrEmpty(lp.PropertyAddress),
-				stringOrEmpty(lp.Facing),
-				fmt.Sprintf("%.2f", lp.Price),
-			})
 
 			// Set project edge
 			propertyCreate.SetProject(proj)

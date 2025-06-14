@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/VI-IM/im_backend_go/internal/controller"
+	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
 	"github.com/VI-IM/im_backend_go/internal/middleware"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -16,10 +16,10 @@ var (
 )
 
 // Init initializes the router with all routes and middleware
-func Init(ctrl controller.ControllerInterface) {
+func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
-	authHandler := handlers.NewAuthHandler(ctrl)
-	projectHandler := handlers.NewProjectHandler(ctrl)
+	authHandler := handlers.NewAuthHandler(app)
+	projectHandler := handlers.NewProjectHandler(app)
 
 	// Apply middleware
 	Router.Use(middleware.Logging)

@@ -49,6 +49,7 @@ type PropertyReraInfo struct {
 }
 
 type WebCards struct {
+	PropertyDetails   PropertyDetails `json:"property_details"`
 	PropertyFloorPlan []struct {
 		Title string `json:"title"`
 		Plans []struct {
@@ -115,4 +116,20 @@ type PropertyPricingInfo struct {
 	BookingAmount      string `json:"booking_amount"`
 	StampDuty          string `json:"stamp_duty"`
 	RegistrationFee    string `json:"registration_fee"`
+}
+
+// property details
+type PropertyDetails struct {
+	PropertyType      string `json:"property_type"`
+	FurnishingType    string `json:"furnishing_type"`
+	ListingType       string `json:"listing_type"`
+	PossessionStatus  string `json:"possession_status"`
+	AgeOfProperty     string `json:"age_of_property"`
+	FloorPara         string `json:"floor_para"`
+	LocationPara      string `json:"location_para"`
+	LocationAdvantage string `json:"location_advantage"`
+	OverviewPara      string `json:"overview_para"`
+	Floors            string `json:"floors"`
+	Images            string `json:"images"`
+	Latlong           string `json:"latlong"`
 }

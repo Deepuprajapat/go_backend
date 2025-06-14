@@ -1,4 +1,4 @@
-package controller
+package application
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ var (
 	ErrNoCredentials     = errors.New("no credentials provided")
 )
 
-func (c *Controller) GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error) {
+func (c *application) GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error) {
 
 	if username == "" || password == "" {
 		return nil, ErrNoCredentials
@@ -55,7 +55,7 @@ func (c *Controller) GetAccessToken(username string, password string) (*response
 	}, nil
 }
 
-func (c *Controller) RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error) {
+func (c *application) RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error) {
 
 	if refreshToken == "" {
 		return nil, ErrRefreshTokenEmpty

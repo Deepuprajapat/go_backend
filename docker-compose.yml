@@ -1,32 +1,30 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: im_mysql_db
+  postgres:
+    image: postgres:15
+    container_name: im_postgres_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: im_db_dev
-      MYSQL_PASSWORD: password
+      POSTGRES_DB: mydb
+      POSTGRES_USER: im_db_dev
+      POSTGRES_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "5434:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
-      - ./migrations:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      test: ["CMD-SHELL", "pg_isready -U im_db_dev -d mydb"]
       timeout: 5s
       retries: 10
       interval: 10s
       start_period: 30s
-    command: --default-authentication-plugin=mysql_native_password
     networks:
       - im_network
 
 volumes:
-  mysql_data:
+  postgres_data:
     driver: local
 
 networks:

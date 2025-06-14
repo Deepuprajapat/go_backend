@@ -3,18 +3,15 @@ package migration
 import (
 	"context"
 	"fmt"
-	"project-schema/ent"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/internal/database"
+	_ "github.com/lib/pq"
 )
 
 // NewNewDBConnection creates a new connection using ent client
 func NewNewDBConnection() (*ent.Client, error) {
-	// Connect using ent
-	client, err := ent.Open("mysql", "root:password@tcp(localhost:3306)/mydb?parseTime=true")
-	if err != nil {
-		return nil, fmt.Errorf("error connecting to new database: %v", err)
-	}
+	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
 
 	// Run the auto migration tool
 	if err := client.Schema.Create(context.Background()); err != nil {

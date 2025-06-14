@@ -37,6 +37,9 @@ generate:
 run:
 	go run cmd/server/main.go
 
+run-migration:
+	go run cmd/server/main.go run-migration
+
 # Setup fresh development environment
 dev-setup: docker-up migrate
 	@echo "Development environment ready!" 
