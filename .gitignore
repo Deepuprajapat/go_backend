@@ -39,7 +39,6 @@
 # Atlas migration files
 dev.db
 atlas.sum
-migrations/
 
 # Docker
 mysql_data/
