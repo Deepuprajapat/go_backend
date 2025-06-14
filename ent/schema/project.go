@@ -47,7 +47,7 @@ type ProjectWebCards struct {
 	VideoPresentation VideoPresentation `json:"video_presentation"`
 	PaymentPlans      PaymentPlans      `json:"payment_plans"`
 	SitePlan          struct {
-		HTMLContent string `json:"html_content"`
+		Description string `json:"description"`
 		Image       string `json:"image"`
 	} `json:"site_plan"`
 	About About `json:"about"`
@@ -55,6 +55,16 @@ type ProjectWebCards struct {
 		Question string `json:"question"`
 		Answer   string `json:"answer"`
 	} `json:"faqs"`
+}
+
+// project info
+type ProjectInfo struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Area        string `json:"area"`
+	LogoURL     string `json:"logo_url"`
+	MinPrice    string `json:"min_price"`
+	MaxPrice    string `json:"max_price"`
 }
 
 // project details
@@ -68,6 +78,10 @@ type ProjectDetails struct {
 	Units struct {
 		Value string `json:"value"`
 	} `json:"units"`
+	Configuration struct {
+		Value string `json:"value"`
+	} `json:"configuration"`
+
 	LaunchDate struct {
 		Value string `json:"value"`
 	} `json:"launch_date"`
@@ -156,7 +170,7 @@ type About struct {
 	Description       string `json:"description"`
 	LogoURL           string `json:"logo_url"`
 	EstablishmentYear string `json:"establishment_year"`
-	TotalProperties   string `json:"total_properties"`
+	TotalProjects   string `json:"total_projects"`
 	ContactDetails    struct {
 		Name           string `json:"name"`
 		ProjectAddress string `json:"project_address"`
@@ -181,7 +195,6 @@ type BasicInfo struct {
 	ProjectArea           string `json:"project_area"`
 	ProjectUnits          string `json:"project_units"`
 	ProjectConfigurations string `json:"project_configurations"`
-	AvailableUnit         string `json:"available_unit"`
 	TotalFloor            string `json:"total_floor"`
 	TotalTowers           string `json:"total_towers"`
 	ProjectType           string `json:"project_type"`
@@ -210,5 +223,4 @@ type LocationInfo struct {
 	Longitude     string `json:"longitude"`
 	Latitude      string `json:"latitude"`
 	GoogleMapLink string `json:"google_map_link"`
-	City          string `json:"city"`
 }

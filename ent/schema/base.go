@@ -13,8 +13,8 @@ type Base struct {
 
 func (Base) Fields() []ent.Field {
 	return []ent.Field{
-		field.Bool("deleted_at").Optional().Nillable(),
-		field.Time("created_at").Default(time.Now()),
-		field.Time("updated_at"),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }

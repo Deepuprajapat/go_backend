@@ -19,6 +19,7 @@ var (
 func Init(ctrl controller.ControllerInterface) {
 	// Initialize handlers with controller
 	authHandler := handlers.NewAuthHandler(ctrl)
+	projectHandler := handlers.NewProjectHandler(ctrl)
 
 	// Apply middleware
 	Router.Use(middleware.Logging)
@@ -32,4 +33,6 @@ func Init(ctrl controller.ControllerInterface) {
 	Router.Handle("/auth/generate-token", imhttp.AppHandler(authHandler.GenerateToken)).Methods(http.MethodPost)
 	Router.Handle("/auth/refresh-token", imhttp.AppHandler(handlers.RefreshToken)).Methods(http.MethodPost)
 
+	// project routes
+	Router.Handle("/projects/{project_id}", imhttp.AppHandler(projectHandler.GetProject)).Methods(http.MethodGet)
 }

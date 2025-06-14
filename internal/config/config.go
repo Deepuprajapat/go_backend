@@ -21,7 +21,7 @@ type (
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT"`
+		Port int    `envconfig:"PORT" default:"8080"`
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
@@ -31,7 +31,7 @@ type (
 	}
 	JWTConfig struct {
 		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET" default:"MY_KEY"`
-		ExpiresIn         string        `envconfig:"JWT_EXPIRATION_DURATION"`
+		ExpiresIn         string        `envconfig:"JWT_EXPIRATION_DURATION" default:"24h"`
 		ExpiresInDuration time.Duration `envconfig:"-"`
 	}
 	Logger struct {

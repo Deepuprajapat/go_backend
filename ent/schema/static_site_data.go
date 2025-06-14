@@ -20,6 +20,12 @@ func (StaticSiteData) Fields() []ent.Field {
 		field.JSON("mango_insights", []byte{}),
 		field.JSON("our_associations", []byte{}),
 		field.Time("updated_at"),
+		field.JSON("categories_with_amenities", struct {
+			Categories map[string][]struct {
+				Icon  string `json:"icon"`
+				Value string `json:"value"`
+			} `json:"categories"`
+		}{}),
 		field.Time("created_at").Default(time.Now),
 	}
 }

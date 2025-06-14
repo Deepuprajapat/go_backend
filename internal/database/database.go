@@ -2,8 +2,8 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
-
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/VI-IM/im_backend_go/ent"
@@ -22,6 +22,8 @@ func NewClient(dsn string) *ent.Client {
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
+
+	fmt.Println("Connected to MySQL")
 
 	return client
 }

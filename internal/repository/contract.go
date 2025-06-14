@@ -8,6 +8,7 @@ type repository struct {
 
 type AppRepository interface {
 	GetUserDetailsByUsername(username string) (*ent.User, error)
+	GetProjectByID(id int) (*ent.Project, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

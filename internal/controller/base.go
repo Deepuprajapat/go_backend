@@ -11,6 +11,7 @@ type Controller struct {
 
 type ControllerInterface interface {
 	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error)
+	GetProjectByID(id int) (*response.ProjectResponse, error)
 }
 
 func NewController(repo repository.AppRepository) *Controller {
