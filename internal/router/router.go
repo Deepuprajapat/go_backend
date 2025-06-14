@@ -24,7 +24,6 @@ func Init(app application.ApplicationInterface) {
 	// Apply middleware
 	Router.Use(middleware.Logging)
 	Router.Use(middleware.Recover)
-	Router.PathPrefix("/api").Subrouter()
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -35,4 +34,5 @@ func Init(app application.ApplicationInterface) {
 
 	// project routes
 	Router.Handle("/projects/{project_id}", imhttp.AppHandler(projectHandler.GetProject)).Methods(http.MethodGet)
+	Router.Handle("/projects", imhttp.AppHandler(projectHandler.AddProject)).Methods(http.MethodPost)
 }

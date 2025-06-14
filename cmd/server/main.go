@@ -28,7 +28,7 @@ func main() {
 		NoColor:    true,
 	})
 
-	if os.Args[1] == "run-migration" {
+	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
 		legacyDB, err := migration.NewLegacyDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to legacy database")
@@ -61,7 +61,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to load configuration")
 	}
 
-	client := database.NewClient("im_db_dev:password@tcp(im_mysql_db:3306)/mydb?parseTime=true")
+	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
 
 	defer client.Close()
 

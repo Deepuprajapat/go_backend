@@ -21,6 +21,8 @@
 !/ent/schema/
 !/ent/generate.go
 
+migrations/
+
 
 
 

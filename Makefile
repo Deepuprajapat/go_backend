@@ -26,6 +26,12 @@ docker-up:
 docker-down:
 	docker-compose down
 
+enums:
+	./go-enum --marshal --sql --flag \
+		--file ./internal/domain/enums/poject_configurations.go \
+		--file ./internal/domain/enums/project_status.go
+
+
 # Install dependencies
 deps:
 	go mod tidy
@@ -43,3 +49,4 @@ run-migration:
 # Setup fresh development environment
 dev-setup: docker-up migrate
 	@echo "Development environment ready!" 
+

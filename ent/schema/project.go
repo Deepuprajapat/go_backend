@@ -12,17 +12,28 @@ type Project struct {
 
 func (Project) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique(),
-		field.JSON("basic_info", BasicInfo{}),
-		field.JSON("timeline_info", TimelineInfo{}),
-		field.JSON("meta_info", SEOMeta{}),
-		field.JSON("web_cards", ProjectWebCards{}),
-		field.JSON("location_info", LocationInfo{}),
-		field.Bool("is_featured").Default(false),
-		field.Bool("is_premium").Default(false),
-		field.Bool("is_priority").Default(false),
-		field.Bool("is_deleted").Default(false),
-		field.JSON("search_context", []string{}),
+		field.String("id").Unique(),
+		field.String("name"),
+		field.Text("description"),
+		field.Enum("status").
+			Values("UNDER_CONSTRUCTION", "READY_TO_MOVE", "NEW_LAUNCH", "PRE_LAUNCH").
+			Default("UNDER_CONSTRUCTION").Optional(),
+		field.Enum("project_configurations").
+			Values("1BHK", "2BHK", "3BHK", "4BHK", "5BHK", "6BHK", "7BHK", "8BHK").Optional(),
+		field.Int("total_floor").Optional(),
+		field.Int("total_towers").Optional(),
+		field.Int("min_price").Default(0), // update on every add property
+		field.Int("max_price").Default(0), // update on every add property
+		field.String("price_unit").Default("cr"),
+		field.JSON("timeline_info", TimelineInfo{}).Optional(),
+		field.JSON("meta_info", SEOMeta{}).Optional(),
+		field.JSON("web_cards", ProjectWebCards{}).Optional(),
+		field.JSON("location_info", LocationInfo{}).Optional(),
+		field.Bool("is_featured").Default(false).Optional(),
+		field.Bool("is_premium").Default(false).Optional(),
+		field.Bool("is_priority").Default(false).Optional(),
+		field.Bool("is_deleted").Default(false).Optional(),
+		field.JSON("search_context", []string{}).Optional(),
 	}
 }
 
@@ -170,7 +181,7 @@ type About struct {
 	Description       string `json:"description"`
 	LogoURL           string `json:"logo_url"`
 	EstablishmentYear string `json:"establishment_year"`
-	TotalProjects   string `json:"total_projects"`
+	TotalProjects     string `json:"total_projects"`
 	ContactDetails    struct {
 		Name           string `json:"name"`
 		ProjectAddress string `json:"project_address"`
@@ -190,17 +201,6 @@ type PaymentPlans struct {
 
 // basic project information
 type BasicInfo struct {
-	ProjectName           string `json:"project_name"`
-	ProjectDescription    string `json:"project_description"`
-	ProjectArea           string `json:"project_area"`
-	ProjectUnits          string `json:"project_units"`
-	ProjectConfigurations string `json:"project_configurations"`
-	TotalFloor            string `json:"total_floor"`
-	TotalTowers           string `json:"total_towers"`
-	ProjectType           string `json:"project_type"`
-	MinPrice              string `json:"min_price"`
-	MaxPrice              string `json:"max_price"`
-	Status                string `json:"status"`
 }
 
 // timeline information

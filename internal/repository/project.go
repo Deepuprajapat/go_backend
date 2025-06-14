@@ -3,12 +3,16 @@ package repository
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/developer"
+	"github.com/VI-IM/im_backend_go/ent/schema"
+	"github.com/VI-IM/im_backend_go/internal/domain"
 )
 
 func (r *repository) GetProjectByID(id int) (*ent.Project, error) {
-	project, err := r.db.Project.Get(context.Background(), id)
+	project, err := r.db.Project.Get(context.Background(), strconv.Itoa(id))
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("project not found")
@@ -21,4 +25,30 @@ func (r *repository) GetProjectByID(id int) (*ent.Project, error) {
 	}
 
 	return project, nil
+}
+
+func (r *repository) AddProject(input domain.AddProjectInput) (string, error) {
+	if err := r.db.Project.Create().
+		SetID(input.ProjectID).
+		SetName(input.ProjectName).
+		SetMetaInfo(schema.SEOMeta{
+			Canonical: input.ProjectURL,
+		}).
+		SetDescription("").
+		SetDeveloperID(input.DeveloperID).
+		Exec(context.Background()); err != nil {
+		return "", err
+	}
+
+	return input.ProjectID, nil
+}
+
+func (r *repository) ExistDeveloperByID(id string) (bool, error) {
+	exist, err := r.db.Developer.Query().
+		Where(developer.ID(id)).
+		Exist(context.Background())
+	if err != nil {
+		return false, err
+	}
+	return exist, nil
 }

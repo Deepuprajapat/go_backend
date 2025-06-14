@@ -12,7 +12,7 @@ type Developer struct {
 
 func (Developer) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique(),
+		field.String("id").Unique(),
 		field.String("name"),
 		field.String("legal_name"),
 		field.String("identifier"),
