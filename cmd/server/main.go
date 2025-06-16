@@ -1,18 +1,17 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/VI-IM/im_backend_go/Migrations-scripts/migration"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
+	"github.com/VI-IM/im_backend_go/migration_jobs"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -29,27 +28,26 @@ func main() {
 	})
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
-		legacyDB, err := migration.NewLegacyDBConnection()
+
+		legacyDB, err := migration_jobs.NewLegacyDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to legacy database")
 		}
 
-		newDB, err := migration.NewNewDBConnection()
+		newDB, err := migration_jobs.NewNewDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to new database")
 		}
+
 		defer newDB.Close()
 		defer legacyDB.Close()
 
-		projects, err := migration.FetchLegacyProjectData(context.Background(), legacyDB)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to fetch legacy project data")
-		}
-
-		err = migration.MigrateCommonFields(context.Background(), newDB, projects)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate common fields")
-		}
+		// ------ follow this sequence ------
+		// migrate city
+		// migrate locality
+		// migrate developer
+		// migrate properties
+		// migrate project
 
 		log.Info().Msg("Migration completed successfully")
 		return

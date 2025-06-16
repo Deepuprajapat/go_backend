@@ -1,12 +1,26 @@
 package migration
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/internal/database"
 )
+
+func NewNewDBConnection() (*ent.Client, error) {
+	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
+
+	// Run the auto migration tool
+	if err := client.Schema.Create(context.Background()); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed creating schema resources: %v", err)
+	}
+
+	return client, nil
+}
 
 // LegacyDBConfig holds the configuration for the legacy database connection
 type LegacyDBConfig struct {
