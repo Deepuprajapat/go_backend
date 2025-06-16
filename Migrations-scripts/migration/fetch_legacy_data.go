@@ -60,6 +60,7 @@ func FetchLegacyProjectData(ctx context.Context, db *sql.DB) ([]ProjectLegacyDat
 			project p
 			LEFT JOIN developer d ON p.developer_id = d.id
 			LEFT JOIN locality l ON p.locality_id = l.id
+			LEFT JOIN city c ON l.city_id = c.id
 			LEFT JOIN project_configuration pc ON p.property_configuration_type_id = pc.id
 			LEFT JOIN project_configuration_type pct ON pc.configuration_type_id = pct.id
 		WHERE 

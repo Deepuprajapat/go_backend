@@ -13,6 +13,7 @@ import (
 	"github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/property"
 	"github.com/VI-IM/im_backend_go/ent/schema"
+	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 )
 
 // Helper function to generate URL-friendly identifier
@@ -409,18 +410,19 @@ func MigrateCommonFields(ctx context.Context, client *ent.Client, legacyProjects
 			}
 		}
 
+		parsedConfiguation, err := enums.ParsePojectConfigurations(lp.ProjectConfigurations)
+		if err != nil {
+			return fmt.Errorf("error parsing project configurations: %v", err)
+		}
+
 		// Create project with common fields
 		projectCreate := client.Project.Create().
-			SetBasicInfo(schema.BasicInfo{
-				ProjectName:           lp.ProjectName,
-				ProjectDescription:    lp.ProjectDescription,
-				ProjectArea:           lp.ProjectArea,
-				ProjectUnits:          lp.ProjectUnits,
-				ProjectConfigurations: lp.ProjectConfigurations,
-				TotalFloor:            lp.TotalFloor,
-				TotalTowers:           lp.TotalTowers,
-				Status:                lp.Status,
-			}).
+			SetName(lp.ProjectName).
+			SetDescription(lp.ProjectDescription).
+			SetStatus(project.Status(lp.Status)).
+			SetProjectConfigurations(project.ProjectConfigurations(parsedConfiguation)).
+			SetTotalFloor(stringToInt(&lp.TotalFloor)).
+			SetTotalTowers(stringToInt(&lp.TotalTowers)).
 			SetTimelineInfo(schema.TimelineInfo{
 				ProjectLaunchDate:     lp.ProjectLaunchDate,
 				ProjectPossessionDate: lp.ProjectPossessionDate,
@@ -484,16 +486,12 @@ func MigrateCommonFields(ctx context.Context, client *ent.Client, legacyProjects
 
 				// Update the project with new data
 				_, err = proj.Update().
-					SetBasicInfo(schema.BasicInfo{
-						ProjectName:           lp.ProjectName,
-						ProjectDescription:    lp.ProjectDescription,
-						ProjectArea:           lp.ProjectArea,
-						ProjectUnits:          lp.ProjectUnits,
-						ProjectConfigurations: lp.ProjectConfigurations,
-						TotalFloor:            lp.TotalFloor,
-						TotalTowers:           lp.TotalTowers,
-						Status:                lp.Status,
-					}).
+					SetName(lp.ProjectName).
+					SetDescription(lp.ProjectDescription).
+					SetStatus(project.Status(lp.Status)).
+					SetProjectConfigurations(project.ProjectConfigurations(lp.ProjectConfigurations)).
+					SetTotalFloor(stringToInt(&lp.TotalFloor)).
+					SetTotalTowers(stringToInt(&lp.TotalTowers)).
 					SetTimelineInfo(schema.TimelineInfo{
 						ProjectLaunchDate:     lp.ProjectLaunchDate,
 						ProjectPossessionDate: lp.ProjectPossessionDate,

@@ -81,7 +81,7 @@ type ProjectLegacyData struct {
 	ProjectAddress        string         `json:"project_address"`
 	ProjectArea           string         `json:"project_area"`
 	ProjectBrochure       string         `json:"project_brochure"`
-	ProjectConfigurations string         `json:"project_configurations"`
+	ProjectConfigurations string         `json:"project_configurations"` //
 	ProjectLaunchDate     string         `json:"project_launch_date"`
 	ProjectLocationURL    string         `json:"project_location_url"`
 	ProjectLogo           string         `json:"project_logo"`
