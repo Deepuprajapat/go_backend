@@ -1,4 +1,4 @@
-package migration
+package migration_jobs
 
 import (
 	"context"
@@ -8,6 +8,11 @@ import (
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/database"
+)
+
+var (
+	newDB    *ent.Client
+	legacyDB *sql.DB
 )
 
 func NewNewDBConnection() (*ent.Client, error) {

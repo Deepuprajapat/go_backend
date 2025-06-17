@@ -150,3 +150,11 @@ type LCity struct {
 	UpdatedDate *int64  `json:"updated_date"`
 	Phone       *string `json:"phone_number"`
 }
+
+type LPropertyConfiguration struct {
+	ID                       int64   `json:"id"`
+	CreatedDate              *int64  `json:"created_date"`
+	ProjectConfigurationName *string `json:"project_configuration_name"`
+	UpdatedDate              *int64  `json:"updated_date"`
+	ConfigurationTypeID      *int64  `json:"configuration_type_id"`
+}

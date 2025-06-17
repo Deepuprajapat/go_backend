@@ -12,7 +12,7 @@ type Location struct {
 
 func (Location) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique().Positive(),
+		field.String("id").Unique(),
 		field.String("locality_name").Optional().Nillable(),
 		field.String("city").Optional().Nillable(),
 		field.String("state").Optional().Nillable(),

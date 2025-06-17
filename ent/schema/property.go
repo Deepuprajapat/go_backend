@@ -12,7 +12,7 @@ type Property struct {
 
 func (Property) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique(),
+		field.String("id").Unique(),
 		field.String("name"),
 		field.Text("description"),
 		field.JSON("property_images", PropertyImages{}),
