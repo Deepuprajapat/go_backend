@@ -3,12 +3,15 @@ package migration_jobs
 import (
 	"context"
 	"database/sql"
+	"fmt"
+
+	"github.com/rs/zerolog/log"
 )
 
 // fetch all tables from legacy database
 
 func FetchCityByID(ctx context.Context, db *sql.DB, id int64) (LCity, error) {
-	query := `SELECT * FROM city WHERE id = ?`
+	query := `SELECT id, city_name, city_url, created_date, is_active, state_name, updated_date, phone_number FROM city WHERE id = ?`
 	rows, err := db.QueryContext(ctx, query, id)
 	if err != nil {
 		return LCity{}, err
@@ -16,33 +19,52 @@ func FetchCityByID(ctx context.Context, db *sql.DB, id int64) (LCity, error) {
 	defer rows.Close()
 
 	var city LCity
-	if err := rows.Scan(&city.ID, &city.Name, &city.URL, &city.CreatedDate, &city.IsActive, &city.StateName, &city.UpdatedDate, &city.Phone); err != nil {
-		return LCity{}, err
+
+	// 👇 This is the key fix
+	if rows.Next() {
+		if err := rows.Scan(&city.ID, &city.Name, &city.URL, &city.CreatedDate, &city.IsActive, &city.StateName, &city.UpdatedDate, &city.Phone); err != nil {
+			return LCity{}, err
+		}
+		return city, nil
 	}
-	return city, nil
+
+	// If no rows found
+	return LCity{}, fmt.Errorf("no city found with ID %d", id)
 }
 
 func FetchAllLocality(ctx context.Context, db *sql.DB) ([]LLocality, error) {
-	query := `SELECT * FROM locality`
+	query := `SELECT id, created_date, locality_name, locality_url, updated_date, city_id FROM locality`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
 	var localities []LLocality
 	for rows.Next() {
 		var locality LLocality
-		if err := rows.Scan(&locality.ID, &locality.Name, &locality.URL, &locality.CreatedDate, &locality.UpdatedDate, &locality.CityID); err != nil {
+		if err := rows.Scan(
+			&locality.ID,
+			&locality.CreatedDate,
+			&locality.Name,
+			&locality.URL,
+			&locality.UpdatedDate,
+			&locality.CityID,
+		); err != nil {
 			return nil, err
 		}
 		localities = append(localities, locality)
 	}
+	// Check for errors after loop
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	log.Info().Msgf("Fetched localities %+v", localities)
 	return localities, nil
 }
 
 func FetchAllDevelopers(ctx context.Context, db *sql.DB) ([]LDeveloper, error) {
-	query := `SELECT * FROM developer`
+	log.Info().Msg("Fetching all developers")
+	query := `SELECT id, about, alt_developer_logo, created_date, developer_address, developer_legal_name, developer_logo, developer_name, developer_url, disclaimer, established_year, is_active, is_verified, overview, project_done_no, updated_date, city_name, phone FROM developer`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

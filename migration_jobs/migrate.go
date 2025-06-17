@@ -3,8 +3,11 @@ package migration_jobs
 import (
 	"context"
 	"database/sql"
+
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
+
 )
 
 // Use ent schema modal to migrate data from legacy database to new database
@@ -17,65 +20,71 @@ var (
 	legacyToNewConfigTypeIDMAP    = make(map[string]string)
 )
 
-func migrateProject(ctx context.Context, db *sql.DB) error {
-	projects, err := FetchhAllProject(ctx, db)
-	if err != nil {
-		return err
-	}
+// func migrateProject(ctx context.Context, db *sql.DB) error {
+// 	projects, err := FetchhAllProject(ctx, db)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	for _, project := range projects {
-		id := uuid.New().String()
-		legacyToNewProjectIDMAP[project.ID] = id
-		if err := newDB.Project.Create().
-			SetID(id).
-			SetName(*project.ProjectName).
-			SetDescription(*project.ProjectDescription).
-			SetStatus(*project.Status).
-			SetProjectConfigurations(*project.ProjectConfigurations).
-			SetTotalFloor(int(*project.TotalFloor)).
-			SetTotalTowers(int(*project.TotalTowers)).
-			SetTimelineInfo(schema.TimelineInfo{
-				ProjectLaunchDate:     *project.ProjectLaunchDate,
-				ProjectPossessionDate: *project.ProjectPossessionDate,
-			}).
-			SetMetaInfo(schema.SEOMeta{
-				Title:         *project.MetaTitle,
-				Description:   *project.MetaDescription,
-				Keywords:      *project.MetaKeywords,
-				Canonical:     *project.ProjectURL,
-				ProjectSchema: *project.ProjectSchema,
-			}).
-			SetWebCards(schema.ProjectWebCards{
-		
-			}).
-			SetIsFeatured(project.IsFeatured).
-			SetIsPremium(project.IsPremium).
-			SetIsPriority(project.IsPriority).
-			SetIsDeleted(project.IsDeleted).
-			SetDeveloperID(legacyToNewDeveloperIDMAP[*project.DeveloperID]).
-			SetLocalityID(legacyToNewLocalityIDMAP[*project.LocalityID]).
-			Exec(ctx); err != nil {
-			return err
-		}
+// 	for _, project := range projects {
+// 		id := uuid.New().String()
+// 		legacyToNewProjectIDMAP[project.ID] = id
+// 		if err := newDB.Project.Create().
+// 			SetID(id).
+// 			SetName(*project.ProjectName).
+// 			SetDescription(*project.ProjectDescription).
+// 			SetStatus(*project.Status).
+// 			SetProjectConfigurations(*project.ProjectConfigurations).
+// 			SetTotalFloor(int(*project.TotalFloor)).
+// 			SetTotalTowers(int(*project.TotalTowers)).
+// 			SetTimelineInfo(schema.TimelineInfo{
+// 				ProjectLaunchDate:     *project.ProjectLaunchDate,
+// 				ProjectPossessionDate: *project.ProjectPossessionDate,
+// 			}).
+// 			SetMetaInfo(schema.SEOMeta{
+// 				Title:         *project.MetaTitle,
+// 				Description:   *project.MetaDescription,
+// 				Keywords:      *project.MetaKeywords,
+// 				Canonical:     *project.ProjectURL,
+// 				ProjectSchema: *project.ProjectSchema,
+// 			}).
+// 			SetWebCards(schema.ProjectWebCards{
 
-	}
+// 			}).
+// 			SetIsFeatured(project.IsFeatured).
+// 			SetIsPremium(project.IsPremium).
+// 			SetIsPriority(project.IsPriority).
+// 			SetIsDeleted(project.IsDeleted).
+// 			SetDeveloperID(legacyToNewDeveloperIDMAP[*project.DeveloperID]).
+// 			SetLocalityID(legacyToNewLocalityIDMAP[*project.LocalityID]).
+// 			Exec(ctx); err != nil {
+// 			return err
+// 		}
 
-	// fetch all projects from legacy database
+// 	}
 
-	// create project in iteration
-	// map legacy project id to new project id
-	// setDeveloperID(legacyToNewDeveloperIDMAP[lproject.DeveloperID])
+// 	// fetch all projects from legacy database
 
-	return nil
-}
+// 	// create project in iteration
+// 	// map legacy project id to new project id
+// 	// setDeveloperID(legacyToNewDeveloperIDMAP[lproject.DeveloperID])
 
-func migrateDeveloper(ctx context.Context, db *sql.DB) error {
+// 	return nil
+// }
+
+func MigrateDeveloper(ctx context.Context, db *sql.DB) error {
+	log.Info().Msg("Migrating developers")
 	ldeveloper, err := FetchAllDevelopers(ctx, db)
 	if err != nil {
 		return err
 	}
 
 	for _, developer := range ldeveloper {
+		if developer.DeveloperName == nil || developer.DeveloperLegalName == nil || developer.DeveloperAddress == nil || developer.Phone == nil || developer.DeveloperLogo == nil || developer.AltDeveloperLogo == nil || developer.About == nil || developer.Overview == nil || developer.Disclaimer == nil || developer.EstablishedYear == nil || developer.IsActive == nil || developer.IsVerified == nil || developer.ID == 0 {
+			log.Warn().Msgf("Skipping developer ID %d due to nil values", developer.ID)
+			continue
+		}
+
 		id := uuid.New().String()
 		legacyToNewDeveloperIDMAP[developer.ID] = id
 		if err := newDB.Developer.Create().
@@ -93,8 +102,9 @@ func migrateDeveloper(ctx context.Context, db *sql.DB) error {
 				Overview:         *developer.Overview,
 				Disclaimer:       *developer.Disclaimer,
 			}).
-			SetIsVerified(developer.IsVerified).
-			Exec(ctx); err != nil {
+			SetIsVerified(developer.IsVerified != nil && *developer.IsVerified).
+			Exec(ctx); 
+			err != nil {
 			return err
 		}
 	}
@@ -102,7 +112,7 @@ func migrateDeveloper(ctx context.Context, db *sql.DB) error {
 	return nil
 }
 
-func migrateLocality(ctx context.Context, db *sql.DB) error {
+func MigrateLocality(ctx context.Context, db *sql.DB) error {
 	//new location id will be generated
 	llocality, err := FetchAllLocality(ctx, db)
 	if err != nil {
@@ -110,14 +120,25 @@ func migrateLocality(ctx context.Context, db *sql.DB) error {
 	}
 
 	for _, locality := range llocality {
+		if locality.Name == nil || locality.URL == nil || locality.CityID == nil || locality.CreatedDate == nil || locality.UpdatedDate == nil || locality.ID == 0 {
+			log.Warn().Msgf("Skipping locality ID %d due to nil values", locality.ID)
+			continue
+		}
+
 		city, err := FetchCityByID(ctx, db, *locality.CityID)
+		log.Info().Msgf("Fetched city %+v", city)
 		if err != nil {
 			return err
 		}
+		if city.Name == nil || city.StateName == nil || city.Phone == nil || city.CreatedDate == nil || city.UpdatedDate == nil || city.ID == 0 || city.IsActive == nil {
+			log.Warn().Msgf("Skipping city ID %d due to nil values", city.ID)
+			continue
+		}
+
 		id := uuid.New().String()
 		legacyToNewLocalityIDMAP[locality.ID] = id
 		if err := newDB.Location.Create().
-			SetID(id).
+			SetID(id).	
 			SetLocalityName(*locality.Name).
 			SetCity(*city.Name).
 			SetState(*city.StateName).
@@ -126,37 +147,36 @@ func migrateLocality(ctx context.Context, db *sql.DB) error {
 			SetPincode(*locality.URL).
 			SetIsActive(true).
 			Exec(ctx); err != nil {
+				log.Error().Err(err).Msgf("Failed to insert locality ID %d", locality.ID)
 			return err
 		}
 	}
-
 	return nil
 }
 
-
-func migrateProperty(ctx context.Context, db *sql.DB) error {
-	properties, err := fetchAllProperty(ctx, db)
-	if err != nil {
-		return err
-	}
-	for _, property := range properties {
-		id := uuid.New().String()
-		legacyToNewPropertyIDMAP[property.ID] = id
-		if err := newDB.Property.Create().
-			SetID(id).
-			SetName(*property.PropertyName).
-			SetDescription(*property.PropertyAddress).
-			SetIsFeatured(property.IsFeatured).
-			SetIsPremium(property.IsPremium).
-			SetIsPriority(property.IsPriority).
-			SetIsDeleted(property.IsDeleted).
-			SetDeveloperID(legacyToNewDeveloperIDMAP[*property.DeveloperID]).
-			SetLocalityID(legacyToNewLocalityIDMAP[*property.LocalityID]).
-			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
-			SetStatus(enums.PropertyStatus(*property.Status)).
-			Exec(ctx); err != nil {
-			return err
-		}	
-	}
-	return nil
-}
+// func migrateProperty(ctx context.Context, db *sql.DB) error {
+// 	properties, err := fetchAllProperty(ctx, db)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	for _, property := range properties {
+// 		id := uuid.New().String()
+// 		legacyToNewPropertyIDMAP[property.ID] = id
+// 		if err := newDB.Property.Create().
+// 			SetID(id).
+// 			SetName(*property.PropertyName).
+// 			SetDescription(*property.PropertyAddress).
+// 			SetIsFeatured(property.IsFeatured).
+// 			SetIsPremium(property.IsPremium).
+// 			SetIsPriority(property.IsPriority).
+// 			SetIsDeleted(property.IsDeleted).
+// 			SetDeveloperID(legacyToNewDeveloperIDMAP[*property.DeveloperID]).
+// 			SetLocalityID(legacyToNewLocalityIDMAP[*property.LocalityID]).
+// 			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
+// 			SetStatus(enums.PropertyStatus(*property.Status)).
+// 			Exec(ctx); err != nil {
+// 			return err
+// 		}
+// 	}
+// 	return nil
+// }

@@ -1,11 +1,12 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-
+	"fmt"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
@@ -18,13 +19,13 @@ import (
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 )
 
+
 func main() {
 	// Initialize zerolog
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.Output(zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: time.RFC3339,
-		NoColor:    true,
 	})
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
@@ -41,6 +42,18 @@ func main() {
 
 		defer newDB.Close()
 		defer legacyDB.Close()
+
+		err = migration_jobs.MigrateLocality(context.Background(), legacyDB)
+		if err != nil {
+			fmt.Println("Error in migrating localities", err)
+			return
+		}
+		
+		err = migration_jobs.MigrateDeveloper(context.Background(), legacyDB)
+		if err != nil {
+			fmt.Println("Error in migrating developers", err)
+			return
+		}
 
 		// ------ follow this sequence ------
 		// migrate city

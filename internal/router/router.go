@@ -2,7 +2,6 @@ package router
 
 import (
 	"net/http"
-
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
 	"github.com/VI-IM/im_backend_go/internal/middleware"
@@ -22,6 +21,7 @@ func Init(app application.ApplicationInterface) {
 	projectHandler := handlers.NewProjectHandler(app)
 
 	// Apply middleware
+	Router.Use(middleware.Cors)
 	Router.Use(middleware.Logging)
 	Router.Use(middleware.Recover)
 
