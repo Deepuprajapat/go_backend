@@ -42,8 +42,8 @@ type LProject struct {
 	SitePlanImg           *string `json:"siteplan_img"`
 	SitePlanPara          *string `json:"siteplan_para"`
 	Status                *string `json:"status"`
-	TotalFloor            *string `json:"total_floor"`
-	TotalTowers           *string `json:"total_towers"`
+	TotalFloor            *int64  `json:"total_floor"`
+	TotalTowers           *int64  `json:"total_towers"`
 	UpdatedDate           *int64  `json:"updated_date"`
 	USP                   *string `json:"usp"`
 	VideoPara             *string `json:"video_para"`

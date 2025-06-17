@@ -3,7 +3,6 @@ package migration_jobs
 import (
 	"context"
 	"database/sql"
-
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/google/uuid"
 )
@@ -19,6 +18,48 @@ var (
 )
 
 func migrateProject(ctx context.Context, db *sql.DB) error {
+	projects, err := FetchhAllProject(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	for _, project := range projects {
+		id := uuid.New().String()
+		legacyToNewProjectIDMAP[project.ID] = id
+		if err := newDB.Project.Create().
+			SetID(id).
+			SetName(*project.ProjectName).
+			SetDescription(*project.ProjectDescription).
+			SetStatus(*project.Status).
+			SetProjectConfigurations(*project.ProjectConfigurations).
+			SetTotalFloor(int(*project.TotalFloor)).
+			SetTotalTowers(int(*project.TotalTowers)).
+			SetTimelineInfo(schema.TimelineInfo{
+				ProjectLaunchDate:     *project.ProjectLaunchDate,
+				ProjectPossessionDate: *project.ProjectPossessionDate,
+			}).
+			SetMetaInfo(schema.SEOMeta{
+				Title:         *project.MetaTitle,
+				Description:   *project.MetaDescription,
+				Keywords:      *project.MetaKeywords,
+				Canonical:     *project.ProjectURL,
+				ProjectSchema: *project.ProjectSchema,
+			}).
+			SetWebCards(schema.ProjectWebCards{
+		
+			}).
+			SetIsFeatured(project.IsFeatured).
+			SetIsPremium(project.IsPremium).
+			SetIsPriority(project.IsPriority).
+			SetIsDeleted(project.IsDeleted).
+			SetDeveloperID(legacyToNewDeveloperIDMAP[*project.DeveloperID]).
+			SetLocalityID(legacyToNewLocalityIDMAP[*project.LocalityID]).
+			Exec(ctx); err != nil {
+			return err
+		}
+
+	}
+
 	// fetch all projects from legacy database
 
 	// create project in iteration
@@ -89,5 +130,33 @@ func migrateLocality(ctx context.Context, db *sql.DB) error {
 		}
 	}
 
+	return nil
+}
+
+
+func migrateProperty(ctx context.Context, db *sql.DB) error {
+	properties, err := fetchAllProperty(ctx, db)
+	if err != nil {
+		return err
+	}
+	for _, property := range properties {
+		id := uuid.New().String()
+		legacyToNewPropertyIDMAP[property.ID] = id
+		if err := newDB.Property.Create().
+			SetID(id).
+			SetName(*property.PropertyName).
+			SetDescription(*property.PropertyAddress).
+			SetIsFeatured(property.IsFeatured).
+			SetIsPremium(property.IsPremium).
+			SetIsPriority(property.IsPriority).
+			SetIsDeleted(property.IsDeleted).
+			SetDeveloperID(legacyToNewDeveloperIDMAP[*property.DeveloperID]).
+			SetLocalityID(legacyToNewLocalityIDMAP[*property.LocalityID]).
+			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
+			SetStatus(enums.PropertyStatus(*property.Status)).
+			Exec(ctx); err != nil {
+			return err
+		}	
+	}
 	return nil
 }
