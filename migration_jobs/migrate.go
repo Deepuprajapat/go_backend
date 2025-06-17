@@ -7,7 +7,6 @@ import (
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-
 )
 
 // Use ent schema modal to migrate data from legacy database to new database
@@ -80,10 +79,6 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB) error {
 	}
 
 	for _, developer := range ldeveloper {
-		if developer.DeveloperName == nil || developer.DeveloperLegalName == nil || developer.DeveloperAddress == nil || developer.Phone == nil || developer.DeveloperLogo == nil || developer.AltDeveloperLogo == nil || developer.About == nil || developer.Overview == nil || developer.Disclaimer == nil || developer.EstablishedYear == nil || developer.IsActive == nil || developer.IsVerified == nil || developer.ID == 0 {
-			log.Warn().Msgf("Skipping developer ID %d due to nil values", developer.ID)
-			continue
-		}
 
 		id := uuid.New().String()
 		legacyToNewDeveloperIDMAP[developer.ID] = id
@@ -103,8 +98,7 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB) error {
 				Disclaimer:       *developer.Disclaimer,
 			}).
 			SetIsVerified(developer.IsVerified != nil && *developer.IsVerified).
-			Exec(ctx); 
-			err != nil {
+			Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -120,25 +114,18 @@ func MigrateLocality(ctx context.Context, db *sql.DB) error {
 	}
 
 	for _, locality := range llocality {
-		if locality.Name == nil || locality.URL == nil || locality.CityID == nil || locality.CreatedDate == nil || locality.UpdatedDate == nil || locality.ID == 0 {
-			log.Warn().Msgf("Skipping locality ID %d due to nil values", locality.ID)
-			continue
-		}
 
 		city, err := FetchCityByID(ctx, db, *locality.CityID)
 		log.Info().Msgf("Fetched city %+v", city)
 		if err != nil {
-			return err
-		}
-		if city.Name == nil || city.StateName == nil || city.Phone == nil || city.CreatedDate == nil || city.UpdatedDate == nil || city.ID == 0 || city.IsActive == nil {
-			log.Warn().Msgf("Skipping city ID %d due to nil values", city.ID)
+			log.Error().Err(err).Msgf("Failed to fetch city for locality ID %d", locality.ID)
 			continue
 		}
 
 		id := uuid.New().String()
 		legacyToNewLocalityIDMAP[locality.ID] = id
 		if err := newDB.Location.Create().
-			SetID(id).	
+			SetID(id).
 			SetLocalityName(*locality.Name).
 			SetCity(*city.Name).
 			SetState(*city.StateName).
@@ -147,8 +134,8 @@ func MigrateLocality(ctx context.Context, db *sql.DB) error {
 			SetPincode(*locality.URL).
 			SetIsActive(true).
 			Exec(ctx); err != nil {
-				log.Error().Err(err).Msgf("Failed to insert locality ID %d", locality.ID)
-			return err
+			log.Error().Err(err).Msgf("Failed to insert locality ID %d", locality.ID)
+			continue
 		}
 	}
 	return nil
