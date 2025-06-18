@@ -122,8 +122,8 @@ type LDeveloper struct {
 	DeveloperURL       *string `json:"developer_url"`
 	Disclaimer         *string `json:"disclaimer"`
 	EstablishedYear    *int64  `json:"established_year"`
-	IsActive           *bool    `json:"is_active"`
-	IsVerified         *bool    `json:"is_verified"`
+	IsActive           *bool   `json:"is_active"`
+	IsVerified         *bool   `json:"is_verified"`
 	Overview           *string `json:"overview"`
 	ProjectDoneNo      *int64  `json:"project_done_no"`
 	UpdatedDate        *int64  `json:"updated_date"`
@@ -145,7 +145,7 @@ type LCity struct {
 	Name        *string `json:"city_name"`
 	URL         *string `json:"city_url"`
 	CreatedDate *int64  `json:"created_date"`
-	IsActive    *int64    `json:"is_active"`
+	IsActive    *int64  `json:"is_active"`
 	StateName   *string `json:"state_name"`
 	UpdatedDate *int64  `json:"updated_date"`
 	Phone       *string `json:"phone_number"`
@@ -157,4 +157,9 @@ type LPropertyConfiguration struct {
 	ProjectConfigurationName *string `json:"project_configuration_name"`
 	UpdatedDate              *int64  `json:"updated_date"`
 	ConfigurationTypeID      *int64  `json:"configuration_type_id"`
+}
+type LProjectImage struct {
+	ProjectID    int64   `json:"project_id"`
+	ImageAltName *string `json:"image_alt_name"`
+	ImageURL     string  `json:"image_url"`
 }

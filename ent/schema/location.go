@@ -16,7 +16,7 @@ func (Location) Fields() []ent.Field {
 		field.String("locality_name").Optional(),
 		field.String("city").Optional(),
 		field.String("state").Optional(),
-		field.Int32("phone_number").Optional(),
+		field.String("phone_number").Optional(),
 		field.String("country").Default("India"),
 		field.String("pincode").Optional(),
 		field.Bool("is_active").Default(true),

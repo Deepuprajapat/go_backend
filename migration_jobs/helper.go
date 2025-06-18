@@ -3,9 +3,9 @@ package migration_jobs
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
+	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/rs/zerolog/log"
 )
 
@@ -57,9 +57,9 @@ func safeInt(i *int64) int {
 //		num, _ := strconv.Atoi(joined)
 //		return int32(num)
 //	}
-func parsePhoneJSONToInt32(s *string) (*int32, error) {
+func parsePhoneJSONToString(s *string) (*string, error) {
 	if s == nil {
-		var zero int32 = 0
+		var zero string = ""
 		log.Info().Msgf("Phone string is nil, returning 0")
 		return &zero, nil
 	}
@@ -82,19 +82,39 @@ func parsePhoneJSONToInt32(s *string) (*int32, error) {
 		phoneClean = phoneClean[len(phoneClean)-10:]
 	}
 
-	// Convert to int64 first since phone numbers can be large
-	phoneInt64, err := strconv.ParseInt(phoneClean, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("failed to convert phone to int64: %w", err)
-	}
+	return &phoneClean, nil
+}
 
-	// Convert to int32, capping at max int32 if needed
-	var result int32
-	if phoneInt64 > 2147483647 { // Max int32
-		result = 2147483647
-	} else {
-		result = int32(phoneInt64)
+func parsePropertyImagesFromProjectImages(projectImages *[]LProjectImage) (*schema.PropertyImages, error) {
+	propertyImages := schema.PropertyImages{
+		Images: []struct {
+			Order int    `json:"order"`
+			Url   string `json:"url"`
+			Type  string `json:"type"`
+		}{},
 	}
+	for _, image := range *projectImages {
+		propertyImages.Images = append(propertyImages.Images, struct {
+			Order int    `json:"order"`
+			Url   string `json:"url"`
+			Type  string `json:"type"`
+		}{
+			Order: 1,
+			Url:   image.ImageURL,
+			Type:  "property_image",
+		})
+	}
+	return &propertyImages, nil
+}
 
-	return &result, nil
+func parseWebCardsFromProject(project *LProject) (*schema.WebCards, error) {
+
+	webCards := schema.WebCards{
+		PropertyDetails: schema.PropertyDetails{
+			PropertyType:   *project.ProjectConfigurations,
+			FurnishingType: *project.ProjectConfigurations,
+			ListingType:    *project.ProjectConfigurations,
+		},
+	}
+	return &webCards, nil
 }

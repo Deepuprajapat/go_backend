@@ -187,3 +187,82 @@ func fetchAllProperty(ctx context.Context, db *sql.DB) ([]LProperty, error) {
 	}
 	return properties, nil
 }
+
+func FetchProjectByID(ctx context.Context, db *sql.DB, id int64) (*LProject, error) {
+	query := `SELECT * FROM project WHERE id = ?`
+	rows, err := db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var project LProject
+	if err := rows.Scan(&project.ID, &project.ProjectName, &project.ProjectDescription, &project.Status, &project.ProjectConfigurations, &project.TotalFloor, &project.TotalTowers, &project.ProjectLaunchDate, &project.ProjectPossessionDate, &project.MetaTitle, &project.MetaDescription, &project.MetaKeywords, &project.ProjectURL, &project.ProjectSchema, &project.ProjectLogo, &project.ProjectBrochure, &project.ProjectVideos, &project.ProjectVideoCount, &project.IsFeatured, &project.IsPremium, &project.IsPriority, &project.IsDeleted, &project.DeveloperID, &project.LocalityID, &project.UserID, &project.CreatedDate, &project.UpdatedDate); err != nil {
+		return nil, err
+	}
+	return &project, nil
+}
+
+func FetchProjectConfigurationsByID(ctx context.Context, db *sql.DB, id int64) (*LPropertyConfiguration, error) {
+	query := `SELECT * FROM property_configuration WHERE id = ?`
+	rows, err := db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var configuration LPropertyConfiguration
+	if err := rows.Scan(&configuration.ID, &configuration.CreatedDate, &configuration.ProjectConfigurationName, &configuration.UpdatedDate, &configuration.ConfigurationTypeID); err != nil {
+		return nil, err
+	}
+	return &configuration, nil
+}
+
+func FetchLocalityByID(ctx context.Context, db *sql.DB, id int64) (*LLocality, error) {
+	query := `SELECT * FROM locality WHERE id = ?`
+	rows, err := db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var locality LLocality
+	if err := rows.Scan(&locality.ID, &locality.CreatedDate, &locality.Name, &locality.URL, &locality.UpdatedDate, &locality.CityID); err != nil {
+		return nil, err
+	}
+	return &locality, nil
+}
+
+func FetchDeveloperByID(ctx context.Context, db *sql.DB, id int64) (*LDeveloper, error) {
+	query := `SELECT * FROM developer WHERE id = ?`
+	rows, err := db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var developer LDeveloper
+	if err := rows.Scan(&developer.ID, &developer.About, &developer.AltDeveloperLogo, &developer.CreatedDate, &developer.DeveloperAddress, &developer.DeveloperLegalName, &developer.DeveloperLogo, &developer.DeveloperName, &developer.DeveloperURL, &developer.Disclaimer, &developer.EstablishedYear, &developer.IsActive, &developer.IsVerified, &developer.Overview, &developer.ProjectDoneNo, &developer.UpdatedDate, &developer.CityName, &developer.Phone); err != nil {
+		return nil, err
+	}
+	return &developer, nil
+}
+
+func FetchProjectImagesByProjectID(ctx context.Context, db *sql.DB, id int64) (*[]LProjectImage, error) {
+	query := `SELECT * FROM project_image WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var propertyImages []LProjectImage
+	for rows.Next() {
+		var propertyImage LProjectImage
+		if err := rows.Scan(&propertyImage.ProjectID, &propertyImage.ImageAltName, &propertyImage.ImageURL); err != nil {
+			return nil, err
+		}
+		propertyImages = append(propertyImages, propertyImage)
+	}
+	return &propertyImages, nil
+}

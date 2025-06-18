@@ -2,23 +2,25 @@ package migration_jobs
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"fmt"
+	"strconv"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
 // Use ent schema modal to migrate data from legacy database to new database
 
 var (
-	legacyToNewProjectIDMAP       = make(map[string]string)
+	legacyToNewProjectIDMAP       = make(map[int64]string)
 	legacyToNewDeveloperIDMAP     = make(map[int64]string)
 	legacyToNewLocalityIDMAP      = make(map[int64]string)
 	legacyToNewConfigurationIDMAP = make(map[string]string)
 	legacyToNewConfigTypeIDMAP    = make(map[string]string)
+	legacyToNewPropertyIDMAP      = make(map[int64]string)
 )
 
 // func migrateProject(ctx context.Context, db *sql.DB) error {
@@ -81,7 +83,7 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error 
 	}
 
 	for _, developer := range ldeveloper {
-		id := uuid.New().String()
+		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(developer.ID, 10))))[:16]
 		legacyToNewDeveloperIDMAP[developer.ID] = id
 		if err := newDB.Developer.Create().
 			SetID(id).
@@ -128,12 +130,12 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			return fmt.Errorf("newDB is nil — database connection not initialized")
 		}
 
-		phoneInt, err := parsePhoneJSONToInt32(city.Phone)
+		phoneInt, err := parsePhoneJSONToString(city.Phone)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to convert phone for locality ID %d", locality.ID)
 		}
 
-		id := uuid.New().String()
+		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(locality.ID, 10))))[:16]
 		legacyToNewLocalityIDMAP[locality.ID] = id
 		if err := newDB.Location.Create().
 			SetID(id).
@@ -152,29 +154,62 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	return nil
 }
 
-// func migrateProperty(ctx context.Context, db *sql.DB) error {
-// 	properties, err := fetchAllProperty(ctx, db)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	for _, property := range properties {
-// 		id := uuid.New().String()
-// 		legacyToNewPropertyIDMAP[property.ID] = id
-// 		if err := newDB.Property.Create().
-// 			SetID(id).
-// 			SetName(*property.PropertyName).
-// 			SetDescription(*property.PropertyAddress).
-// 			SetIsFeatured(property.IsFeatured).
-// 			SetIsPremium(property.IsPremium).
-// 			SetIsPriority(property.IsPriority).
-// 			SetIsDeleted(property.IsDeleted).
-// 			SetDeveloperID(legacyToNewDeveloperIDMAP[*property.DeveloperID]).
-// 			SetLocalityID(legacyToNewLocalityIDMAP[*property.LocalityID]).
-// 			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
-// 			SetStatus(enums.PropertyStatus(*property.Status)).
-// 			Exec(ctx); err != nil {
-// 			return err
-// 		}
-// 	}
-// 	return nil
-// }
+func migrateProperty(ctx context.Context, db *sql.DB) error {
+	properties, err := fetchAllProperty(ctx, db)
+	if err != nil {
+		return err
+	}
+	for _, property := range properties {
+		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(property.ID, 10))))[:16]
+		legacyToNewPropertyIDMAP[property.ID] = id
+		project, err := FetchProjectByID(ctx, db, *property.ProjectID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch project for property ID %d", property.ID)
+			continue
+		}
+		projectConfigurations, err := FetchProjectConfigurationsByID(ctx, db, *property.ConfigurationID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
+			continue
+		}
+		locality, err := FetchLocalityByID(ctx, db, *property.LocalityID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch locality for property ID %d", property.ID)
+			continue
+		}
+		developer, err := FetchDeveloperByID(ctx, db, *property.DeveloperID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch developer for property ID %d", property.ID)
+		}
+
+		projectImages, err := FetchProjectImagesByProjectID(ctx, db, *property.ProjectID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch project images for property ID %d", property.ID)
+			continue
+		}
+
+		propertyImages, err := parsePropertyImagesFromProjectImages(projectImages)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to parse property images for property ID %d", property.ID)
+			continue
+		}
+
+		webCards, err := parseWebCardsFromProject(project)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to parse web cards for property ID %d", property.ID)
+			continue
+		}
+
+		// property Type and configurationtype(Ground Floor, Apartment, etc.) name from projectConfigurations table
+
+		if err := newDB.Property.Create().
+			SetID(id).
+			SetName(*property.PropertyName).
+			SetPropertyImages(*propertyImages).
+			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
+			Exec(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
