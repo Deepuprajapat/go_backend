@@ -128,11 +128,10 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			return fmt.Errorf("newDB is nil — database connection not initialized")
 		}
 
-		// phoneInt, err := parsePhoneJSONToInt32(city.Phone)
-		// if err != nil {
-		// 	log.Error().Err(err).Msgf("Failed to convert phone for locality ID %d", locality.ID)
-		// 	continue
-		// }
+		phoneInt, err := parsePhoneJSONToInt32(city.Phone)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to convert phone for locality ID %d", locality.ID)
+		}
 
 		id := uuid.New().String()
 		legacyToNewLocalityIDMAP[locality.ID] = id
@@ -141,7 +140,7 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			SetLocalityName(safeStr(locality.Name)).
 			SetCity(safeStr(city.Name)).
 			SetState(safeStr(city.StateName)).
-			SetPhoneNumber(extractNumericPhone(*city.Phone)).
+			SetPhoneNumber(*phoneInt).
 			SetCountry("India").
 			SetPincode("112222").
 			SetIsActive(true).
