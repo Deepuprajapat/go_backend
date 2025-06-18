@@ -3,7 +3,9 @@ package migration_jobs
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
+	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -71,7 +73,7 @@ var (
 // 	return nil
 // }
 
-func MigrateDeveloper(ctx context.Context, db *sql.DB) error {
+func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	log.Info().Msg("Migrating developers")
 	ldeveloper, err := FetchAllDevelopers(ctx, db)
 	if err != nil {
@@ -79,34 +81,33 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB) error {
 	}
 
 	for _, developer := range ldeveloper {
-
 		id := uuid.New().String()
 		legacyToNewDeveloperIDMAP[developer.ID] = id
 		if err := newDB.Developer.Create().
 			SetID(id).
-			SetName(*developer.DeveloperName).
-			SetLegalName(*developer.DeveloperLegalName).
-			SetIdentifier(*developer.DeveloperName).
-			SetEstablishedYear(int(*developer.EstablishedYear)).
+			SetName(safeStr(developer.DeveloperName)).
+			SetLegalName(safeStr(developer.DeveloperLegalName)).
+			SetIdentifier(safeStr(developer.DeveloperName)).
+			SetEstablishedYear(safeInt(developer.EstablishedYear)).
 			SetMediaContent(schema.DeveloperMediaContent{
-				DeveloperAddress: *developer.DeveloperAddress,
-				Phone:            *developer.Phone,
-				DeveloperLogo:    *developer.DeveloperLogo,
-				AltDeveloperLogo: *developer.AltDeveloperLogo,
-				About:            *developer.About,
-				Overview:         *developer.Overview,
-				Disclaimer:       *developer.Disclaimer,
+				DeveloperAddress: safeStr(developer.DeveloperAddress),
+				Phone:            safeStr(developer.Phone),
+				DeveloperLogo:    safeStr(developer.DeveloperLogo),
+				AltDeveloperLogo: safeStr(developer.AltDeveloperLogo),
+				About:            safeStr(developer.About),
+				Overview:         safeStr(developer.Overview),
+				Disclaimer:       safeStr(developer.Disclaimer),
 			}).
 			SetIsVerified(developer.IsVerified != nil && *developer.IsVerified).
 			Exec(ctx); err != nil {
 			return err
 		}
-	}
 
+	}
 	return nil
 }
 
-func MigrateLocality(ctx context.Context, db *sql.DB) error {
+func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	//new location id will be generated
 	llocality, err := FetchAllLocality(ctx, db)
 	if err != nil {
@@ -116,22 +117,33 @@ func MigrateLocality(ctx context.Context, db *sql.DB) error {
 	for _, locality := range llocality {
 
 		city, err := FetchCityByID(ctx, db, *locality.CityID)
+
 		log.Info().Msgf("Fetched city %+v", city)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch city for locality ID %d", locality.ID)
 			continue
 		}
 
+		if newDB == nil {
+			return fmt.Errorf("newDB is nil — database connection not initialized")
+		}
+
+		// phoneInt, err := parsePhoneJSONToInt32(city.Phone)
+		// if err != nil {
+		// 	log.Error().Err(err).Msgf("Failed to convert phone for locality ID %d", locality.ID)
+		// 	continue
+		// }
+
 		id := uuid.New().String()
 		legacyToNewLocalityIDMAP[locality.ID] = id
 		if err := newDB.Location.Create().
 			SetID(id).
-			SetLocalityName(*locality.Name).
-			SetCity(*city.Name).
-			SetState(*city.StateName).
-			SetPhoneNumber(*city.Phone).
+			SetLocalityName(safeStr(locality.Name)).
+			SetCity(safeStr(city.Name)).
+			SetState(safeStr(city.StateName)).
+			SetPhoneNumber(extractNumericPhone(*city.Phone)).
 			SetCountry("India").
-			SetPincode(*locality.URL).
+			SetPincode("112222").
 			SetIsActive(true).
 			Exec(ctx); err != nil {
 			log.Error().Err(err).Msgf("Failed to insert locality ID %d", locality.ID)

@@ -13,12 +13,12 @@ type Location struct {
 func (Location) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
-		field.String("locality_name").Optional().Nillable(),
-		field.String("city").Optional().Nillable(),
-		field.String("state").Optional().Nillable(),
-		field.String("phone_number").Optional().Nillable(),
-		field.String("country").Default("India").NotEmpty(),
-		field.String("pincode").Optional().Nillable(),
+		field.String("locality_name").Optional(),
+		field.String("city").Optional(),
+		field.String("state").Optional(),
+		field.Int32("phone_number").Optional(),
+		field.String("country").Default("India"),
+		field.String("pincode").Optional(),
 		field.Bool("is_active").Default(true),
 	}
 }

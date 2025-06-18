@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strconv"
-
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/schema"
@@ -39,7 +38,6 @@ func (r *repository) AddProject(input domain.AddProjectInput) (string, error) {
 		Exec(context.Background()); err != nil {
 		return "", err
 	}
-
 	return input.ProjectID, nil
 }
 

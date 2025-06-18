@@ -43,13 +43,13 @@ func main() {
 		defer newDB.Close()
 		defer legacyDB.Close()
 
-		err = migration_jobs.MigrateLocality(context.Background(), legacyDB)
+		err = migration_jobs.MigrateLocality(context.Background(), legacyDB, newDB)
 		if err != nil {
 			fmt.Println("Error in migrating localities", err)
 			return
 		}
 		
-		err = migration_jobs.MigrateDeveloper(context.Background(), legacyDB)
+		err = migration_jobs.MigrateDeveloper(context.Background(), legacyDB,newDB)
 		if err != nil {
 			fmt.Println("Error in migrating developers", err)
 			return
