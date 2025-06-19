@@ -291,6 +291,7 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 			SetIsPriority(project.IsPriority).
 			SetIsDeleted(project.IsDeleted).
 			SetDeveloperID(legacyToNewDeveloperIDMAP[*project.DeveloperID]).
+			SetLocationID(legacyToNewLocalityIDMAP[*project.LocalityID]).
 			Exec(ctx); err != nil {
 			return err
 		}
