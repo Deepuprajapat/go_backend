@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/rs/zerolog/log"
 )
@@ -23,40 +22,6 @@ func safeInt(i *int64) int {
 	return 0
 }
 
-// func parsePhoneJSONToInt32(s *string) (int32, error) {
-// 	if s == nil {
-// 		return 0, fmt.Errorf("phone string is nil")
-// 	}
-
-// 	var phones []string
-// 	if err := json.Unmarshal([]byte(*s), &phones); err != nil {
-// 		return 0, fmt.Errorf("failed to unmarshal phone JSON: %w", err)
-// 	}
-
-// 	if len(phones) == 0 {
-// 		return 0, fmt.Errorf("no phone number found")
-// 	}
-
-// 	// Clean up: remove dashes and whitespace
-// 	phoneClean := strings.ReplaceAll(phones[0], "-", "")
-// 	phoneClean = strings.TrimSpace(phoneClean)
-
-// 	// Convert to int32
-// 	phoneInt, err := strconv.ParseInt(phoneClean, 10, 32)
-// 	if err != nil {
-// 		return 0, fmt.Errorf("failed to convert phone to int32: %w", err)
-// 	}
-
-// 	return int32(phoneInt), nil
-// }
-
-//	func extractNumericPhone(phoneRaw string) int32 {
-//		re := regexp.MustCompile(`\d+`)
-//		allNums := re.FindAllString(phoneRaw, -1)
-//		joined := strings.Join(allNums, "")
-//		num, _ := strconv.Atoi(joined)
-//		return int32(num)
-//	}
 func parsePhoneJSONToString(s *string) (*string, error) {
 	if s == nil {
 		var zero string = ""
@@ -108,13 +73,70 @@ func parsePropertyImagesFromProjectImages(projectImages *[]LProjectImage) (*sche
 }
 
 func parseWebCardsFromProject(project *LProject) (*schema.WebCards, error) {
-
+	
 	webCards := schema.WebCards{
 		PropertyDetails: schema.PropertyDetails{
-			PropertyType:   *project.ProjectConfigurations,
-			FurnishingType: *project.ProjectConfigurations,
-			ListingType:    *project.ProjectConfigurations,
+			PropertyType:      safeStr(project.ProjectConfigurations),
+			FurnishingType:    "", // Not available in legacy data
+			ListingType:       "", // Not available in legacy data
+			PossessionStatus:  safeStr(project.Status),
+			AgeOfProperty:     "", // Not available in legacy data
+			FloorPara:         safeStr(project.FloorPara),
+			LocationPara:      safeStr(project.LocationPara),
+			LocationAdvantage: "", // Not available in legacy data
+			OverviewPara:      safeStr(project.OverviewPara),
+			Floors:            fmt.Sprintf("%d", safeInt(project.TotalFloor)),
+			Images:            "", // Will be populated from project images if available
+			Latlong:           safeStr(project.ProjectLocationURL),
 		},
+		PropertyFloorPlan: []struct {
+			Title string `json:"title"`
+			Plans []struct {
+				Title        string `json:"title"`
+				FlatType     string `json:"flat_type"`
+				Price        string `json:"price"`
+				BuildingArea string `json:"building_area"`
+				Image        string `json:"image"`
+				ExpertLink   string `json:"expert_link"`
+				BrochureLink string `json:"brochure_link"`
+			} `json:"plans"`
+		}{
+			{
+				Title: safeStr(project.FloorPara),
+				Plans: []struct {
+					Title        string `json:"title"`
+					FlatType     string `json:"flat_type"`
+					Price        string `json:"price"`
+					BuildingArea string `json:"building_area"`
+					Image        string `json:"image"`
+					ExpertLink   string `json:"expert_link"`
+					BrochureLink string `json:"brochure_link"`
+				}{
+					{
+						Title:        safeStr(project.ProjectConfigurations),
+						FlatType:     safeStr(project.ProjectConfigurations),
+						Price:        "",
+						BuildingArea: safeStr(project.ProjectArea),
+						Image:        "",
+						ExpertLink:   "",
+						BrochureLink: safeStr(project.ProjectBrochure),
+					},
+				},
+			},
+		},
+		KnowAbout: struct {
+			HtmlText string `json:"html_text"`
+		}{
+			HtmlText: safeStr(project.ProjectAbout),
+		},
+		VideoPresentation: struct {
+			Title    string `json:"title"`
+			VideoUrl string `json:"video_url"`
+		}{
+			Title:    safeStr(project.VideoPara),
+			VideoUrl: "", // Will be populated from project videos if available
+		},
+		GoogleMapLink: safeStr(project.ProjectLocationURL),
 	}
 	return &webCards, nil
 }

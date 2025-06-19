@@ -193,7 +193,11 @@ func migrateProperty(ctx context.Context, db *sql.DB) error {
 			log.Error().Err(err).Msgf("Failed to parse property images for property ID %d", property.ID)
 			continue
 		}
-
+		floorPlans, err := FetchFloorPlansByProjectID(ctx, db, *property.ProjectID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch floor plans for property ID %d", property.ID)
+			continue
+		}
 		webCards, err := parseWebCardsFromProject(project)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to parse web cards for property ID %d", property.ID)
@@ -207,6 +211,7 @@ func migrateProperty(ctx context.Context, db *sql.DB) error {
 			SetName(*property.PropertyName).
 			SetPropertyImages(*propertyImages).
 			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
+			SetWebCards(*webCards).
 			Exec(ctx); err != nil {
 			return err
 		}

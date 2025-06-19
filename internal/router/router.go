@@ -34,5 +34,6 @@ func Init(app application.ApplicationInterface) {
 
 	// project routes
 	Router.Handle("/projects/{project_id}", imhttp.AppHandler(projectHandler.GetProject)).Methods(http.MethodGet)
-	Router.Handle("/projects", imhttp.AppHandler(projectHandler.AddProject)).Methods(http.MethodPost)
+	Router.Handle("/projects", middleware.Auth(imhttp.AppHandler(projectHandler.AddProject))).Methods(http.MethodPost)
 }
+

@@ -163,3 +163,19 @@ type LProjectImage struct {
 	ImageAltName *string `json:"image_alt_name"`
 	ImageURL     string  `json:"image_url"`
 }
+
+
+// Floor Plan table structure - matches MySQL floorplan table
+type LFloorPlan struct {
+	ID              int64   `json:"id"`
+	CreatedDate     *int64  `json:"created_date"`
+	ImgURL          *string `json:"img_url"`
+	IsSoldOut       bool    `json:"is_sold_out"`
+	Price           float64 `json:"price"`
+	Size            *int64  `json:"size"`
+	Title           *string `json:"title"`
+	UpdatedDate     *int64  `json:"updated_date"`
+	ConfigurationID *int64  `json:"configuration_id"`
+	ProjectID       *int64  `json:"project_id"`
+	UserID          *int64  `json:"user_id"`
+}

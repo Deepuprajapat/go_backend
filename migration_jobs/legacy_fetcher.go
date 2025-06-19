@@ -266,3 +266,35 @@ func FetchProjectImagesByProjectID(ctx context.Context, db *sql.DB, id int64) (*
 	}
 	return &propertyImages, nil
 }
+
+
+func FetchFloorPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64) (*[]LFloorPlan, error) {
+	query := `SELECT id, created_date, img_url, is_sold_out, price, size, title, updated_date, configuration_id, project_id, user_id FROM floorplan WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var floorPlans []LFloorPlan
+	for rows.Next() {
+		var floorPlan LFloorPlan
+		if err := rows.Scan(
+			&floorPlan.ID,
+			&floorPlan.CreatedDate,
+			&floorPlan.ImgURL,
+			&floorPlan.IsSoldOut,
+			&floorPlan.Price,
+			&floorPlan.Size,
+			&floorPlan.Title,
+			&floorPlan.UpdatedDate,
+			&floorPlan.ConfigurationID,
+			&floorPlan.ProjectID,
+			&floorPlan.UserID,
+		); err != nil {
+			return nil, err
+		}
+		floorPlans = append(floorPlans, floorPlan)
+	}
+	return &floorPlans, nil
+}
