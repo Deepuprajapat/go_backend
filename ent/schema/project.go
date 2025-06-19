@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 )
 
 type Project struct {
@@ -15,11 +16,7 @@ func (Project) Fields() []ent.Field {
 		field.String("id").Unique(),
 		field.String("name"),
 		field.Text("description"),
-		field.Enum("status").
-			Values("UNDER_CONSTRUCTION", "READY_TO_MOVE", "NEW_LAUNCH", "PRE_LAUNCH").
-			Default("UNDER_CONSTRUCTION").Optional(),
-		field.Enum("project_configurations").
-			Values("1BHK", "2BHK", "3BHK", "4BHK", "5BHK", "6BHK", "7BHK", "8BHK").Optional(),
+		field.String("status").GoType(enums.ProjectStatus("")),
 		field.Int("total_floor").Optional(),
 		field.Int("total_towers").Optional(),
 		field.Int("min_price").Default(0), // update on every add property
@@ -61,11 +58,24 @@ type ProjectWebCards struct {
 		Description string `json:"description"`
 		Image       string `json:"image"`
 	} `json:"site_plan"`
-	About About `json:"about"`
-	Faqs  []struct {
-		Question string `json:"question"`
-		Answer   string `json:"answer"`
-	} `json:"faqs"`
+	About struct {
+		Description       string `json:"description"`
+		LogoURL           string `json:"logo_url"`
+		EstablishmentYear string `json:"establishment_year"`
+		TotalProjects     string `json:"total_projects"`
+		ContactDetails    struct {
+			Name           string `json:"name"`
+			ProjectAddress string `json:"project_address"`
+			Phone          string `json:"phone"`
+			BookingLink    string `json:"booking_link"`
+		} `json:"contact_details"`
+	} `json:"about"`
+	Faqs []FAQ `json:"faqs"`
+}
+
+type FAQ struct {
+	Question string `json:"question"`
+	Answer   string `json:"answer"`
 }
 
 // project info
@@ -115,22 +125,26 @@ type ProjectDetails struct {
 
 // Rera info
 type ReraInfo struct {
-	WebsiteLink string `json:"website_link"`
-	ReraList    []struct {
-		Phase      string `json:"phase"`
-		ReraQR     string `json:"rera_qr"`
-		ReraNumber string `json:"rera_number"`
-		Status     string `json:"status"`
-	} `json:"rera_list"`
+	WebsiteLink string         `json:"website_link"`
+	ReraList    []ReraListItem `json:"rera_list"`
+}
+
+type ReraListItem struct {
+	Phase      string `json:"phase"`
+	ReraQR     string `json:"rera_qr"`
+	ReraNumber string `json:"rera_number"`
+	Status     string `json:"status"`
 }
 
 // why to choose
 type WhyToChoose struct {
-	ImageUrls []string `json:"image_urls"`
-	USP_List  []struct {
-		Icon        string `json:"icon"`
-		Description string `json:"description"`
-	} `json:"usp_list"`
+	ImageUrls []string      `json:"image_urls"`
+	USP_List  []USPListItem `json:"usp_list"`
+}
+
+type USPListItem struct {
+	Icon        string `json:"icon"`
+	Description string `json:"description"`
 }
 
 // know about
@@ -141,66 +155,56 @@ type KnowAbout struct {
 
 // floor plan
 type FloorPlan struct {
-	Title    string `json:"title"`
-	Products []struct {
-		Title        string `json:"title"`
-		FlatType     string `json:"flat_type"`
-		Price        string `json:"price"`
-		BuildingArea string `json:"building_area"`
-		Image        string `json:"image"`
-	} `json:"products"`
+	Description string          `json:"description"`
+	Products    []FloorPlanItem `json:"products"`
+}
+
+type FloorPlanItem struct {
+	Title        string `json:"title"`
+	FlatType     string `json:"flat_type"`
+	Price        string `json:"price"`
+	IsSoldOut    bool   `json:"is_sold_out"`
+	BuildingArea string `json:"building_area"`
+	Image        string `json:"image"`
 }
 
 type PriceList struct {
-	Description          string `json:"description"`
-	BHKOptionsWithPrices []struct {
-		BHKOption string `json:"bhk_option"`
-		Size      string `json:"size"`
-		Price     string `json:"price"`
-	} `json:"bhk_options_with_prices"`
+	Description          string                 `json:"description"`
+	BHKOptionsWithPrices []ProductConfiguration `json:"product_configurations"`
+}
+
+type ProductConfiguration struct {
+	ConfigurationName string `json:"configuration_name"`
+	Size              string `json:"size"`
+	Price             string `json:"price"`
 }
 
 // amenities
 type Amenities struct {
-	Description             string `json:"description"`
-	CategoriesWithAmenities map[string][]struct {
-		Icon  string `json:"icon"`
-		Value string `json:"value"`
-	} `json:"categories_with_amenities"`
+	Description             string                       `json:"description"`
+	CategoriesWithAmenities map[string][]AmenityCategory `json:"categories_with_amenities"`
+}
+
+type AmenityCategory struct {
+	Icon  string `json:"icon"`
+	Value string `json:"value"`
 }
 
 // video presentation
 type VideoPresentation struct {
 	Description string `json:"description"`
-	URL         string `json:"url"`
-}
-
-// about
-
-type About struct {
-	Description       string `json:"description"`
-	LogoURL           string `json:"logo_url"`
-	EstablishmentYear string `json:"establishment_year"`
-	TotalProjects     string `json:"total_projects"`
-	ContactDetails    struct {
-		Name           string `json:"name"`
-		ProjectAddress string `json:"project_address"`
-		Phone          string `json:"phone"`
-		BookingLink    string `json:"booking_link"`
-	} `json:"contact_details"`
+	URL         []byte `json:"url"`
 }
 
 // payment plans
 type PaymentPlans struct {
 	Description string `json:"description"`
-	Plans       []struct {
-		Name    string `json:"name"`
-		Details string `json:"details"`
-	} `json:"plans"`
+	Plans       []Plan `json:"plans"`
 }
 
-// basic project information
-type BasicInfo struct {
+type Plan struct {
+	Name    string `json:"name"`
+	Details string `json:"details"`
 }
 
 // timeline information
@@ -223,4 +227,9 @@ type LocationInfo struct {
 	Longitude     string `json:"longitude"`
 	Latitude      string `json:"latitude"`
 	GoogleMapLink string `json:"google_map_link"`
+}
+
+type Configurations struct {
+	Name string `json:"name"`
+	Type string `json:"type"` // apartment, villa, penthouse, studio
 }

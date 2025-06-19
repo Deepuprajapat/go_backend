@@ -164,7 +164,6 @@ type LProjectImage struct {
 	ImageURL     string  `json:"image_url"`
 }
 
-
 // Floor Plan table structure - matches MySQL floorplan table
 type LFloorPlan struct {
 	ID              int64   `json:"id"`
@@ -178,4 +177,37 @@ type LFloorPlan struct {
 	ConfigurationID *int64  `json:"configuration_id"`
 	ProjectID       *int64  `json:"project_id"`
 	UserID          *int64  `json:"user_id"`
+}
+type LRera struct {
+	ID              int64   `json:"id"`
+	CreatedDate     *int64  `json:"created_on"`
+	Phase           *string `json:"phase"`
+	ProjectReraName *string `json:"project_rera_name"`
+	QRImages        *string `json:"qr_images"`
+	ReraNumber      *string `json:"rera_number"`
+	Status          *string `json:"status"`
+	UpdatedDate     *int64  `json:"updated_on"`
+	ProjectID       *int64  `json:"project_id"`
+	UserID          *int64  `json:"user_id"`
+}
+type LAmenity struct {
+	ID                int64   `json:"id"`
+	AmenitiesCategory *string `json:"amenities_category"`
+	AmenitiesName     *string `json:"amenities_name"`
+	AmenitiesURL      *string `json:"amenities_url"`
+	CreatedDate       *int64  `json:"created_date"`
+	UpdatedDate       *int64  `json:"updated_date"`
+}
+
+type LPaymentPlan struct {
+	ID               int64   `json:"id"`
+	PaymentPlanName  *string `json:"payment_plan_name"`
+	PaymentPlanValue *string `json:"payment_plan_value"`
+}
+
+type LFAQ struct {
+	ID        int64   `json:"id"`
+	Question  *string `json:"question"`
+	Answer    *string `json:"answer"`
+	ProjectID *int64  `json:"project_id"`
 }

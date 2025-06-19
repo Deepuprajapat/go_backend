@@ -8,6 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var projectIDToAmenitiesMap = map[int64][]int64{}
+
 // fetch all tables from legacy database
 
 func FetchCityByID(ctx context.Context, db *sql.DB, id int64) (LCity, error) {
@@ -267,7 +269,6 @@ func FetchProjectImagesByProjectID(ctx context.Context, db *sql.DB, id int64) (*
 	return &propertyImages, nil
 }
 
-
 func FetchFloorPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64) (*[]LFloorPlan, error) {
 	query := `SELECT id, created_date, img_url, is_sold_out, price, size, title, updated_date, configuration_id, project_id, user_id FROM floorplan WHERE project_id = ?`
 	rows, err := db.QueryContext(ctx, query, projectID)
@@ -297,4 +298,129 @@ func FetchFloorPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64
 		floorPlans = append(floorPlans, floorPlan)
 	}
 	return &floorPlans, nil
+}
+
+func FetchReraByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LRera, error) {
+	query := `SELECT * FROM rera WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var reras []*LRera
+	for rows.Next() {
+		var rera LRera
+		if err := rows.Scan(&rera.ID, &rera.CreatedDate, &rera.Phase, &rera.ProjectReraName, &rera.QRImages, &rera.ReraNumber, &rera.Status, &rera.UpdatedDate, &rera.ProjectID, &rera.UserID); err != nil {
+			return nil, err
+		}
+		reras = append(reras, &rera)
+	}
+	return reras, nil
+}
+
+func FetchFloorPlanByProjectID(ctx context.Context, db *sql.DB, projectID int64) (*[]LFloorPlan, error) {
+	query := `SELECT * FROM floorplan WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var floorPlans []LFloorPlan
+	for rows.Next() {
+		var floorPlan LFloorPlan
+		if err := rows.Scan(&floorPlan.ID, &floorPlan.CreatedDate, &floorPlan.ImgURL, &floorPlan.IsSoldOut, &floorPlan.Price, &floorPlan.Size, &floorPlan.Title, &floorPlan.UpdatedDate, &floorPlan.ConfigurationID, &floorPlan.ProjectID, &floorPlan.UserID); err != nil {
+			return nil, err
+		}
+		floorPlans = append(floorPlans, floorPlan)
+	}
+	return &floorPlans, nil
+}
+
+type LProjectAmenity struct {
+	ProjectID int64 `json:"project_id"`
+	AmenityID int64 `json:"amenity_id"`
+}
+
+func FetchAmenityByID(ctx context.Context, db *sql.DB, id int64) (*LAmenity, error) {
+	query := `SELECT * FROM amenity WHERE id = ?`
+	rows, err := db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var amenity LAmenity
+	if err := rows.Scan(&amenity.ID, &amenity.AmenitiesCategory, &amenity.AmenitiesName, &amenity.AmenitiesURL, &amenity.CreatedDate, &amenity.UpdatedDate); err != nil {
+		return nil, err
+	}
+	return &amenity, nil
+}
+
+func FetchProjectAmenitiesByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LAmenity, error) {
+	query := `SELECT * FROM property_amenity WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var amenityIDs []int64
+	for rows.Next() {
+		var projectAmenity LProjectAmenity
+		if err := rows.Scan(&projectAmenity.ProjectID, &projectAmenity.AmenityID); err != nil {
+			return nil, err
+		}
+		amenityIDs = append(amenityIDs, projectAmenity.AmenityID)
+	}
+
+	var amenities []*LAmenity
+	for _, amenityID := range amenityIDs {
+		amenity, err := FetchAmenityByID(ctx, db, amenityID)
+		if err != nil {
+			return nil, err
+		}
+		amenities = append(amenities, amenity)
+	}
+
+	return amenities, nil
+}
+
+func FetchPaymentPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LPaymentPlan, error) {
+	query := `SELECT * FROM payment_plan WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paymentPlans []*LPaymentPlan
+	for rows.Next() {
+		var paymentPlan LPaymentPlan
+		if err := rows.Scan(&paymentPlan.ID, &paymentPlan.PaymentPlanName, &paymentPlan.PaymentPlanValue, &paymentPlan.CreatedDate, &paymentPlan.UpdatedDate, &paymentPlan.UserID); err != nil {
+			return nil, err
+		}
+		paymentPlans = append(paymentPlans, &paymentPlan)
+	}
+	return paymentPlans, nil
+}
+
+func FetchFaqsByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LFAQ, error) {
+	query := `SELECT * FROM faq WHERE project_id = ?`
+	rows, err := db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var faqs []*LFAQ
+	for rows.Next() {
+		var faq LFAQ
+		if err := rows.Scan(&faq.ID, &faq.Question, &faq.Answer, &faq.ProjectID); err != nil {
+			return nil, err
+		}
+		faqs = append(faqs, &faq)
+	}
+	return faqs, nil
 }

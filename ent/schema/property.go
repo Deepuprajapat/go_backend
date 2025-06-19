@@ -17,7 +17,7 @@ func (Property) Fields() []ent.Field {
 		field.Text("description"),
 		field.JSON("property_images", PropertyImages{}),
 		field.JSON("web_cards", WebCards{}),
-		field.JSON("basic_info", PropertyBasicInfo{}),
+		field.JSON("configuration", Configuration{}),
 		field.JSON("location_details", PropertyLocationDetails{}),
 		field.JSON("pricing_info", PropertyPricingInfo{}),
 		field.JSON("property_rera_info", PropertyReraInfo{}),
@@ -85,11 +85,12 @@ type PropertyAmenities struct {
 }
 
 // basic property information
-type PropertyBasicInfo struct {
-	PropertyType string `json:"property_type"` // apartment, villa, penthouse, studio
-	BHKType      string `json:"bhk_type"`      // 1BHK, 2BHK, 3BHK, etc.
-	Bedrooms     int    `json:"bedrooms"`
-	Bathrooms    int    `json:"bathrooms"`
+type Configuration struct {
+	PropertyType      string `json:"property_type"`      // apartment, villa, penthouse, studio
+	ConfigurationName string `json:"configuration_name"` // 1BHK, 2BHK, 3BHK, etc.
+	ConfigurationType string `json:"configuration_type"` // apartment, villa, penthouse, studio
+	Bedrooms          int    `json:"bedrooms"`
+	Bathrooms         int    `json:"bathrooms"`
 }
 
 // area details
