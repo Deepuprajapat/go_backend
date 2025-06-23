@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
@@ -57,7 +56,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		uspList := []string{}
 		if project.USP != nil {
 			uspText := strings.Trim(*project.USP, "[]")
-			uspItems := strings.Split(uspText, "\",")
+			uspItems := strings.Split(uspText, "\",")      
 			for _, item := range uspItems {
 				item = strings.Trim(item, "\" ")
 				if item != "" {
@@ -92,7 +91,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 				Image:        safeStr(floorPlan.ImgURL),
 			})
 			configurationProducts = append(configurationProducts, schema.ProductConfiguration{
-				ConfigurationName: *floorPlan.Title,
+				ConfigurationName: safeStr(floorPlan.Title),
 				Size:              strconv.FormatInt(*floorPlan.Size, 10),
 				Price:             strconv.FormatFloat(floorPlan.Price, 'f', -1, 64),
 			})
@@ -107,8 +106,8 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		amenitiesMap := map[string][]schema.AmenityCategory{}
 		for _, amenity := range amenities {
 			amenitiesMap[*amenity.AmenitiesCategory] = append(amenitiesMap[*amenity.AmenitiesCategory], schema.AmenityCategory{
-				Icon:  *amenity.AmenitiesURL,
-				Value: *amenity.AmenitiesName,
+				Icon:  safeStr(amenity.AmenitiesURL),
+				Value: safeStr(amenity.AmenitiesName),
 			})
 		}
 
@@ -121,11 +120,10 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		paymentPlansNew := []schema.Plan{}
 		for _, paymentPlan := range paymentPlans {
 			paymentPlansNew = append(paymentPlansNew, schema.Plan{
-				Name:    *paymentPlan.PaymentPlanName,
-				Details: *paymentPlan.PaymentPlanValue,
+				Name:    safeStr(paymentPlan.PaymentPlanName),
+				Details: safeStr(paymentPlan.PaymentPlanValue),
 			})
 		}
-
 		developer, err := FetchDeveloperByID(ctx, db, *project.DeveloperID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch developer for project ID %d", project.ID)
@@ -160,8 +158,8 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		faqsNew := []schema.FAQ{}
 		for _, faq := range faqs {
 			faqsNew = append(faqsNew, schema.FAQ{
-				Question: *faq.Question,
-				Answer:   *faq.Answer,
+				Question: safeStr(faq.Question),
+				Answer:   safeStr(faq.Answer),
 			})
 		}
 
@@ -220,22 +218,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 						Value string `json:"value"`
 					}{
 						Value: safeStr(project.ProjectPossessionDate),
-					},
-					TotalTowers: struct {
-						Value string `json:"value"`
-					}{
-						Value: safeStr(project.TotalTowers),
-					},
-					TotalFloors: struct {
-						Value string `json:"value"`
-					}{
-						Value: safeStr(project.TotalFloor),
-					},
-					ProjectStatus: struct {
-						Value string `json:"value"`
-					}{
-						Value: safeStr(project.Status),
-					},
+					},             
 					Type: struct {
 						Value string `json:"value"`
 					}{
@@ -251,31 +234,31 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 					DownloadLink: safeStr(project.ProjectBrochure),
 				},
 				FloorPlan: schema.FloorPlan{
-					Description: *project.PriceListPara,
+					Description: safeStr(project.PriceListPara),
 					Products:    floorPlanItems,
 				},
 				PriceList: schema.PriceList{
-					Description:          *project.PriceListPara,
+					Description:          safeStr(project.PriceListPara),
 					BHKOptionsWithPrices: configurationProducts,
 				},
 				Amenities: schema.Amenities{
-					Description:             *project.AmenitiesPara,
+					Description:             safeStr(project.AmenitiesPara),
 					CategoriesWithAmenities: amenitiesMap,
 				},
 				VideoPresentation: schema.VideoPresentation{
 					Description: safeStr(project.VideoPara),
-					URL:         project.ProjectVideos,
+					URL:         []byte(project.ProjectVideos),
 				},
 				PaymentPlans: schema.PaymentPlans{
-					Description: *project.PaymentPara,
+					Description: safeStr(project.PaymentPara),
 					Plans:       paymentPlansNew,
 				},
 				SitePlan: struct {
 					Description string `json:"description"`
 					Image       string `json:"image"`
 				}{
-					Description: *project.SitePlanPara,
-					Image:       *project.SitePlanImg,
+					Description: safeStr(project.SitePlanPara),
+					Image:       safeStr(project.SitePlanImg),
 				},
 				About: struct {
 					Description       string `json:"description"`
@@ -289,10 +272,10 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 						BookingLink    string `json:"booking_link"`
 					} `json:"contact_details"`
 				}{
-					Description:       *project.ProjectAbout,
-					LogoURL:           *project.ProjectLogo,
+					Description:       safeStr(project.ProjectAbout),
+					LogoURL:           safeStr(project.ProjectLogo),
 					EstablishmentYear: strconv.FormatInt(*developer.EstablishedYear, 10),
-					TotalProjects:     strconv.FormatInt(*developer.ProjectDoneNo, 10),
+					TotalProjects:     safeStr(developer.ProjectDoneNo),
 					ContactDetails: struct {
 						Name           string `json:"name"`
 						ProjectAddress string `json:"project_address"`
@@ -437,20 +420,20 @@ func MigrateProperty(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			log.Error().Err(err).Msgf("Failed to fetch project for property ID %d", property.ID)
 			continue
 		}
-		// projectConfigurations, err := FetchProjectConfigurationsByID(ctx, db, *property.ConfigurationID)
-		// if err != nil {
-		// 	log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
-		// 	continue
-		// }
-		// locality, err := FetchLocalityByID(ctx, db, *property.LocalityID)
-		// if err != nil {
-		// 	log.Error().Err(err).Msgf("Failed to fetch locality for property ID %d", property.ID)
-		// 	continue
-		// }
-		// developer, err := FetchDeveloperByID(ctx, db, *property.DeveloperID)
-		// if err != nil {
-		// 	log.Error().Err(err).Msgf("Failed to fetch developer for property ID %d", property.ID)
-		// }
+		projectConfigurations, err := FetchProjectConfigurationsByID(ctx, db, *property.ConfigurationID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
+			continue
+		}
+		locality, err := FetchLocalityByID(ctx, db, *property.LocalityID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch locality for property ID %d", property.ID)
+			continue
+		}
+		developer, err := FetchDeveloperByID(ctx, db, *property.DeveloperID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch developer for property ID %d", property.ID)
+		}
 
 		projectImages, err := FetchProjectImagesByProjectID(ctx, db, *property.ProjectID)
 		if err != nil {

@@ -23,7 +23,6 @@ func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
 	if project.IsDeleted {
 		return nil, errors.New("project is deleted")
 	}
-
 	return project, nil
 }
 

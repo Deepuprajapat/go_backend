@@ -125,7 +125,7 @@ type LDeveloper struct {
 	IsActive           *bool   `json:"is_active"`
 	IsVerified         *bool   `json:"is_verified"`
 	Overview           *string `json:"overview"`
-	ProjectDoneNo      *int64  `json:"project_done_no"`
+	ProjectDoneNo      *string  `json:"project_done_no"`
 	UpdatedDate        *int64  `json:"updated_date"`
 	CityName           *int64  `json:"city_name"`
 	Phone              *string `json:"phone"`

@@ -58,16 +58,13 @@ func main() {
 			return
 		}
 
-		log.Info().Msg("Migration completed successfully")
-		return
-
-		err = migration_jobs.MigrateProperty(context.Background(), legacyDB, newDB)
-		if err != nil {
-			fmt.Println("Error in migrating properties", err)
-			return
-		}
-		
-
+		// err = migration_jobs.MigrateProperty(context.Background(), legacyDB, newDB)
+		// if err != nil {
+		// 	fmt.Println("Error in migrating properties", err)
+		// 	return
+		// }
+		// log.Info().Msg("Migration completed successfully")
+		// return
 	}
 
 	// Load configuration

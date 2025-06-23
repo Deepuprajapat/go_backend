@@ -102,22 +102,13 @@ type ProjectDetails struct {
 	Configuration struct {
 		Value string `json:"value"`
 	} `json:"configuration"`
-
+	
 	LaunchDate struct {
 		Value string `json:"value"`
 	} `json:"launch_date"`
 	PossessionDate struct {
 		Value string `json:"value"`
 	} `json:"possession_date"`
-	TotalTowers struct {
-		Value string `json:"value"`
-	} `json:"total_towers"`
-	TotalFloors struct {
-		Value string `json:"value"`
-	} `json:"total_floors"`
-	ProjectStatus struct {
-		Value string `json:"value"`
-	} `json:"project_status"`
 	Type struct {
 		Value string `json:"value"`
 	} `json:"type"`
