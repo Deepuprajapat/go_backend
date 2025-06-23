@@ -15,82 +15,79 @@ func (Property) Fields() []ent.Field {
 		field.String("id").Unique(),
 		field.String("name"),
 		field.Text("description"),
-		field.JSON("property_images", PropertyImages{}),
+		field.JSON("property_images", []string{}), // 0 index logo image
 		field.JSON("web_cards", WebCards{}),
-		field.JSON("configuration", Configuration{}),
-		field.JSON("location_details", PropertyLocationDetails{}),
 		field.JSON("pricing_info", PropertyPricingInfo{}),
 		field.JSON("property_rera_info", PropertyReraInfo{}),
-		field.JSON("search_context", []string{}),
+		field.JSON("search_context", []string{}).Optional(),
+		field.String("project_id").Optional(),
+		field.String("developer_id").Optional(),
+		field.String("location_id").Optional(),
 	}
 }
 
 func (Property) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("project", Project.Type).Ref("properties").Unique(),
+		edge.From("project", Project.Type).
+			Ref("properties").
+			Unique().
+			Field("project_id"),
 		edge.To("leads", Leads.Type),
+		edge.To("developer", Developer.Type).
+			Unique().
+			Field("developer_id"),
+		edge.To("location", Location.Type).
+			Unique().
+			Field("location_id"),
 	}
 }
 
-// property images
-type PropertyImages struct {
-	Images []struct {
-		Order int    `json:"order"`
-		Url   string `json:"url"`
-		Type  string `json:"type"` // floor_plan, interior, exterior, amenities
-	} `json:"images"`
-}
-
 type PropertyReraInfo struct {
-	Phase      string `json:"phase"`
-	Status     string `json:"status"`
 	ReraNumber string `json:"rera_number"`
-	ReraQR     string `json:"rera_qr"`
 }
 
 type WebCards struct {
-	PropertyDetails   PropertyDetails `json:"property_details"`
-	PropertyFloorPlan []struct {
-		Title string `json:"title"`
-		Plans []struct {
-			Title        string `json:"title"`
-			FlatType     string `json:"flat_type"`
-			Price        string `json:"price"`
-			BuildingArea string `json:"building_area"`
-			Image        string `json:"image"`
-			  ExpertLink   string `json:"expert_link"`
-			BrochureLink string `json:"brochure_link"`
-		} `json:"plans"`
-	} `json:"property_floor_plan"`
-	KnowAbout struct {
-		HtmlText string `json:"html_text"`
+	PropertyDetails PropertyDetails `json:"property_details"`
+	WhyChooseUs     struct {
+		ImageUrls []string `json:"image_urls"`
+		USP_List  []string `json:"usp_list"`
+	} `json:"why_choose_us"`
+	PropertyFloorPlan PropertyFloorPlan `json:"property_floor_plan"`
+	KnowAbout         struct {
+		Description string `json:"description"`
 	} `json:"know_about"`
 	VideoPresentation struct {
 		Title    string `json:"title"`
 		VideoUrl string `json:"video_url"`
 	} `json:"video_presentation"`
-	GoogleMapLink string `json:"google_map_link"`
+	LocationMap struct {
+		Description   string `json:"description"`
+		GoogleMapLink string `json:"google_map_link"`
+	} `json:"location_map"`
+}
+
+type PropertyUSPListItem struct {
+	Icon        string `json:"icon"`
+	Description string `json:"description"`
+}
+
+type PropertyFloorPlan struct {
+	Title string         `json:"title"`
+	Plans []PropertyPlan `json:"plans"`
+}
+
+type PropertyPlan struct {
+	Title        string `json:"title"`
+	FlatType     string `json:"flat_type"`
+	Price        string `json:"price"`
+	BuildingArea string `json:"building_area"`
+	Image        string `json:"image"`
 }
 
 // property amenities - specific to this property unit
 type PropertyAmenities struct {
-	UnitAmenities []struct {
-		Icon string `json:"icon"`
-		Name string `json:"name"`
-	} `json:"unit_amenities"`
-	FloorAmenities []struct {
-		Icon string `json:"icon"`
-		Name string `json:"name"`
-	} `json:"floor_amenities"`
-}
-
-// basic property information
-type Configuration struct {
-	PropertyType      string `json:"property_type"`      // apartment, villa, penthouse, studio
-	ConfigurationName string `json:"configuration_name"` // 1BHK, 2BHK, 3BHK, etc.
-	ConfigurationType string `json:"configuration_type"` // apartment, villa, penthouse, studio
-	Bedrooms          int    `json:"bedrooms"`
-	Bathrooms         int    `json:"bathrooms"`
+	Description             string                       `json:"description"`
+	CategoriesWithAmenities map[string][]AmenityCategory `json:"categories_with_amenities"`
 }
 
 // area details
@@ -100,37 +97,53 @@ type PropertyAreaDetails struct {
 	SuperBuiltUpArea string `json:"super_built_up_area"` // in sq ft
 }
 
-// location details
-type PropertyLocationDetails struct {
-	FloorNumber int    `json:"floor_number"`
-	Facing      string `json:"facing"` // North, South, East, West, etc.
-	Tower       string `json:"tower"`  // Tower name/number if applicable
-	Wing        string `json:"wing"`   // Wing name if applicable
-}
-
 // pricing information
 type PropertyPricingInfo struct {
-	StartingPrice      string `json:"starting_price"`
-	Price              string `json:"price"` // selling price
-	PricePerSqft       string `json:"price_per_sqft"`
-	MaintenanceCharges string `json:"maintenance_charges"`
-	BookingAmount      string `json:"booking_amount"`
-	StampDuty          string `json:"stamp_duty"`
-	RegistrationFee    string `json:"registration_fee"`
+	Price string `json:"price"` // selling price
 }
 
 // property details
 type PropertyDetails struct {
-	PropertyType      string `json:"property_type"`
-	FurnishingType    string `json:"furnishing_type"`
-	ListingType       string `json:"listing_type"`
-	PossessionStatus  string `json:"possession_status"`
-	AgeOfProperty     string `json:"age_of_property"`
-	FloorPara         string `json:"floor_para"`
-	LocationPara      string `json:"location_para"`
-	LocationAdvantage string `json:"location_advantage"`
-	OverviewPara      string `json:"overview_para"`
-	Floors            string `json:"floors"`
-	Images            string `json:"images"`
-	Latlong           string `json:"latlong"`
+	BuiltUpArea struct {
+		Value string `json:"value"`
+	} `json:"built_up_area"`
+	Sizes struct {
+		Value string `json:"value"`
+	} `json:"size"`
+	FloorNumber struct {
+		Value string `json:"value"`
+	} `json:"floor_number"`
+	Configuration struct {
+		Value string `json:"value"`
+	} `json:"configuration"`
+	PossessionStatus struct {
+		Value string `json:"value"`
+	} `json:"possession_status"`
+	Balconies struct {
+		Value string `json:"value"`
+	} `json:"balconies"`
+	CoveredParking struct {
+		Value string `json:"value"`
+	} `json:"covered_parking"`
+	Bedrooms struct {
+		Value string `json:"value"`
+	} `json:"bedrooms"`
+	PropertyType struct {
+		Value string `json:"value"`
+	} `json:"property_type"`
+	AgeOfProperty struct {
+		Value string `json:"value"`
+	} `json:"age_of_property"`
+	FurnishingType struct {
+		Value string `json:"value"`
+	} `json:"furnishing_type"`
+	Facing struct {
+		Value string `json:"value"`
+	} `json:"facing"`
+	ReraNumber struct {
+		Value string `json:"value"`
+	} `json:"rera_number"`
+	Bathrooms struct {
+		Value string `json:"value"`
+	} `json:"bathrooms"`
 }

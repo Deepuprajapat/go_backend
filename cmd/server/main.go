@@ -2,20 +2,29 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/VI-IM/im_backend_go/migration_jobs"
+	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
+)
+
+var (
+	legacyDB *sql.DB
+	newDB    *ent.Client
+	txn      *ent.Tx
 )
 
 func main() {
@@ -25,8 +34,9 @@ func main() {
 		Out:        os.Stdout,
 		TimeFormat: time.RFC3339,
 	})
+	ctx := context.Background()
 
-	if len(os.Args) > 1 && os.Args[1] == "run-migration" {		
+	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
 		legacyDB, err := migration_jobs.NewLegacyDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to legacy database")
@@ -37,25 +47,36 @@ func main() {
 			log.Fatal().Err(err).Msg("Failed to connect to new database")
 		}
 
+		txn, err = newDB.BeginTx(ctx, nil)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to begin transaction")
+		}
+
+		defer txn.Rollback()
 		defer newDB.Close()
 		defer legacyDB.Close()
 
-		err = migration_jobs.MigrateLocality(context.Background(), legacyDB, newDB)
+		err = migration_jobs.MigrateLocality(ctx, txn)
 		if err != nil {
 			fmt.Println("Error in migrating localities", err)
 			return
 		}
 
-		err = migration_jobs.MigrateDeveloper(context.Background(), legacyDB, newDB)
+		err = migration_jobs.MigrateDeveloper(ctx, txn)
 		if err != nil {
 			fmt.Println("Error in migrating developers", err)
 			return
 		}
 
-		err = migration_jobs.MigrateProject(context.Background(), legacyDB, newDB)
+		err = migration_jobs.MigrateProject(ctx, txn)
 		if err != nil {
 			fmt.Println("Error in migrating projects", err)
 			return
+		}
+
+		err = txn.Commit()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to commit transaction")
 		}
 
 		// err = migration_jobs.MigrateProperty(context.Background(), legacyDB, newDB)

@@ -17,8 +17,6 @@ func (Project) Fields() []ent.Field {
 		field.String("name"),
 		field.Text("description"),
 		field.String("status").GoType(enums.ProjectStatus("")),
-		field.String("total_floor").Optional(),
-		field.String("total_towers").Optional(),
 		field.Int("min_price").Default(0), // update on every add property
 		field.Int("max_price").Default(0), // update on every add property
 		field.String("price_unit").Default("cr"),
@@ -102,7 +100,12 @@ type ProjectDetails struct {
 	Configuration struct {
 		Value string `json:"value"`
 	} `json:"configuration"`
-	
+	TotalFloor struct {
+		Value string `json:"value"`
+	} `json:"total_floor"`
+	TotalTowers struct {
+		Value string `json:"value"`
+	} `json:"total_towers"`
 	LaunchDate struct {
 		Value string `json:"value"`
 	} `json:"launch_date"`
@@ -129,13 +132,8 @@ type ReraListItem struct {
 
 // why to choose
 type WhyToChoose struct {
-	ImageUrls []string      `json:"image_urls"`
-	USP_List  []USPListItem `json:"usp_list"`
-}
-
-type USPListItem struct {
-	Icon        string `json:"icon"`
-	Description string `json:"description"`
+	ImageUrls []string `json:"image_urls"`
+	USP_List  []string `json:"usp_list"`
 }
 
 // know about

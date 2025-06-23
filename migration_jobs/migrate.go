@@ -3,10 +3,10 @@ package migration_jobs
 import (
 	"context"
 	"crypto/sha256"
-	"database/sql"
 	"fmt"
 	"strconv"
 	"strings"
+
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
@@ -24,8 +24,8 @@ var (
 	legacyToNewPropertyIDMAP      = make(map[int64]string)
 )
 
-func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
-	projects, err := FetchhAllProject(ctx, db)
+func MigrateProject(ctx context.Context, txn *ent.Tx) error {
+	projects, err := FetchhAllProject(ctx)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
 		// append images in sequesnce
 
-		projectRera, err := FetchReraByProjectID(ctx, db, project.ID)
+		projectRera, err := FetchReraByProjectID(ctx, project.ID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch project RERA for project ID %d", project.ID)
 			continue
@@ -56,7 +56,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		uspList := []string{}
 		if project.USP != nil {
 			uspText := strings.Trim(*project.USP, "[]")
-			uspItems := strings.Split(uspText, "\",")      
+			uspItems := strings.Split(uspText, "\",")
 			for _, item := range uspItems {
 				item = strings.Trim(item, "\" ")
 				if item != "" {
@@ -65,15 +65,12 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			}
 		}
 
-		uspListNew := []schema.USPListItem{}
+		uspListNew := []string{}
 		for _, usp := range uspList {
-			uspListNew = append(uspListNew, schema.USPListItem{
-				Icon:        "",
-				Description: safeStr(&usp),
-			})
+			uspListNew = append(uspListNew, safeStr(&usp))
 		}
 
-		floorPlans, err := FetchFloorPlanByProjectID(ctx, db, project.ID)
+		floorPlans, err := FetchFloorPlanByProjectID(ctx, project.ID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch floor plans for project ID %d", project.ID)
 			continue
@@ -97,7 +94,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			})
 		}
 
-		amenities, err := FetchProjectAmenitiesByProjectID(ctx, db, project.ID)
+		amenities, err := FetchProjectAmenitiesByProjectID(ctx, project.ID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch amenities for project ID %d", project.ID)
 			continue
@@ -111,7 +108,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			})
 		}
 
-		paymentPlans, err := FetchPaymentPlansByProjectID(ctx, db, project.ID)
+		paymentPlans, err := FetchPaymentPlansByProjectID(ctx, project.ID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch payment plans for project ID %d", project.ID)
 			continue
@@ -124,19 +121,19 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 				Details: safeStr(paymentPlan.PaymentPlanValue),
 			})
 		}
-		developer, err := FetchDeveloperByID(ctx, db, *project.DeveloperID)
+		developer, err := FetchDeveloperByID(ctx, *project.DeveloperID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch developer for project ID %d", project.ID)
 			return err
 		}
 
-		faqs, err := FetchFaqsByProjectID(ctx, db, project.ID)
+		faqs, err := FetchFaqsByProjectID(ctx, project.ID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch faqs for project ID %d", project.ID)
 			return err
 		}
 
-		projectImages, err := FetchProjectImagesByProjectID(ctx, db, project.ID)
+		projectImages, err := FetchProjectImagesByProjectID(ctx, project.ID)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch project images for project ID %d", project.ID)
 			return err
@@ -164,13 +161,11 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 		}
 
 		legacyToNewProjectIDMAP[project.ID] = id
-		if err := newDB.Project.Create().
+		if err := txn.Project.Create().
 			SetID(id).
 			SetName(safeStr(project.ProjectName)).
 			SetDescription(safeStr(project.ProjectDescription)).
 			SetStatus(enums.ProjectStatus(*project.Status)).
-			SetTotalFloor(safeStr(project.TotalFloor)).
-			SetTotalTowers(safeStr(project.TotalTowers)).
 			SetTimelineInfo(schema.TimelineInfo{
 				ProjectLaunchDate:     safeStr(project.ProjectLaunchDate),
 				ProjectPossessionDate: safeStr(project.ProjectPossessionDate),
@@ -204,6 +199,16 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 					}{
 						Value: safeStr(project.ProjectUnits),
 					},
+					TotalFloor: struct {
+						Value string `json:"value"`
+					}{
+						Value: safeStr(project.TotalFloor),
+					},
+					TotalTowers: struct {
+						Value string `json:"value"`
+					}{
+						Value: safeStr(project.TotalTowers),
+					},
 					Configuration: struct {
 						Value string `json:"value"`
 					}{
@@ -218,7 +223,7 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 						Value string `json:"value"`
 					}{
 						Value: safeStr(project.ProjectPossessionDate),
-					},             
+					},
 					Type: struct {
 						Value string `json:"value"`
 					}{
@@ -306,15 +311,14 @@ func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			return err
 		}
 		log.Info().Msgf("Project %s migrated successfully", id)
-
 	}
 	log.Info().Msg("Projects migrated successfully")
 	return nil
 }
 
-func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
+func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching developers")
-	ldeveloper, err := FetchAllDevelopers(ctx, db)
+	ldeveloper, err := FetchAllDevelopers(ctx)
 	if err != nil {
 		return err
 	}
@@ -325,7 +329,7 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error 
 	for _, developer := range ldeveloper {
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(developer.ID, 10))))[:16]
 		legacyToNewDeveloperIDMAP[developer.ID] = id
-		if err := newDB.Developer.Create().
+		if err := txn.Developer.Create().
 			SetID(id).
 			SetName(safeStr(developer.DeveloperName)).
 			SetLegalName(safeStr(developer.DeveloperLegalName)).
@@ -350,10 +354,10 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error 
 	return nil
 }
 
-func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
+func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 	//new location id will be generated
 	log.Info().Msg("fetching localities")
-	llocality, err := FetchAllLocality(ctx, db)
+	llocality, err := FetchAllLocality(ctx)
 	if err != nil {
 		return err
 	}
@@ -363,16 +367,12 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 
 	for _, locality := range llocality {
 
-		city, err := FetchCityByID(ctx, db, *locality.CityID)
+		city, err := FetchCityByID(ctx, *locality.CityID)
 
 		log.Info().Msgf("Fetched city %+v", city)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to fetch city for locality ID %d", locality.ID)
 			continue
-		}
-
-		if newDB == nil {
-			return fmt.Errorf("newDB is nil — database connection not initialized")
 		}
 
 		phoneInt, err := parsePhoneJSONToString(city.Phone)
@@ -382,7 +382,7 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(locality.ID, 10))))[:16]
 		legacyToNewLocalityIDMAP[locality.ID] = id
-		if err := newDB.Location.Create().
+		if err := txn.Location.Create().
 			SetID(id).
 			SetLocalityName(safeStr(locality.Name)).
 			SetCity(safeStr(city.Name)).
@@ -401,9 +401,9 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	return nil
 }
 
-func MigrateProperty(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
+func MigrateProperty(ctx context.Context) error {
 	log.Info().Msg("fetching properties")
-	properties, err := fetchAllProperty(ctx, db)
+	properties, err := fetchAllProperty(ctx)
 	if err != nil {
 		return err
 	}
@@ -414,98 +414,160 @@ func MigrateProperty(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	for _, property := range properties {
 
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(property.ID, 10))))[:16]
+		var err error
 		legacyToNewPropertyIDMAP[property.ID] = id
-		project, err := FetchProjectByID(ctx, db, *property.ProjectID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch project for property ID %d", property.ID)
-			continue
-		}
-		projectConfigurations, err := FetchProjectConfigurationsByID(ctx, db, *property.ConfigurationID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
-			continue
-		}
-		locality, err := FetchLocalityByID(ctx, db, *property.LocalityID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch locality for property ID %d", property.ID)
-			continue
-		}
-		developer, err := FetchDeveloperByID(ctx, db, *property.DeveloperID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch developer for property ID %d", property.ID)
-		}
 
-		projectImages, err := FetchProjectImagesByProjectID(ctx, db, *property.ProjectID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch project images for property ID %d", property.ID)
-			continue
-		}
-
-		propertyImages, err := parsePropertyImagesFromProjectImages(projectImages)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to parse property images for property ID %d", property.ID)
-			continue
-		}
-		floorPlans, err := FetchFloorPlansByProjectID(ctx, db, *property.ProjectID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch floor plans for property ID %d", property.ID)
-			continue
-		}
-		webCards, err := parseWebCardsFromProject(project, floorPlans, &property)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to parse web cards for property ID %d", property.ID)
-			continue
-		}
-		reras, err := FetchReraByProjectID(ctx, db, *property.ProjectID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch reras for property ID %d", property.ID)
-			continue
-		}
-
-		rerasNew := []schema.ReraListItem{}
-		for _, rera := range reras {
-			rerasNew = append(rerasNew, schema.ReraListItem{
-				Phase:      safeStr(rera.Phase),
-				ReraQR:     safeStr(rera.QRImages),
-				ReraNumber: safeStr(rera.ReraNumber),
-				Status:     safeStr(rera.Status),
-			})
-
-			// property Type and configurationtype(Ground Floor, Apartment, etc.) name from projectConfigurations table
-
-			if err := newDB.Property.Create().
-				SetID(id).
-				SetName(*property.PropertyName).
-				SetPropertyImages(*propertyImages).
-				SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
-				SetWebCards(*webCards).
-				SetConfiguration(schema.Configuration{
-					PropertyType:      safeStr(project.ProjectConfigurations),
-					ConfigurationName: safeStr(project.ProjectConfigurations),
-					ConfigurationType: safeStr(project.ProjectConfigurations),
-					Bedrooms:          safeStrToInt(property.Bedrooms),
-					Bathrooms:         safeStrToInt(property.Bathrooms),
-				}).
-				SetLocationDetails(schema.PropertyLocationDetails{
-					FloorNumber: safeStrToInt(property.Floors),
-					Facing:      safeStr(property.Facing),
-				}).
-				SetPricingInfo(schema.PropertyPricingInfo{
-					StartingPrice: "",
-					Price:         strconv.FormatFloat(property.Price, 'f', -1, 64),
-					PricePerSqft:  "",
-				}).
-				SetPropertyReraInfo(schema.PropertyReraInfo{
-					Phase:      safeStr(rerasNew.Phase),
-					ReraNumber: safeStr(rerasNew.ReraNumber),
-					ReraQR:     safeStr(rerasNew.ReraQR),
-					Status:     safeStr(rerasNew.Status),
-				}).
-				Exec(ctx); err != nil {
+		var propertyConfiguration *LPropertyConfiguration
+		if property.ConfigurationID != nil {
+			propertyConfiguration, err = FetchPropertyConfigurationByID(ctx, *property.ConfigurationID)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
 				return err
 			}
 		}
-		return nil
+
+		uspList := []string{}
+		if property.USP != nil {
+			uspText := strings.Trim(*property.USP, "[]")
+			uspItems := strings.Split(uspText, "\",")
+			for _, item := range uspItems {
+				item = strings.Trim(item, "\" ")
+				if item != "" {
+					uspList = append(uspList, item)
+				}
+			}
+		}
+
+		parsedImages, err := parsePropertyImagesFromPropertyImages(property.Images)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to parse property images for property ID %d", property.ID)
+			return err
+		}
+
+		propertyType, err := FetchPropertyConfigurationTypeByID(ctx, *property.ConfigurationID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch property type for property ID %d", property.ID)
+			return err
+		}
+
+		webCard := schema.WebCards{
+			PropertyDetails: schema.PropertyDetails{
+				BuiltUpArea: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.BuiltupArea),
+				},
+				Sizes: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Size),
+				},
+				FloorNumber: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Floors),
+				},
+				Configuration: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(propertyConfiguration.ProjectConfigurationName),
+				},
+				PossessionStatus: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.PossessionStatus),
+				},
+				Balconies: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Balcony),
+				},
+				CoveredParking: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.CoveredParking),
+				},
+				Bedrooms: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Bedrooms),
+				},
+				PropertyType: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(propertyType.PropertyType),
+				},
+				AgeOfProperty: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.AgeOfProperty),
+				},
+				FurnishingType: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.FurnishingType),
+				},
+				ReraNumber: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Rera),
+				},
+				Facing: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Facing),
+				},
+				Bathrooms: struct {
+					Value string `json:"value"`
+				}{
+					Value: safeStr(property.Bathrooms),
+				},
+			},
+			WhyChooseUs: struct {
+				ImageUrls []string `json:"image_urls"`
+				USP_List  []string `json:"usp_list"`
+			}{
+				ImageUrls: parsedImages,
+				USP_List:  uspList,
+			},
+			KnowAbout: struct {
+				Description string `json:"description"`
+			}{
+				Description: safeStr(property.About),
+			},
+			VideoPresentation: struct {
+				Title    string `json:"title"`
+				VideoUrl string `json:"video_url"`
+			}{
+				Title:    safeStr(property.VideoPara),
+				VideoUrl: safeStr(property.PropertyVideo),
+			},
+			LocationMap: struct {
+				Description   string `json:"description"`
+				GoogleMapLink string `json:"google_map_link"`
+			}{
+				Description:   safeStr(property.LocationPara),
+				GoogleMapLink: safeStr(property.LocaionMap),
+			},
+		}
+
+		if err := newDB.Property.Create().
+			SetID(id).
+			SetName(*property.PropertyName).
+			SetPropertyImages(parsedImages).
+			SetWebCards(webCard).
+			SetPricingInfo(schema.PropertyPricingInfo{
+				Price: strconv.FormatFloat(property.Price, 'f', -1, 64),
+			}).
+			SetPropertyReraInfo(schema.PropertyReraInfo{
+				ReraNumber: safeStr(property.Rera),
+			}).
+			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
+			SetDeveloperID(legacyToNewDeveloperIDMAP[*property.DeveloperID]).
+			SetLocationID(legacyToNewLocalityIDMAP[*property.LocalityID]).
+			Exec(ctx); err != nil {
+			return err
+		}
 	}
 	log.Info().Msg("Properties migrated successfully")
 	return nil
@@ -519,4 +581,3 @@ func safeStrToInt(s *string) int {
 	}
 	return 0
 }
- 

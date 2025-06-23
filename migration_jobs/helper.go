@@ -7,12 +7,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/rs/zerolog/log"
 )
 
 func safeStr(s *string) string {
 	if s != nil {
+		log.Info().Msgf("Safe string: %s", *s)
 		return *s
 	}
 	return ""
@@ -53,114 +53,28 @@ func parsePhoneJSONToString(s *string) (*string, error) {
 	return &phoneClean, nil
 }
 
-func parsePropertyImagesFromProjectImages(projectImages *[]LProjectImage) (*schema.PropertyImages, error) {
-	propertyImages := schema.PropertyImages{
-		Images: []struct {
-			Order int    `json:"order"`
-			Url   string `json:"url"`
-			Type  string `json:"type"`
-		}{},
+func parsePropertyImagesFromPropertyImages(propertyImages *string) ([]string, error) {
+	if propertyImages == nil {
+		return []string{}, nil
 	}
-	for _, image := range *projectImages {
-		propertyImages.Images = append(propertyImages.Images, struct {
-			Order int    `json:"order"`
-			Url   string `json:"url"`
-			Type  string `json:"type"`
-		}{
-			Order: 1,
-			Url:   image.ImageURL,
-			Type:  "property_image",
-		})
-	}
-	return &propertyImages, nil
-}
 
-func parseWebCardsFromProject(project *LProject, floorPlans *[]LFloorPlan, property *LProperty) (*schema.WebCards, error) {
+	var projectImagesList []LProjectImage
+	if err := json.Unmarshal([]byte(*propertyImages), &projectImagesList); err != nil {
+		log.Error().Err(err).Msgf("Failed to unmarshal project images: %s", *propertyImages)
+		return nil, fmt.Errorf("failed to unmarshal project images: %w", err)
+	}
 
-	floorPlanItems := []schema.FloorPlanItem{}
-	for _, floorPlan := range *floorPlans {
-		floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
-			Title: safeStr(floorPlan.Title),
-			FlatType: func() string {
-				if floorPlan.ConfigurationID != nil {
-					return fmt.Sprintf("%d", *floorPlan.ConfigurationID)
-				}
-				return ""
-			}(),
-			Price: fmt.Sprintf("%v", floorPlan.Price),
-			BuildingArea: func() string {
-				if floorPlan.Size != nil {
-					return fmt.Sprintf("%d", *floorPlan.Size)
-				}
-				return ""
-			}(),
-			Image: safeStr(floorPlan.ImgURL),
-		})
+	if len(projectImagesList) == 0 {
+		log.Info().Msgf("No project images found")
+		return []string{}, nil
 	}
-	webCards := schema.WebCards{
-		PropertyDetails: schema.PropertyDetails{
-			PropertyType:      safeStr(project.ProjectConfigurations),
-			FurnishingType:    safeStr(property.FurnishingType), // Not available in legacy data
-			ListingType:       safeStr(property.ListingType),    // Not available in legacy data
-			PossessionStatus:  safeStr(property.PossessionStatus),
-			AgeOfProperty:     safeStr(property.AgeOfProperty), // Not available in legacy data
-			FloorPara:         safeStr(property.FloorPara),
-			LocationPara:      safeStr(property.LocationPara),
-			LocationAdvantage: safeStr(property.LocationAdvantage), // Not available in legacy data
-			OverviewPara:      safeStr(property.OverviewPara),
-			Floors:            safeStr(property.Floors),
-			Images:            safeStr(property.Images), // Will be populated from project images if available
-		},
-		PropertyFloorPlan: []struct {
-			Title string `json:"title"`
-			Plans []struct {
-				Title        string `json:"title"`
-				FlatType     string `json:"flat_type"`
-				Price        string `json:"price"`
-				BuildingArea string `json:"building_area"`
-				Image        string `json:"image"`
-				ExpertLink   string `json:"expert_link"`
-				BrochureLink string `json:"brochure_link"`
-			} `json:"plans"`
-		}{
-			{
-				Title: safeStr(project.FloorPara),
-				Plans: []struct {
-					Title        string `json:"title"`
-					FlatType     string `json:"flat_type"`
-					Price        string `json:"price"`
-					BuildingArea string `json:"building_area"`
-					Image        string `json:"image"`
-					ExpertLink   string `json:"expert_link"`
-					BrochureLink string `json:"brochure_link"`
-				}{
-					{
-						Title:        safeStr(project.ProjectConfigurations),
-						FlatType:     safeStr(project.ProjectConfigurations),
-						Price:        "",
-						BuildingArea: safeStr(project.ProjectArea),
-						Image:        "",
-						ExpertLink:   "",
-						BrochureLink: safeStr(project.ProjectBrochure),
-					},
-				},
-			},
-		},
-		KnowAbout: struct {
-			HtmlText string `json:"html_text"`
-		}{
-			HtmlText: safeStr(project.ProjectAbout),
-		},
-		VideoPresentation: struct {
-			Title    string `json:"title"`
-			VideoUrl string `json:"video_url"`
-		}{
-			Title:    safeStr(project.VideoPara),
-			VideoUrl: string(project.ProjectVideos), // Will be populated from project videos if available
-		},
-		GoogleMapLink: safeStr(project.ProjectLocationURL),
+
+	propertyImagesList := []string{}
+	for _, image := range projectImagesList {
+		log.Info().Msgf("Parsing property image %+v", image)
+		propertyImagesList = append(propertyImagesList, image.ImageURL)
 	}
-	return &webCards, nil
+	return propertyImagesList, nil
 }
 
 func parseFloor(floorStr *string) *int64 {

@@ -12,9 +12,9 @@ var projectIDToAmenitiesMap = map[int64][]int64{}
 
 // fetch all tables from legacy database
 
-func FetchCityByID(ctx context.Context, db *sql.DB, id int64) (LCity, error) {
+func FetchCityByID(ctx context.Context, id int64) (LCity, error) {
 	query := `SELECT id, city_name, city_url, created_date, is_active, state_name, updated_date, phone_number FROM city WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return LCity{}, err
 	}
@@ -34,9 +34,9 @@ func FetchCityByID(ctx context.Context, db *sql.DB, id int64) (LCity, error) {
 	return LCity{}, fmt.Errorf("no city found with ID %d", id)
 }
 
-func FetchAllLocality(ctx context.Context, db *sql.DB) ([]LLocality, error) {
+func FetchAllLocality(ctx context.Context) ([]LLocality, error) {
 	query := `SELECT id, created_date, locality_name, locality_url, updated_date, city_id FROM locality`
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := legacyDB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +64,10 @@ func FetchAllLocality(ctx context.Context, db *sql.DB) ([]LLocality, error) {
 	return localities, nil
 }
 
-func FetchAllDevelopers(ctx context.Context, db *sql.DB) ([]LDeveloper, error) {
+func FetchAllDevelopers(ctx context.Context) ([]LDeveloper, error) {
 	log.Info().Msg("Fetching all developers")
 	query := `SELECT id, about, alt_developer_logo, created_date, developer_address, developer_legal_name, developer_logo, developer_name, developer_url, disclaimer, established_year, is_active, is_verified, overview, project_done_no, updated_date, city_name, phone FROM developer`
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := legacyDB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -84,9 +84,9 @@ func FetchAllDevelopers(ctx context.Context, db *sql.DB) ([]LDeveloper, error) {
 	return developers, nil
 }
 
-func FetchConfigurationByID(ctx context.Context, db *sql.DB, id int64) (*LPropertyConfiguration, error) {
+func FetchPropertyConfigurationByID(ctx context.Context, id int64) (*LPropertyConfiguration, error) {
 	query := `SELECT * FROM property_configuration WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -99,10 +99,10 @@ func FetchConfigurationByID(ctx context.Context, db *sql.DB, id int64) (*LProper
 	return &configuration, nil
 }
 
-func FetchhAllProject(ctx context.Context, db *sql.DB) ([]LProject, error) {
+func FetchhAllProject(ctx context.Context) ([]LProject, error) {
 	fmt.Println("Fetching all projects")
 	query := `SELECT * FROM project`
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := legacyDB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -172,9 +172,9 @@ func FetchhAllProject(ctx context.Context, db *sql.DB) ([]LProject, error) {
 	return projects, nil
 }
 
-func fetchAllProperty(ctx context.Context, db *sql.DB) ([]LProperty, error) {
+func fetchAllProperty(ctx context.Context) ([]LProperty, error) {
 	query := `SELECT * FROM property`
-	rows, err := db.QueryContext(ctx, query)
+	rows, err := legacyDB.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
 	}
@@ -244,9 +244,9 @@ func fetchAllProperty(ctx context.Context, db *sql.DB) ([]LProperty, error) {
 	return properties, nil
 }
 
-func FetchProjectByID(ctx context.Context, db *sql.DB, id int64) (*LProject, error) {
+func FetchProjectByID(ctx context.Context, id int64) (*LProject, error) {
 	query := `SELECT * FROM project WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -259,9 +259,9 @@ func FetchProjectByID(ctx context.Context, db *sql.DB, id int64) (*LProject, err
 	return &project, nil
 }
 
-func FetchProjectConfigurationsByID(ctx context.Context, db *sql.DB, id int64) (*LPropertyConfiguration, error) {
+func FetchProjectConfigurationsByID(ctx context.Context, id int64) (*LPropertyConfiguration, error) {
 	query := `SELECT * FROM property_configuration WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -274,9 +274,9 @@ func FetchProjectConfigurationsByID(ctx context.Context, db *sql.DB, id int64) (
 	return &configuration, nil
 }
 
-func FetchLocalityByID(ctx context.Context, db *sql.DB, id int64) (*LLocality, error) {
+func FetchLocalityByID(ctx context.Context, id int64) (*LLocality, error) {
 	query := `SELECT * FROM locality WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -289,9 +289,9 @@ func FetchLocalityByID(ctx context.Context, db *sql.DB, id int64) (*LLocality, e
 	return &locality, nil
 }
 
-func FetchDeveloperByID(ctx context.Context, db *sql.DB, id int64) (*LDeveloper, error) {
+func FetchDeveloperByID(ctx context.Context, id int64) (*LDeveloper, error) {
 	query := `SELECT * FROM developer WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -328,10 +328,9 @@ func FetchDeveloperByID(ctx context.Context, db *sql.DB, id int64) (*LDeveloper,
 	return nil, sql.ErrNoRows
 }
 
-
-func FetchProjectImagesByProjectID(ctx context.Context, db *sql.DB, id int64) (*[]LProjectImage, error) {
+func FetchProjectImagesByProjectID(ctx context.Context, id int64) (*[]LProjectImage, error) {
 	query := `SELECT * FROM project_image WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -348,9 +347,9 @@ func FetchProjectImagesByProjectID(ctx context.Context, db *sql.DB, id int64) (*
 	return &propertyImages, nil
 }
 
-func FetchFloorPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64) (*[]LFloorPlan, error) {
+func FetchFloorPlansByProjectID(ctx context.Context, projectID int64) (*[]LFloorPlan, error) {
 	query := `SELECT id, created_date, img_url, is_sold_out, price, size, title, updated_date, configuration_id, project_id, user_id FROM floorplan WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, projectID)
+	rows, err := legacyDB.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -379,9 +378,9 @@ func FetchFloorPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64
 	return &floorPlans, nil
 }
 
-func FetchReraByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LRera, error) {
+func FetchReraByProjectID(ctx context.Context, projectID int64) ([]*LRera, error) {
 	query := `SELECT * FROM rera_info WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, projectID)
+	rows, err := legacyDB.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -398,9 +397,9 @@ func FetchReraByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*
 	return reras, nil
 }
 
-func FetchFloorPlanByProjectID(ctx context.Context, db *sql.DB, projectID int64) (*[]LFloorPlan, error) {
+func FetchFloorPlanByProjectID(ctx context.Context, projectID int64) (*[]LFloorPlan, error) {
 	query := `SELECT * FROM floorplan WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, projectID)
+	rows, err := legacyDB.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -422,9 +421,9 @@ type LProjectAmenity struct {
 	AmenityID int64 `json:"amenity_id"`
 }
 
-func FetchAmenityByID(ctx context.Context, db *sql.DB, id int64) (*LAmenity, error) {
+func FetchAmenityByID(ctx context.Context, id int64) (*LAmenity, error) {
 	query := `SELECT * FROM amenities WHERE id = ?`
-	rows, err := db.QueryContext(ctx, query, id)
+	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -448,10 +447,9 @@ func FetchAmenityByID(ctx context.Context, db *sql.DB, id int64) (*LAmenity, err
 	return nil, sql.ErrNoRows
 }
 
-
-func FetchProjectAmenitiesByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LAmenity, error) {
+func FetchProjectAmenitiesByProjectID(ctx context.Context, projectID int64) ([]*LAmenity, error) {
 	query := `SELECT * FROM project_amenities WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, projectID)
+	rows, err := legacyDB.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -468,7 +466,7 @@ func FetchProjectAmenitiesByProjectID(ctx context.Context, db *sql.DB, projectID
 
 	var amenities []*LAmenity
 	for _, amenityID := range amenityIDs {
-		amenity, err := FetchAmenityByID(ctx, db, amenityID)
+		amenity, err := FetchAmenityByID(ctx, amenityID)
 		if err != nil {
 			return nil, err
 		}
@@ -478,9 +476,9 @@ func FetchProjectAmenitiesByProjectID(ctx context.Context, db *sql.DB, projectID
 	return amenities, nil
 }
 
-func FetchPaymentPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LPaymentPlan, error) {
+func FetchPaymentPlansByProjectID(ctx context.Context, projectID int64) ([]*LPaymentPlan, error) {
 	query := `SELECT * FROM payment_plan WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, projectID)
+	rows, err := legacyDB.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -497,9 +495,9 @@ func FetchPaymentPlansByProjectID(ctx context.Context, db *sql.DB, projectID int
 	return paymentPlans, nil
 }
 
-func FetchFaqsByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LFAQ, error) {
+func FetchFaqsByProjectID(ctx context.Context, projectID int64) ([]*LFAQ, error) {
 	query := `SELECT * FROM faq WHERE project_id = ?`
-	rows, err := db.QueryContext(ctx, query, projectID)
+	rows, err := legacyDB.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -514,4 +512,19 @@ func FetchFaqsByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*
 		faqs = append(faqs, &faq)
 	}
 	return faqs, nil
+}
+
+func FetchPropertyConfigurationTypeByID(ctx context.Context, id int64) (*LPropertyConfigurationType, error) {
+	query := `SELECT * FROM property_configuration_type WHERE id = ?`
+	rows, err := legacyDB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var propertyConfigurationType LPropertyConfigurationType
+	if err := rows.Scan(&propertyConfigurationType.ID, &propertyConfigurationType.ConfigurationTypeName, &propertyConfigurationType.CreatedDate, &propertyConfigurationType.PropertyType, &propertyConfigurationType.UpdatedDate); err != nil {
+		return nil, err
+	}
+	return &propertyConfigurationType, nil
 }

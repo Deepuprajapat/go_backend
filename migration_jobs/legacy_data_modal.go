@@ -42,8 +42,8 @@ type LProject struct {
 	SitePlanImg           *string `json:"siteplan_img"`
 	SitePlanPara          *string `json:"siteplan_para"`
 	Status                *string `json:"status"`
-	TotalFloor            *string  `json:"total_floor"`
-	TotalTowers           *string  `json:"total_towers"`
+	TotalFloor            *string `json:"total_floor"`
+	TotalTowers           *string `json:"total_towers"`
 	UpdatedDate           *int64  `json:"updated_date"`
 	USP                   *string `json:"usp"`
 	VideoPara             *string `json:"video_para"`
@@ -125,7 +125,7 @@ type LDeveloper struct {
 	IsActive           *bool   `json:"is_active"`
 	IsVerified         *bool   `json:"is_verified"`
 	Overview           *string `json:"overview"`
-	ProjectDoneNo      *string  `json:"project_done_no"`
+	ProjectDoneNo      *string `json:"project_done_no"`
 	UpdatedDate        *int64  `json:"updated_date"`
 	CityName           *int64  `json:"city_name"`
 	Phone              *string `json:"phone"`
@@ -211,4 +211,12 @@ type LFAQ struct {
 	Question  *string `json:"question"`
 	Answer    *string `json:"answer"`
 	ProjectID *int64  `json:"project_id"`
+}
+
+type LPropertyConfigurationType struct {
+	ID                    int64   `json:"id"`
+	ConfigurationTypeName *string `json:"configuration_type_name"`
+	CreatedDate           *int64  `json:"created_date"`
+	PropertyType          *string `json:"property_type"`
+	UpdatedDate           *int64  `json:"updated_date"`
 }
