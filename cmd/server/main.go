@@ -68,14 +68,14 @@ func main() {
 			log.Fatal().Err(err).Msg("Failed to migrate developers")
 		}
 
-		log.Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
-		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate properties")
-		}
-
 		log.Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
 			log.Fatal().Err(err).Msg("Failed to migrate projects")
+		}
+
+		log.Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
+			log.Fatal().Err(err).Msg("Failed to migrate properties")
 		}
 
 		log.Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")

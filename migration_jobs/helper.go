@@ -12,7 +12,6 @@ import (
 
 func safeStr(s *string) string {
 	if s != nil {
-		log.Info().Msgf("Safe string: %s", *s)
 		return *s
 	}
 	return ""
