@@ -68,6 +68,9 @@ func NewLegacyDBConnection() (*sql.DB, error) {
 		return nil, fmt.Errorf("error connecting to the database: %v", err)
 	}
 
+	// Set the global variable
+	legacyDB = db
+
 	log.Println("Successfully connected to legacy database")
 	return db, nil
 }

@@ -16,12 +16,9 @@ import (
 // Use ent schema modal to migrate data from legacy database to new database
 
 var (
-	legacyToNewProjectIDMAP       = make(map[int64]string)
-	legacyToNewDeveloperIDMAP     = make(map[int64]string)
-	legacyToNewLocalityIDMAP      = make(map[int64]string)
-	legacyToNewConfigurationIDMAP = make(map[string]string)
-	legacyToNewConfigTypeIDMAP    = make(map[string]string)
-	legacyToNewPropertyIDMAP      = make(map[int64]string)
+	legacyToNewProjectIDMAP   = make(map[int64]string)
+	legacyToNewDeveloperIDMAP = make(map[int64]string)
+	legacyToNewLocalityIDMAP  = make(map[int64]string)
 )
 
 func MigrateProject(ctx context.Context, txn *ent.Tx) error {
@@ -29,9 +26,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 	if err != nil {
 		return err
 	}
-	log.Info().Msg("Fetched all projects")
-	fmt.Println("--------------------------------")
-	log.Info().Msg("Migrating projects")
+	log.Info().Msg("Fetched all projects --------->>>> success")
 
 	for _, project := range projects {
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
@@ -310,9 +305,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 			Exec(ctx); err != nil {
 			return err
 		}
-		log.Info().Msgf("Project %s migrated successfully", id)
 	}
-	log.Info().Msg("Projects migrated successfully")
+	log.Info().Msg("Projects migrated successfully --------->>>> success")
 	return nil
 }
 
@@ -322,9 +316,7 @@ func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 	if err != nil {
 		return err
 	}
-	log.Info().Msg("fetched developers")
-	fmt.Println("--------------------------------")
-	log.Info().Msg("Migrating developers")
+	log.Info().Msg("fetched developers --------->>>> success")
 
 	for _, developer := range ldeveloper {
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(developer.ID, 10))))[:16]
@@ -348,9 +340,8 @@ func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 			Exec(ctx); err != nil {
 			return err
 		}
-		log.Info().Msgf("Developer %s migrated successfully", id)
 	}
-	log.Info().Msg("Developers migrated successfully")
+	log.Info().Msg("Developers migrated successfully --------->>>> success")
 	return nil
 }
 
@@ -361,9 +352,7 @@ func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 	if err != nil {
 		return err
 	}
-	log.Info().Msg("fetched localities")
-	fmt.Println("--------------------------------")
-	log.Info().Msg("Migrating localities")
+	log.Info().Msg("fetched localities --------->>>> success")
 
 	for _, locality := range llocality {
 
@@ -395,27 +384,22 @@ func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 			log.Error().Err(err).Msgf("Failed to insert locality ID %d", locality.ID)
 			continue
 		}
-		log.Info().Msgf("Locality %s migrated successfully", id)
 	}
-	log.Info().Msg("Localities migrated successfully")
+	log.Info().Msg("Localities migrated successfully --------->>>> success")
 	return nil
 }
 
-func MigrateProperty(ctx context.Context) error {
-	log.Info().Msg("fetching properties")
+func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
+	log.Info().Msg("fetching properties --------->>>> success")
 	properties, err := fetchAllProperty(ctx)
 	if err != nil {
 		return err
 	}
-	log.Info().Msgf("Fetched all properties")
-	for _, property := range properties {
-		log.Info().Msgf("Migrating property %+v", property)
-	}
+	log.Info().Msgf("Fetched all properties --------->>>> success")
 	for _, property := range properties {
 
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(property.ID, 10))))[:16]
 		var err error
-		legacyToNewPropertyIDMAP[property.ID] = id
 
 		var propertyConfiguration *LPropertyConfiguration
 		if property.ConfigurationID != nil {
@@ -551,7 +535,7 @@ func MigrateProperty(ctx context.Context) error {
 			},
 		}
 
-		if err := newDB.Property.Create().
+		if err := txn.Property.Create().
 			SetID(id).
 			SetName(*property.PropertyName).
 			SetPropertyImages(parsedImages).
@@ -569,7 +553,7 @@ func MigrateProperty(ctx context.Context) error {
 			return err
 		}
 	}
-	log.Info().Msg("Properties migrated successfully")
+	log.Info().Msg("Properties migrated successfully --------->>>> success")
 	return nil
 }
 

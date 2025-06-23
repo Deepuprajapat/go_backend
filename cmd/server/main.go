@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -37,55 +36,55 @@ func main() {
 	ctx := context.Background()
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
-		legacyDB, err := migration_jobs.NewLegacyDBConnection()
+		var err error
+		legacyDB, err = migration_jobs.NewLegacyDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to legacy database")
 		}
+		defer legacyDB.Close()
 
-		newDB, err := migration_jobs.NewNewDBConnection()
+		newDB, err = migration_jobs.NewNewDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to new database")
 		}
+		defer newDB.Close()
 
+		// Start a transaction for the entire migration process
 		txn, err = newDB.BeginTx(ctx, nil)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to begin transaction")
 		}
-
 		defer txn.Rollback()
-		defer newDB.Close()
-		defer legacyDB.Close()
 
-		err = migration_jobs.MigrateLocality(ctx, txn)
-		if err != nil {
-			fmt.Println("Error in migrating localities", err)
-			return
+		// Execute migrations in sequence
+
+		log.Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {
+			log.Fatal().Err(err).Msg("Failed to migrate localities")
 		}
 
-		err = migration_jobs.MigrateDeveloper(ctx, txn)
-		if err != nil {
-			fmt.Println("Error in migrating developers", err)
-			return
+		log.Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
+			log.Fatal().Err(err).Msg("Failed to migrate developers")
 		}
 
-		err = migration_jobs.MigrateProject(ctx, txn)
-		if err != nil {
-			fmt.Println("Error in migrating projects", err)
-			return
+		log.Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
+			log.Fatal().Err(err).Msg("Failed to migrate properties")
 		}
 
-		err = txn.Commit()
-		if err != nil {
+		log.Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
+			log.Fatal().Err(err).Msg("Failed to migrate projects")
+		}
+
+		log.Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")
+		if err := txn.Commit(); err != nil {
 			log.Fatal().Err(err).Msg("Failed to commit transaction")
 		}
 
-		// err = migration_jobs.MigrateProperty(context.Background(), legacyDB, newDB)
-		// if err != nil {
-		// 	fmt.Println("Error in migrating properties", err)
-		// 	return
-		// }
-		// log.Info().Msg("Migration completed successfully")
-		// return
+		log.Info().Msg("Migration completed successfully")
+		return
 	}
 
 	// Load configuration
