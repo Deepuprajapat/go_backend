@@ -15,7 +15,7 @@ type ApplicationInterface interface {
 	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error)
 	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error)
 	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, error)
-	GetProjectByID(id int) (*ent.Project, error)
+	GetProjectByID(id string) (*ent.Project, error)
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {

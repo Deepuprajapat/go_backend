@@ -42,8 +42,8 @@ type LProject struct {
 	SitePlanImg           *string `json:"siteplan_img"`
 	SitePlanPara          *string `json:"siteplan_para"`
 	Status                *string `json:"status"`
-	TotalFloor            *int64  `json:"total_floor"`
-	TotalTowers           *int64  `json:"total_towers"`
+	TotalFloor            *string  `json:"total_floor"`
+	TotalTowers           *string  `json:"total_towers"`
 	UpdatedDate           *int64  `json:"updated_date"`
 	USP                   *string `json:"usp"`
 	VideoPara             *string `json:"video_para"`
@@ -203,6 +203,7 @@ type LPaymentPlan struct {
 	ID               int64   `json:"id"`
 	PaymentPlanName  *string `json:"payment_plan_name"`
 	PaymentPlanValue *string `json:"payment_plan_value"`
+	ProjectID        *int64  `json:"project_id"`
 }
 
 type LFAQ struct {

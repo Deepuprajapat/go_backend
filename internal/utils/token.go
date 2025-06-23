@@ -41,7 +41,19 @@ func VerifyToken(tokenString string) (userID int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	return int(token.Claims.(jwt.MapClaims)["user_id"].(float64)), nil
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, errors.New("invalid token claims")
+	}
+	val, ok := claims["user_id"]
+	if !ok || val == nil {
+		return 0, errors.New("user_id not found in token")
+	}
+	userIDFloat, ok := val.(float64)
+	if !ok {
+		return 0, errors.New("user_id in token is not a float64")
+	}
+	return int(userIDFloat), nil
 }
 
 func VerifyRefreshToken(tokenString string) (userID int, err error) {
@@ -51,10 +63,20 @@ func VerifyRefreshToken(tokenString string) (userID int, err error) {
 	if err != nil {
 		return 0, err
 	}
-
-	if token.Claims.(jwt.MapClaims)["token_type"] != "refresh" {
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, errors.New("invalid token claims")
+	}
+	if claims["token_type"] != "refresh" {
 		return 0, errors.New("invalid token type")
 	}
-
-	return int(token.Claims.(jwt.MapClaims)["user_id"].(float64)), nil
+	val, ok := claims["user_id"]
+	if !ok || val == nil {
+		return 0, errors.New("user_id not found in token")
+	}
+	userIDFloat, ok := val.(float64)
+	if !ok {
+		return 0, errors.New("user_id in token is not a float64")
+	}
+	return int(userIDFloat), nil
 }

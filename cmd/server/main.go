@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-	"fmt"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
@@ -15,10 +15,8 @@ import (
 	"github.com/VI-IM/im_backend_go/migration_jobs"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 )
-
 
 func main() {
 	// Initialize zerolog
@@ -28,8 +26,7 @@ func main() {
 		TimeFormat: time.RFC3339,
 	})
 
-	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
-
+	if len(os.Args) > 1 && os.Args[1] == "run-migration" {		
 		legacyDB, err := migration_jobs.NewLegacyDBConnection()
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to connect to legacy database")
@@ -48,22 +45,28 @@ func main() {
 			fmt.Println("Error in migrating localities", err)
 			return
 		}
-		
-		err = migration_jobs.MigrateDeveloper(context.Background(), legacyDB,newDB)
+
+		err = migration_jobs.MigrateDeveloper(context.Background(), legacyDB, newDB)
 		if err != nil {
 			fmt.Println("Error in migrating developers", err)
 			return
 		}
 
-		// ------ follow this sequence ------
-		// migrate city
-		// migrate locality
-		// migrate developer
-		// migrate properties
-		// migrate project
+		err = migration_jobs.MigrateProject(context.Background(), legacyDB, newDB)
+		if err != nil {
+			fmt.Println("Error in migrating projects", err)
+			return
+		}
 
 		log.Info().Msg("Migration completed successfully")
 		return
+
+		err = migration_jobs.MigrateProperty(context.Background(), legacyDB, newDB)
+		if err != nil {
+			fmt.Println("Error in migrating properties", err)
+			return
+		}
+		
 
 	}
 

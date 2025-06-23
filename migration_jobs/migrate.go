@@ -25,11 +25,14 @@ var (
 	legacyToNewPropertyIDMAP      = make(map[int64]string)
 )
 
-func migrateProject(ctx context.Context, db *sql.DB) error {
+func MigrateProject(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	projects, err := FetchhAllProject(ctx, db)
 	if err != nil {
 		return err
 	}
+	log.Info().Msg("Fetched all projects")
+	fmt.Println("--------------------------------")
+	log.Info().Msg("Migrating projects")
 
 	for _, project := range projects {
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
@@ -44,10 +47,10 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 		reras := []schema.ReraListItem{}
 		for _, rera := range projectRera {
 			reras = append(reras, schema.ReraListItem{
-				Phase:      *rera.Phase,
-				ReraQR:     *rera.QRImages,
-				ReraNumber: *rera.ReraNumber,
-				Status:     *rera.Status,
+				Phase:      safeStr(rera.Phase),
+				ReraQR:     safeStr(rera.QRImages),
+				ReraNumber: safeStr(rera.ReraNumber),
+				Status:     safeStr(rera.Status),
 			})
 		}
 
@@ -67,7 +70,7 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 		for _, usp := range uspList {
 			uspListNew = append(uspListNew, schema.USPListItem{
 				Icon:        "",
-				Description: usp,
+				Description: safeStr(&usp),
 			})
 		}
 
@@ -81,12 +84,12 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 		configurationProducts := []schema.ProductConfiguration{}
 		for _, floorPlan := range *floorPlans {
 			floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
-				Title:        *floorPlan.Title,
-				FlatType:     *floorPlan.Title,
+				Title:        safeStr(floorPlan.Title),
+				FlatType:     safeStr(floorPlan.Title),
 				IsSoldOut:    floorPlan.IsSoldOut,
 				Price:        strconv.FormatFloat(floorPlan.Price, 'f', -1, 64),
 				BuildingArea: strconv.FormatInt(*floorPlan.Size, 10),
-				Image:        *floorPlan.ImgURL,
+				Image:        safeStr(floorPlan.ImgURL),
 			})
 			configurationProducts = append(configurationProducts, schema.ProductConfiguration{
 				ConfigurationName: *floorPlan.Title,
@@ -135,6 +138,25 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 			return err
 		}
 
+		projectImages, err := FetchProjectImagesByProjectID(ctx, db, project.ID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch project images for project ID %d", project.ID)
+			return err
+		}
+
+		projectImagesNew := []LProjectImage{}
+		for _, image := range *projectImages {
+			projectImagesNew = append(projectImagesNew, LProjectImage{
+				ImageURL:     image.ImageURL,
+				ImageAltName: image.ImageAltName,
+			})
+		}
+
+		imageURLs := make([]string, len(projectImagesNew))
+		for i, img := range projectImagesNew {
+			imageURLs[i] = img.ImageURL
+		}
+
 		faqsNew := []schema.FAQ{}
 		for _, faq := range faqs {
 			faqsNew = append(faqsNew, schema.FAQ{
@@ -146,74 +168,73 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 		legacyToNewProjectIDMAP[project.ID] = id
 		if err := newDB.Project.Create().
 			SetID(id).
-			SetName(*project.ProjectName).
-			SetDescription(*project.ProjectDescription).
+			SetName(safeStr(project.ProjectName)).
+			SetDescription(safeStr(project.ProjectDescription)).
 			SetStatus(enums.ProjectStatus(*project.Status)).
-			SetTotalTowers(int(*project.TotalTowers)).
-			SetTotalFloor(int(*project.TotalFloor)).
-			SetTotalTowers(int(*project.TotalTowers)).
+			SetTotalFloor(safeStr(project.TotalFloor)).
+			SetTotalTowers(safeStr(project.TotalTowers)).
 			SetTimelineInfo(schema.TimelineInfo{
-				ProjectLaunchDate:     *project.ProjectLaunchDate,
-				ProjectPossessionDate: *project.ProjectPossessionDate,
+				ProjectLaunchDate:     safeStr(project.ProjectLaunchDate),
+				ProjectPossessionDate: safeStr(project.ProjectPossessionDate),
 			}).
 			SetMetaInfo(schema.SEOMeta{
-				Title:         *project.MetaTitle,
-				Description:   *project.MetaDescription,
-				Keywords:      *project.MetaKeywords,
-				Canonical:     *project.ProjectURL,
-				ProjectSchema: *project.ProjectSchema,
+				Title:         safeStr(project.MetaTitle),
+				Description:   safeStr(project.MetaDescription),
+				Keywords:      safeStr(project.MetaKeywords),
+				Canonical:     safeStr(project.ProjectURL),
+				ProjectSchema: safeStr(project.ProjectSchema),
 			}).
 			SetWebCards(schema.ProjectWebCards{
-				Images: []string{*project.CoverPhoto},
+				Images: imageURLs,
 				ReraInfo: schema.ReraInfo{
-					WebsiteLink: *project.ReraLink,
+					WebsiteLink: safeStr(project.ReraLink),
 					ReraList:    reras,
 				},
 				Details: schema.ProjectDetails{
 					Area: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.ProjectArea,
+						Value: safeStr(project.ProjectArea),
 					},
 					Sizes: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.ProjectArea,
+						Value: safeStr(project.ProjectArea),
 					},
 					Units: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.ProjectArea,
+						Value: safeStr(project.ProjectUnits),
 					},
 					Configuration: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.ProjectArea,
+						Value: safeStr(project.ProjectConfigurations),
 					},
 					LaunchDate: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.ProjectLaunchDate,
+						Value: safeStr(project.ProjectLaunchDate),
 					},
 					PossessionDate: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.ProjectPossessionDate,
+						Value: safeStr(project.ProjectPossessionDate),
 					},
 					TotalTowers: struct {
 						Value string `json:"value"`
 					}{
-						Value: strconv.FormatInt(*project.TotalTowers, 10),
+						Value: safeStr(project.TotalTowers),
 					},
 					TotalFloors: struct {
 						Value string `json:"value"`
 					}{
-						Value: strconv.FormatInt(*project.TotalFloor, 10),
+						Value: safeStr(project.TotalFloor),
 					},
 					ProjectStatus: struct {
 						Value string `json:"value"`
 					}{
-						Value: *project.Status,
+						Value: safeStr(project.Status),
 					},
 					Type: struct {
 						Value string `json:"value"`
@@ -222,12 +243,12 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 					},
 				},
 				WhyToChoose: schema.WhyToChoose{
-					ImageUrls: []string{*project.SitePlanImg},
+					ImageUrls: []string{safeStr(project.SitePlanImg)},
 					USP_List:  uspListNew,
 				},
 				KnowAbout: schema.KnowAbout{
 					Description:  *project.ProjectAbout,
-					DownloadLink: *project.ProjectBrochure,
+					DownloadLink: safeStr(project.ProjectBrochure),
 				},
 				FloorPlan: schema.FloorPlan{
 					Description: *project.PriceListPara,
@@ -242,7 +263,7 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 					CategoriesWithAmenities: amenitiesMap,
 				},
 				VideoPresentation: schema.VideoPresentation{
-					Description: *project.VideoPara,
+					Description: safeStr(project.VideoPara),
 					URL:         project.ProjectVideos,
 				},
 				PaymentPlans: schema.PaymentPlans{
@@ -278,13 +299,19 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 						Phone          string `json:"phone"`
 						BookingLink    string `json:"booking_link"`
 					}{
-						Name:           *developer.DeveloperName,
-						ProjectAddress: *developer.DeveloperAddress,
-						Phone:          *developer.Phone,
-						BookingLink:    *developer.DeveloperURL,
+						Name:           safeStr(developer.DeveloperName),
+						ProjectAddress: safeStr(developer.DeveloperAddress),
+						Phone:          safeStr(developer.Phone),
+						BookingLink:    safeStr(developer.DeveloperURL),
 					},
 				},
 				Faqs: faqsNew,
+			}).
+			SetLocationInfo(schema.LocationInfo{
+				ShortAddress:  safeStr(project.ShortAddress),
+				Latitude:      "",
+				Longitude:     "",
+				GoogleMapLink: safeStr(project.ProjectLocationURL),
 			}).
 			SetIsFeatured(project.IsFeatured).
 			SetIsPremium(project.IsPremium).
@@ -295,24 +322,22 @@ func migrateProject(ctx context.Context, db *sql.DB) error {
 			Exec(ctx); err != nil {
 			return err
 		}
+		log.Info().Msgf("Project %s migrated successfully", id)
 
 	}
-
-	// fetch all projects from legacy database
-
-	// create project in iteration
-	// map legacy project id to new project id
-	// setDeveloperID(legacyToNewDeveloperIDMAP[lproject.DeveloperID])
-
+	log.Info().Msg("Projects migrated successfully")
 	return nil
 }
 
 func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
-	log.Info().Msg("Migrating developers")
+	log.Info().Msg("fetching developers")
 	ldeveloper, err := FetchAllDevelopers(ctx, db)
 	if err != nil {
 		return err
 	}
+	log.Info().Msg("fetched developers")
+	fmt.Println("--------------------------------")
+	log.Info().Msg("Migrating developers")
 
 	for _, developer := range ldeveloper {
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(developer.ID, 10))))[:16]
@@ -336,17 +361,22 @@ func MigrateDeveloper(ctx context.Context, db *sql.DB, newDB *ent.Client) error 
 			Exec(ctx); err != nil {
 			return err
 		}
-
+		log.Info().Msgf("Developer %s migrated successfully", id)
 	}
+	log.Info().Msg("Developers migrated successfully")
 	return nil
 }
 
 func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 	//new location id will be generated
+	log.Info().Msg("fetching localities")
 	llocality, err := FetchAllLocality(ctx, db)
 	if err != nil {
 		return err
 	}
+	log.Info().Msg("fetched localities")
+	fmt.Println("--------------------------------")
+	log.Info().Msg("Migrating localities")
 
 	for _, locality := range llocality {
 
@@ -382,16 +412,24 @@ func MigrateLocality(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
 			log.Error().Err(err).Msgf("Failed to insert locality ID %d", locality.ID)
 			continue
 		}
+		log.Info().Msgf("Locality %s migrated successfully", id)
 	}
+	log.Info().Msg("Localities migrated successfully")
 	return nil
 }
 
-func migrateProperty(ctx context.Context, db *sql.DB) error {
+func MigrateProperty(ctx context.Context, db *sql.DB, newDB *ent.Client) error {
+	log.Info().Msg("fetching properties")
 	properties, err := fetchAllProperty(ctx, db)
 	if err != nil {
 		return err
 	}
+	log.Info().Msgf("Fetched all properties")
 	for _, property := range properties {
+		log.Info().Msgf("Migrating property %+v", property)
+	}
+	for _, property := range properties {
+
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(property.ID, 10))))[:16]
 		legacyToNewPropertyIDMAP[property.ID] = id
 		project, err := FetchProjectByID(ctx, db, *property.ProjectID)
@@ -399,20 +437,20 @@ func migrateProperty(ctx context.Context, db *sql.DB) error {
 			log.Error().Err(err).Msgf("Failed to fetch project for property ID %d", property.ID)
 			continue
 		}
-		projectConfigurations, err := FetchProjectConfigurationsByID(ctx, db, *property.ConfigurationID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
-			continue
-		}
-		locality, err := FetchLocalityByID(ctx, db, *property.LocalityID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch locality for property ID %d", property.ID)
-			continue
-		}
-		developer, err := FetchDeveloperByID(ctx, db, *property.DeveloperID)
-		if err != nil {
-			log.Error().Err(err).Msgf("Failed to fetch developer for property ID %d", property.ID)
-		}
+		// projectConfigurations, err := FetchProjectConfigurationsByID(ctx, db, *property.ConfigurationID)
+		// if err != nil {
+		// 	log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
+		// 	continue
+		// }
+		// locality, err := FetchLocalityByID(ctx, db, *property.LocalityID)
+		// if err != nil {
+		// 	log.Error().Err(err).Msgf("Failed to fetch locality for property ID %d", property.ID)
+		// 	continue
+		// }
+		// developer, err := FetchDeveloperByID(ctx, db, *property.DeveloperID)
+		// if err != nil {
+		// 	log.Error().Err(err).Msgf("Failed to fetch developer for property ID %d", property.ID)
+		// }
 
 		projectImages, err := FetchProjectImagesByProjectID(ctx, db, *property.ProjectID)
 		if err != nil {
@@ -430,23 +468,72 @@ func migrateProperty(ctx context.Context, db *sql.DB) error {
 			log.Error().Err(err).Msgf("Failed to fetch floor plans for property ID %d", property.ID)
 			continue
 		}
-		webCards, err := parseWebCardsFromProject(project)
+		webCards, err := parseWebCardsFromProject(project, floorPlans, &property)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to parse web cards for property ID %d", property.ID)
 			continue
 		}
-
-		// property Type and configurationtype(Ground Floor, Apartment, etc.) name from projectConfigurations table
-
-		if err := newDB.Property.Create().
-			SetID(id).
-			SetName(*property.PropertyName).
-			SetPropertyImages(*propertyImages).
-			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
-			SetWebCards(*webCards).
-			Exec(ctx); err != nil {
-			return err
+		reras, err := FetchReraByProjectID(ctx, db, *property.ProjectID)
+		if err != nil {
+			log.Error().Err(err).Msgf("Failed to fetch reras for property ID %d", property.ID)
+			continue
 		}
+
+		rerasNew := []schema.ReraListItem{}
+		for _, rera := range reras {
+			rerasNew = append(rerasNew, schema.ReraListItem{
+				Phase:      safeStr(rera.Phase),
+				ReraQR:     safeStr(rera.QRImages),
+				ReraNumber: safeStr(rera.ReraNumber),
+				Status:     safeStr(rera.Status),
+			})
+
+			// property Type and configurationtype(Ground Floor, Apartment, etc.) name from projectConfigurations table
+
+			if err := newDB.Property.Create().
+				SetID(id).
+				SetName(*property.PropertyName).
+				SetPropertyImages(*propertyImages).
+				SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
+				SetWebCards(*webCards).
+				SetConfiguration(schema.Configuration{
+					PropertyType:      safeStr(project.ProjectConfigurations),
+					ConfigurationName: safeStr(project.ProjectConfigurations),
+					ConfigurationType: safeStr(project.ProjectConfigurations),
+					Bedrooms:          safeStrToInt(property.Bedrooms),
+					Bathrooms:         safeStrToInt(property.Bathrooms),
+				}).
+				SetLocationDetails(schema.PropertyLocationDetails{
+					FloorNumber: safeStrToInt(property.Floors),
+					Facing:      safeStr(property.Facing),
+				}).
+				SetPricingInfo(schema.PropertyPricingInfo{
+					StartingPrice: "",
+					Price:         strconv.FormatFloat(property.Price, 'f', -1, 64),
+					PricePerSqft:  "",
+				}).
+				SetPropertyReraInfo(schema.PropertyReraInfo{
+					Phase:      safeStr(rerasNew.Phase),
+					ReraNumber: safeStr(rerasNew.ReraNumber),
+					ReraQR:     safeStr(rerasNew.ReraQR),
+					Status:     safeStr(rerasNew.Status),
+				}).
+				Exec(ctx); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
+	log.Info().Msg("Properties migrated successfully")
 	return nil
 }
+
+func safeStrToInt(s *string) int {
+	if s != nil {
+		if n, err := strconv.Atoi(*s); err == nil {
+			return n
+		}
+	}
+	return 0
+}
+ 

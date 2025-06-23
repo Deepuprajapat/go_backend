@@ -3,15 +3,16 @@ package repository
 import (
 	"context"
 	"errors"
-	"strconv"
+
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
+	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 )
 
-func (r *repository) GetProjectByID(id int) (*ent.Project, error) {
-	project, err := r.db.Project.Get(context.Background(), strconv.Itoa(id))
+func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
+	project, err := r.db.Project.Get(context.Background(), id)
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("project not found")
@@ -30,6 +31,7 @@ func (r *repository) AddProject(input domain.AddProjectInput) (string, error) {
 	if err := r.db.Project.Create().
 		SetID(input.ProjectID).
 		SetName(input.ProjectName).
+		SetStatus(enums.ProjectStatus("")).
 		SetMetaInfo(schema.SEOMeta{
 			Canonical: input.ProjectURL,
 		}).

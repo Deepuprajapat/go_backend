@@ -3,7 +3,10 @@ package migration_jobs
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
+
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/rs/zerolog/log"
 )
@@ -72,22 +75,41 @@ func parsePropertyImagesFromProjectImages(projectImages *[]LProjectImage) (*sche
 	return &propertyImages, nil
 }
 
-func parseWebCardsFromProject(project *LProject) (*schema.WebCards, error) {
-	
+func parseWebCardsFromProject(project *LProject, floorPlans *[]LFloorPlan, property *LProperty) (*schema.WebCards, error) {
+
+	floorPlanItems := []schema.FloorPlanItem{}
+	for _, floorPlan := range *floorPlans {
+		floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
+			Title: safeStr(floorPlan.Title),
+			FlatType: func() string {
+				if floorPlan.ConfigurationID != nil {
+					return fmt.Sprintf("%d", *floorPlan.ConfigurationID)
+				}
+				return ""
+			}(),
+			Price: fmt.Sprintf("%v", floorPlan.Price),
+			BuildingArea: func() string {
+				if floorPlan.Size != nil {
+					return fmt.Sprintf("%d", *floorPlan.Size)
+				}
+				return ""
+			}(),
+			Image: safeStr(floorPlan.ImgURL),
+		})
+	}
 	webCards := schema.WebCards{
 		PropertyDetails: schema.PropertyDetails{
 			PropertyType:      safeStr(project.ProjectConfigurations),
-			FurnishingType:    "", // Not available in legacy data
-			ListingType:       "", // Not available in legacy data
-			PossessionStatus:  safeStr(project.Status),
-			AgeOfProperty:     "", // Not available in legacy data
-			FloorPara:         safeStr(project.FloorPara),
-			LocationPara:      safeStr(project.LocationPara),
-			LocationAdvantage: "", // Not available in legacy data
-			OverviewPara:      safeStr(project.OverviewPara),
-			Floors:            fmt.Sprintf("%d", safeInt(project.TotalFloor)),
-			Images:            "", // Will be populated from project images if available
-			Latlong:           safeStr(project.ProjectLocationURL),
+			FurnishingType:    safeStr(property.FurnishingType), // Not available in legacy data
+			ListingType:       safeStr(property.ListingType),    // Not available in legacy data
+			PossessionStatus:  safeStr(property.PossessionStatus),
+			AgeOfProperty:     safeStr(property.AgeOfProperty), // Not available in legacy data
+			FloorPara:         safeStr(property.FloorPara),
+			LocationPara:      safeStr(property.LocationPara),
+			LocationAdvantage: safeStr(property.LocationAdvantage), // Not available in legacy data
+			OverviewPara:      safeStr(property.OverviewPara),
+			Floors:            safeStr(property.Floors),
+			Images:            safeStr(property.Images), // Will be populated from project images if available
 		},
 		PropertyFloorPlan: []struct {
 			Title string `json:"title"`
@@ -134,9 +156,25 @@ func parseWebCardsFromProject(project *LProject) (*schema.WebCards, error) {
 			VideoUrl string `json:"video_url"`
 		}{
 			Title:    safeStr(project.VideoPara),
-			VideoUrl: "", // Will be populated from project videos if available
+			VideoUrl: string(project.ProjectVideos), // Will be populated from project videos if available
 		},
 		GoogleMapLink: safeStr(project.ProjectLocationURL),
 	}
 	return &webCards, nil
+}
+
+func parseFloor(floorStr *string) *int64 {
+	if floorStr == nil {
+		return nil
+	}
+	re := regexp.MustCompile(`\d+`)
+	matches := re.FindAllString(*floorStr, -1)
+	if len(matches) == 0 {
+		return nil
+	}
+	n, err := strconv.ParseInt(matches[len(matches)-1], 10, 64)
+	if err != nil {
+		return nil
+	}
+	return &n
 }

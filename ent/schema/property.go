@@ -58,7 +58,7 @@ type WebCards struct {
 			Price        string `json:"price"`
 			BuildingArea string `json:"building_area"`
 			Image        string `json:"image"`
-			ExpertLink   string `json:"expert_link"`
+			  ExpertLink   string `json:"expert_link"`
 			BrochureLink string `json:"brochure_link"`
 		} `json:"plans"`
 	} `json:"property_floor_plan"`

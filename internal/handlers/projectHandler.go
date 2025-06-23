@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
@@ -21,10 +20,7 @@ func NewProjectHandler(app application.ApplicationInterface) *ProjectHandler {
 
 func (h *ProjectHandler) GetProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
-	projectID, err := strconv.Atoi(vars["project_id"])
-	if err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid project ID", err.Error())
-	}
+	projectID := vars["project_id"]
 
 	response, err := h.app.GetProjectByID(projectID)
 	if err != nil {

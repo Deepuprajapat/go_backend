@@ -100,6 +100,7 @@ func FetchConfigurationByID(ctx context.Context, db *sql.DB, id int64) (*LProper
 }
 
 func FetchhAllProject(ctx context.Context, db *sql.DB) ([]LProject, error) {
+	fmt.Println("Fetching all projects")
 	query := `SELECT * FROM project`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
@@ -110,7 +111,60 @@ func FetchhAllProject(ctx context.Context, db *sql.DB) ([]LProject, error) {
 	var projects []LProject
 	for rows.Next() {
 		var project LProject
-		if err := rows.Scan(&project.ID, &project.ProjectName, &project.ProjectDescription, &project.Status, &project.ProjectConfigurations, &project.TotalFloor, &project.TotalTowers, &project.ProjectLaunchDate, &project.ProjectPossessionDate, &project.MetaTitle, &project.MetaDescription, &project.MetaKeywords, &project.ProjectURL, &project.ProjectSchema, &project.ProjectLogo, &project.ProjectBrochure, &project.ProjectVideos, &project.ProjectVideoCount, &project.IsFeatured, &project.IsPremium, &project.IsPriority, &project.IsDeleted, &project.DeveloperID, &project.LocalityID, &project.UserID, &project.CreatedDate, &project.UpdatedDate); err != nil {
+		if err := rows.Scan(
+			&project.ID,
+			&project.AltProjectLogo,
+			&project.AltSitePlanImg,
+			&project.AmenitiesPara,
+			&project.AvailableUnit,
+			&project.CoverPhoto,
+			&project.CreatedDate,
+			&project.FloorPara,
+			&project.IsDeleted,
+			&project.IsFeatured,
+			&project.IsPremium,
+			&project.IsPriority,
+			&project.LocationMap,
+			&project.LocationPara,
+			&project.MetaDescription,
+			&project.MetaTitle,
+			&project.OverviewPara,
+			&project.PaymentPara,
+			&project.PriceListPara,
+			&project.ProjectAbout,
+			&project.ProjectAddress,
+			&project.ProjectArea,
+			&project.ProjectBrochure,
+			&project.ProjectConfigurations,
+			&project.ProjectDescription,
+			&project.ProjectLaunchDate,
+			&project.ProjectLocationURL,
+			&project.ProjectLogo,
+			&project.ProjectName,
+			&project.ProjectPossessionDate,
+			&project.ProjectRERA,
+			&project.ProjectSchema,
+			&project.ProjectUnits,
+			&project.ProjectURL,
+			&project.ProjectVideoCount,
+			&project.ProjectVideos,
+			&project.ReraLink,
+			&project.ShortAddress,
+			&project.SitePlanImg,
+			&project.SitePlanPara,
+			&project.Status,
+			&project.TotalFloor,
+			&project.TotalTowers,
+			&project.UpdatedDate,
+			&project.USP,
+			&project.VideoPara,
+			&project.WhyPara,
+			&project.PropertyConfigTypeID,
+			&project.DeveloperID,
+			&project.LocalityID,
+			&project.UserID,
+			&project.MetaKeywords,
+		); err != nil {
 			return nil, err
 		}
 		projects = append(projects, project)
@@ -244,11 +298,36 @@ func FetchDeveloperByID(ctx context.Context, db *sql.DB, id int64) (*LDeveloper,
 	defer rows.Close()
 
 	var developer LDeveloper
-	if err := rows.Scan(&developer.ID, &developer.About, &developer.AltDeveloperLogo, &developer.CreatedDate, &developer.DeveloperAddress, &developer.DeveloperLegalName, &developer.DeveloperLogo, &developer.DeveloperName, &developer.DeveloperURL, &developer.Disclaimer, &developer.EstablishedYear, &developer.IsActive, &developer.IsVerified, &developer.Overview, &developer.ProjectDoneNo, &developer.UpdatedDate, &developer.CityName, &developer.Phone); err != nil {
-		return nil, err
+	if rows.Next() {
+		if err := rows.Scan(
+			&developer.ID,
+			&developer.About,
+			&developer.AltDeveloperLogo,
+			&developer.CreatedDate,
+			&developer.DeveloperAddress,
+			&developer.DeveloperLegalName,
+			&developer.DeveloperLogo,
+			&developer.DeveloperName,
+			&developer.DeveloperURL,
+			&developer.Disclaimer,
+			&developer.EstablishedYear,
+			&developer.IsActive,
+			&developer.IsVerified,
+			&developer.Overview,
+			&developer.ProjectDoneNo,
+			&developer.UpdatedDate,
+			&developer.CityName,
+			&developer.Phone,
+		); err != nil {
+			return nil, err
+		}
+		return &developer, nil
 	}
-	return &developer, nil
+
+	// No rows found
+	return nil, sql.ErrNoRows
 }
+
 
 func FetchProjectImagesByProjectID(ctx context.Context, db *sql.DB, id int64) (*[]LProjectImage, error) {
 	query := `SELECT * FROM project_image WHERE project_id = ?`
@@ -301,7 +380,7 @@ func FetchFloorPlansByProjectID(ctx context.Context, db *sql.DB, projectID int64
 }
 
 func FetchReraByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LRera, error) {
-	query := `SELECT * FROM rera WHERE project_id = ?`
+	query := `SELECT * FROM rera_info WHERE project_id = ?`
 	rows, err := db.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
@@ -344,7 +423,7 @@ type LProjectAmenity struct {
 }
 
 func FetchAmenityByID(ctx context.Context, db *sql.DB, id int64) (*LAmenity, error) {
-	query := `SELECT * FROM amenity WHERE id = ?`
+	query := `SELECT * FROM amenities WHERE id = ?`
 	rows, err := db.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
@@ -352,14 +431,26 @@ func FetchAmenityByID(ctx context.Context, db *sql.DB, id int64) (*LAmenity, err
 	defer rows.Close()
 
 	var amenity LAmenity
-	if err := rows.Scan(&amenity.ID, &amenity.AmenitiesCategory, &amenity.AmenitiesName, &amenity.AmenitiesURL, &amenity.CreatedDate, &amenity.UpdatedDate); err != nil {
-		return nil, err
+	if rows.Next() {
+		if err := rows.Scan(
+			&amenity.ID,
+			&amenity.AmenitiesCategory,
+			&amenity.AmenitiesName,
+			&amenity.AmenitiesURL,
+			&amenity.CreatedDate,
+			&amenity.UpdatedDate,
+		); err != nil {
+			return nil, err
+		}
+		return &amenity, nil
 	}
-	return &amenity, nil
+	// No rows found
+	return nil, sql.ErrNoRows
 }
 
+
 func FetchProjectAmenitiesByProjectID(ctx context.Context, db *sql.DB, projectID int64) ([]*LAmenity, error) {
-	query := `SELECT * FROM property_amenity WHERE project_id = ?`
+	query := `SELECT * FROM project_amenities WHERE project_id = ?`
 	rows, err := db.QueryContext(ctx, query, projectID)
 	if err != nil {
 		return nil, err
@@ -398,7 +489,7 @@ func FetchPaymentPlansByProjectID(ctx context.Context, db *sql.DB, projectID int
 	var paymentPlans []*LPaymentPlan
 	for rows.Next() {
 		var paymentPlan LPaymentPlan
-		if err := rows.Scan(&paymentPlan.ID, &paymentPlan.PaymentPlanName, &paymentPlan.PaymentPlanValue, &paymentPlan.CreatedDate, &paymentPlan.UpdatedDate, &paymentPlan.UserID); err != nil {
+		if err := rows.Scan(&paymentPlan.ID, &paymentPlan.PaymentPlanName, &paymentPlan.PaymentPlanValue, &paymentPlan.ProjectID); err != nil {
 			return nil, err
 		}
 		paymentPlans = append(paymentPlans, &paymentPlan)

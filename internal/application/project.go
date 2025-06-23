@@ -3,6 +3,7 @@ package application
 import (
 	"errors"
 	"strconv"
+
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/request"
@@ -10,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (c *application) GetProjectByID(id int) (*ent.Project, error) {
+func (c *application) GetProjectByID(id string) (*ent.Project, error) {
 	project, err := c.repo.GetProjectByID(id)
 	if err != nil {
 		return nil, err
