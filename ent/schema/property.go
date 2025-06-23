@@ -14,10 +14,10 @@ func (Property) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
 		field.String("name"),
-		field.Text("description"),
 		field.JSON("property_images", []string{}), // 0 index logo image
 		field.JSON("web_cards", WebCards{}),
 		field.JSON("pricing_info", PropertyPricingInfo{}),
+		field.JSON("meta_info", PropertyMetaInfo{}).Optional(),
 		field.JSON("property_rera_info", PropertyReraInfo{}),
 		field.JSON("search_context", []string{}).Optional(),
 		field.String("project_id").Optional(),
@@ -66,11 +66,6 @@ type WebCards struct {
 	} `json:"location_map"`
 }
 
-type PropertyUSPListItem struct {
-	Icon        string `json:"icon"`
-	Description string `json:"description"`
-}
-
 type PropertyFloorPlan struct {
 	Title string         `json:"title"`
 	Plans []PropertyPlan `json:"plans"`
@@ -82,12 +77,6 @@ type PropertyPlan struct {
 	Price        string `json:"price"`
 	BuildingArea string `json:"building_area"`
 	Image        string `json:"image"`
-}
-
-// property amenities - specific to this property unit
-type PropertyAmenities struct {
-	Description             string                       `json:"description"`
-	CategoriesWithAmenities map[string][]AmenityCategory `json:"categories_with_amenities"`
 }
 
 // area details
@@ -146,4 +135,11 @@ type PropertyDetails struct {
 	Bathrooms struct {
 		Value string `json:"value"`
 	} `json:"bathrooms"`
+}
+
+type PropertyMetaInfo struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Keywords    string `json:"keywords"`
+	Canonical   string `json:"canonical"`
 }

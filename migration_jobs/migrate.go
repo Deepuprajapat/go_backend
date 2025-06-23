@@ -546,10 +546,17 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 			SetPropertyReraInfo(schema.PropertyReraInfo{
 				ReraNumber: safeStr(property.Rera),
 			}).
+			SetMetaInfo(schema.PropertyMetaInfo{
+				Title:       safeStr(property.MetaTitle),
+				Description: safeStr(property.MetaDescription),
+				Keywords:    safeStr(property.MetaKeywords),
+				Canonical:   safeStr(property.PropertyURL),
+			}).
 			SetProjectID(legacyToNewProjectIDMAP[*property.ProjectID]).
 			SetDeveloperID(legacyToNewDeveloperIDMAP[*property.DeveloperID]).
 			SetLocationID(legacyToNewLocalityIDMAP[*property.LocalityID]).
 			Exec(ctx); err != nil {
+			log.Error().Err(err).Msgf("Failed to insert property ID %d", property.ID)
 			return err
 		}
 	}

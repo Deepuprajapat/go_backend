@@ -58,7 +58,7 @@ func parsePropertyImagesFromPropertyImages(propertyImages *string) ([]string, er
 		return []string{}, nil
 	}
 
-	var projectImagesList []LProjectImage
+	var projectImagesList []string
 	if err := json.Unmarshal([]byte(*propertyImages), &projectImagesList); err != nil {
 		log.Error().Err(err).Msgf("Failed to unmarshal project images: %s", *propertyImages)
 		return nil, fmt.Errorf("failed to unmarshal project images: %w", err)
@@ -72,7 +72,7 @@ func parsePropertyImagesFromPropertyImages(propertyImages *string) ([]string, er
 	propertyImagesList := []string{}
 	for _, image := range projectImagesList {
 		log.Info().Msgf("Parsing property image %+v", image)
-		propertyImagesList = append(propertyImagesList, image.ImageURL)
+		propertyImagesList = append(propertyImagesList, image)
 	}
 	return propertyImagesList, nil
 }

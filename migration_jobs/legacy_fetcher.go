@@ -94,10 +94,14 @@ func FetchPropertyConfigurationByID(ctx context.Context, id int64) (*LPropertyCo
 	defer rows.Close()
 
 	var configuration LPropertyConfiguration
-	if err := rows.Scan(&configuration.ID, &configuration.CreatedDate, &configuration.ProjectConfigurationName, &configuration.UpdatedDate, &configuration.ConfigurationTypeID); err != nil {
-		log.Error().Err(err).Msgf("Failed to scan property configuration by ID %d", id)
-		return nil, err
+
+	for rows.Next() {
+		if err := rows.Scan(&configuration.ID, &configuration.CreatedDate, &configuration.ProjectConfigurationName, &configuration.UpdatedDate, &configuration.ConfigurationTypeID); err != nil {
+			log.Error().Err(err).Msgf("Failed to scan property configuration by ID %d", id)
+			return nil, err
+		}
 	}
+
 	return &configuration, nil
 }
 
@@ -517,20 +521,18 @@ func FetchFaqsByProjectID(ctx context.Context, projectID int64) ([]*LFAQ, error)
 }
 
 func FetchPropertyConfigurationTypeByID(ctx context.Context, id int64) (*LPropertyConfigurationType, error) {
-	query := `SELECT * FROM property_configuration_type WHERE id = ?`
+	query := `SELECT * FROM project_configuration_type WHERE id = ?`
 	rows, err := legacyDB.QueryContext(ctx, query, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	if !rows.Next() {
-		return nil, sql.ErrNoRows
-	}
-
 	var propertyConfigurationType LPropertyConfigurationType
-	if err := rows.Scan(&propertyConfigurationType.ID, &propertyConfigurationType.ConfigurationTypeName, &propertyConfigurationType.CreatedDate, &propertyConfigurationType.PropertyType, &propertyConfigurationType.UpdatedDate); err != nil {
-		return nil, err
+	for rows.Next() {
+		if err := rows.Scan(&propertyConfigurationType.ID, &propertyConfigurationType.ConfigurationTypeName, &propertyConfigurationType.CreatedDate, &propertyConfigurationType.PropertyType, &propertyConfigurationType.UpdatedDate); err != nil {
+			return nil, err
+		}
 	}
 
 	return &propertyConfigurationType, nil
