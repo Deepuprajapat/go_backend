@@ -283,47 +283,47 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					},
 					Details: schema.ProjectDetails{
 						Area: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.ProjectArea),
 						},
 						Sizes: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.ProjectArea),
 						},
 						Units: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.ProjectUnits),
 						},
 						TotalFloor: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.TotalFloor),
 						},
 						TotalTowers: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.TotalTowers),
 						},
 						Configuration: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.ProjectConfigurations),
 						},
 						LaunchDate: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.ProjectLaunchDate),
 						},
 						PossessionDate: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(project.ProjectPossessionDate),
 						},
 						Type: struct {
-							Value string `json:"value"`
+							Value string `json:"value,omitempty"`
 						}{
 							Value: *project.ProjectConfigurations,
 						},
@@ -357,33 +357,33 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 						Plans:       paymentPlansNew,
 					},
 					SitePlan: struct {
-						Description string `json:"description"`
-						Image       string `json:"image"`
+						Description string `json:"description,omitempty"`
+						Image       string `json:"image,omitempty"`
 					}{
 						Description: safeStr(project.SitePlanPara),
 						Image:       safeStr(project.SitePlanImg),
 					},
 					About: struct {
-						Description       string `json:"description"`
-						LogoURL           string `json:"logo_url"`
-						EstablishmentYear string `json:"establishment_year"`
-						TotalProjects     string `json:"total_projects"`
+						Description       string `json:"description,omitempty"`
+						LogoURL           string `json:"logo_url,omitempty"`
+						EstablishmentYear string `json:"establishment_year,omitempty"`
+						TotalProjects     string `json:"total_projects,omitempty"`
 						ContactDetails    struct {
-							Name           string `json:"name"`
-							ProjectAddress string `json:"project_address"`
-							Phone          string `json:"phone"`
-							BookingLink    string `json:"booking_link"`
-						} `json:"contact_details"`
+							Name           string `json:"name,omitempty"`
+							ProjectAddress string `json:"project_address,omitempty"`
+							Phone          string `json:"phone,omitempty"`
+							BookingLink    string `json:"booking_link,omitempty"`
+						} `json:"contact_details,omitempty"`
 					}{
 						Description:       safeStr(project.ProjectAbout),
 						LogoURL:           safeStr(project.ProjectLogo),
 						EstablishmentYear: strconv.FormatInt(*developer.EstablishedYear, 10),
 						TotalProjects:     safeStr(developer.ProjectDoneNo),
 						ContactDetails: struct {
-							Name           string `json:"name"`
-							ProjectAddress string `json:"project_address"`
-							Phone          string `json:"phone"`
-							BookingLink    string `json:"booking_link"`
+							Name           string `json:"name,omitempty"`
+							ProjectAddress string `json:"project_address,omitempty"`
+							Phone          string `json:"phone,omitempty"`
+							BookingLink    string `json:"booking_link,omitempty"`
 						}{
 							Name:           safeStr(developer.DeveloperName),
 							ProjectAddress: safeStr(developer.DeveloperAddress),

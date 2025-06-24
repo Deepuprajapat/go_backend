@@ -15,8 +15,8 @@ type ApplicationInterface interface {
 	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, *imhttp.CustomError)
 	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, *imhttp.CustomError)
 	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
-	GetProjectByID(id string) (*response.GetProjectResponse, *imhttp.CustomError)
-	UpdateProject(input request.UpdateProjectRequest) (*response.UpdateProjectResponse, *imhttp.CustomError)
+	GetProjectByID(id string) (*response.Project, *imhttp.CustomError)
+	UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {

@@ -42,183 +42,183 @@ func (Project) Edges() []ent.Edge {
 
 // web cards
 type ProjectWebCards struct {
-	Images            []string          `json:"images"`
-	ReraInfo          ReraInfo          `json:"rera_info"`
-	Details           ProjectDetails    `json:"project_details"`
-	WhyToChoose       WhyToChoose       `json:"why_to_choose"`
-	KnowAbout         KnowAbout         `json:"know_about"`
-	FloorPlan         FloorPlan         `json:"floor_plan"`
-	PriceList         PriceList         `json:"price_list"`
-	Amenities         Amenities         `json:"amenities"`
-	VideoPresentation VideoPresentation `json:"video_presentation"`
-	PaymentPlans      PaymentPlans      `json:"payment_plans"`
+	Images            []string          `json:"images,omitempty"`
+	ReraInfo          ReraInfo          `json:"rera_info,omitempty"`
+	Details           ProjectDetails    `json:"project_details,omitempty"`
+	WhyToChoose       WhyToChoose       `json:"why_to_choose,omitempty"`
+	KnowAbout         KnowAbout         `json:"know_about,omitempty"`
+	FloorPlan         FloorPlan         `json:"floor_plan,omitempty"`
+	PriceList         PriceList         `json:"price_list,omitempty"`
+	Amenities         Amenities         `json:"amenities,omitempty"`
+	VideoPresentation VideoPresentation `json:"video_presentation,omitempty"`
+	PaymentPlans      PaymentPlans      `json:"payment_plans,omitempty"`
 	SitePlan          struct {
-		Description string `json:"description"`
-		Image       string `json:"image"`
-	} `json:"site_plan"`
+		Description string `json:"description,omitempty"`
+		Image       string `json:"image,omitempty"`
+	} `json:"site_plan,omitempty"`
 	About struct {
-		Description       string `json:"description"`
-		LogoURL           string `json:"logo_url"`
-		EstablishmentYear string `json:"establishment_year"`
-		TotalProjects     string `json:"total_projects"`
+		Description       string `json:"description,omitempty"`
+		LogoURL           string `json:"logo_url,omitempty"`
+		EstablishmentYear string `json:"establishment_year,omitempty"`
+		TotalProjects     string `json:"total_projects,omitempty"`
 		ContactDetails    struct {
-			Name           string `json:"name"`
-			ProjectAddress string `json:"project_address"`
-			Phone          string `json:"phone"`
-			BookingLink    string `json:"booking_link"`
-		} `json:"contact_details"`
-	} `json:"about"`
-	Faqs []FAQ `json:"faqs"`
+			Name           string `json:"name,omitempty"`
+			ProjectAddress string `json:"project_address,omitempty"`
+			Phone          string `json:"phone,omitempty"`
+			BookingLink    string `json:"booking_link,omitempty"`
+		} `json:"contact_details,omitempty"`
+	} `json:"about,omitempty"`
+	Faqs []FAQ `json:"faqs,omitempty"`
 }
 
 type FAQ struct {
-	Question string `json:"question"`
-	Answer   string `json:"answer"`
+	Question string `json:"question,omitempty"`
+	Answer   string `json:"answer,omitempty"`
 }
 
 // project info
 type ProjectInfo struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Area        string `json:"area"`
-	LogoURL     string `json:"logo_url"`
-	MinPrice    string `json:"min_price"`
-	MaxPrice    string `json:"max_price"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	Area        string `json:"area,omitempty"`
+	LogoURL     string `json:"logo_url,omitempty"`
+	MinPrice    string `json:"min_price,omitempty"`
+	MaxPrice    string `json:"max_price,omitempty"`
 }
 
 // project details
 type ProjectDetails struct {
 	Area struct {
-		Value string `json:"value"`
-	} `json:"area"`
+		Value string `json:"value,omitempty"`
+	} `json:"area,omitempty"`
 	Sizes struct {
-		Value string `json:"value"`
-	} `json:"sizes"`
+		Value string `json:"value,omitempty"`
+	} `json:"sizes,omitempty"`
 	Units struct {
-		Value string `json:"value"`
-	} `json:"units"`
+		Value string `json:"value,omitempty"`
+	} `json:"units,omitempty"`
 	Configuration struct {
-		Value string `json:"value"`
-	} `json:"configuration"`
+		Value string `json:"value,omitempty"`
+	} `json:"configuration,omitempty"`
 	TotalFloor struct {
-		Value string `json:"value"`
-	} `json:"total_floor"`
+		Value string `json:"value,omitempty"`
+	} `json:"total_floor,omitempty"`
 	TotalTowers struct {
-		Value string `json:"value"`
-	} `json:"total_towers"`
+		Value string `json:"value,omitempty"`
+	} `json:"total_towers,omitempty"`
 	LaunchDate struct {
-		Value string `json:"value"`
-	} `json:"launch_date"`
+		Value string `json:"value,omitempty"`
+	} `json:"launch_date,omitempty"`
 	PossessionDate struct {
-		Value string `json:"value"`
-	} `json:"possession_date"`
+		Value string `json:"value,omitempty"`
+	} `json:"possession_date,omitempty"`
 	Type struct {
-		Value string `json:"value"`
-	} `json:"type"`
+		Value string `json:"value,omitempty"`
+	} `json:"type,omitempty"`
 }
 
 // Rera info
 type ReraInfo struct {
-	WebsiteLink string         `json:"website_link"`
-	ReraList    []ReraListItem `json:"rera_list"`
+	WebsiteLink string         `json:"website_link,omitempty"`
+	ReraList    []ReraListItem `json:"rera_list,omitempty"`
 }
 
 type ReraListItem struct {
-	Phase      string `json:"phase"`
-	ReraQR     string `json:"rera_qr"`
-	ReraNumber string `json:"rera_number"`
-	Status     string `json:"status"`
+	Phase      string `json:"phase,omitempty"`
+	ReraQR     string `json:"rera_qr,omitempty"`
+	ReraNumber string `json:"rera_number,omitempty"`
+	Status     string `json:"status,omitempty"`
 }
 
 // why to choose
 type WhyToChoose struct {
-	ImageUrls []string `json:"image_urls"`
-	USP_List  []string `json:"usp_list"`
+	ImageUrls []string `json:"image_urls,omitempty"`
+	USP_List  []string `json:"usp_list,omitempty"`
 }
 
 // know about
 type KnowAbout struct {
-	Description  string `json:"description"`
-	DownloadLink string `json:"download_link"`
+	Description  string `json:"description,omitempty"`
+	DownloadLink string `json:"download_link,omitempty"`
 }
 
 // floor plan
 type FloorPlan struct {
-	Description string          `json:"description"`
-	Products    []FloorPlanItem `json:"products"`
+	Description string          `json:"description,omitempty"`
+	Products    []FloorPlanItem `json:"products,omitempty"`
 }
 
 type FloorPlanItem struct {
-	Title        string `json:"title"`
-	FlatType     string `json:"flat_type"`
-	Price        string `json:"price"`
-	IsSoldOut    bool   `json:"is_sold_out"`
-	BuildingArea string `json:"building_area"`
-	Image        string `json:"image"`
+	Title        string `json:"title,omitempty"`
+	FlatType     string `json:"flat_type,omitempty"`
+	Price        string `json:"price,omitempty"`
+	IsSoldOut    bool   `json:"is_sold_out,omitempty"`
+	BuildingArea string `json:"building_area,omitempty"`
+	Image        string `json:"image,omitempty"`
 }
 
 type PriceList struct {
-	Description          string                 `json:"description"`
-	BHKOptionsWithPrices []ProductConfiguration `json:"product_configurations"`
+	Description          string                 `json:"description,omitempty"`
+	BHKOptionsWithPrices []ProductConfiguration `json:"product_configurations,omitempty"`
 }
 
 type ProductConfiguration struct {
-	ConfigurationName string `json:"configuration_name"`
-	Size              string `json:"size"`
-	Price             string `json:"price"`
+	ConfigurationName string `json:"configuration_name,omitempty"`
+	Size              string `json:"size,omitempty"`
+	Price             string `json:"price,omitempty"`
 }
 
 // amenities
 type Amenities struct {
-	Description             string                       `json:"description"`
-	CategoriesWithAmenities map[string][]AmenityCategory `json:"categories_with_amenities"`
+	Description             string                       `json:"description,omitempty"`
+	CategoriesWithAmenities map[string][]AmenityCategory `json:"categories_with_amenities,omitempty"`
 }
 
 type AmenityCategory struct {
-	Icon  string `json:"icon"`
-	Value string `json:"value"`
+	Icon  string `json:"icon,omitempty"`
+	Value string `json:"value,omitempty"`
 }
 
 // video presentation
 type VideoPresentation struct {
-	Description string `json:"description"`
-	URL         []byte `json:"url"`
+	Description string `json:"description,omitempty"`
+	URL         []byte `json:"url,omitempty"`
 }
 
 // payment plans
 type PaymentPlans struct {
-	Description string `json:"description"`
-	Plans       []Plan `json:"plans"`
+	Description string `json:"description,omitempty"`
+	Plans       []Plan `json:"plans,omitempty"`
 }
 
 type Plan struct {
-	Name    string `json:"name"`
-	Details string `json:"details"`
+	Name    string `json:"name,omitempty"`
+	Details string `json:"details,omitempty"`
 }
 
 // timeline information
 type TimelineInfo struct {
-	ProjectLaunchDate     string `json:"project_launch_date"`
-	ProjectPossessionDate string `json:"project_possession_date"`
+	ProjectLaunchDate     string `json:"project_launch_date,omitempty"`
+	ProjectPossessionDate string `json:"project_possession_date,omitempty"`
 }
 
 // SEO and meta information
 type SEOMeta struct {
-	Title         string `json:"title"`
-	Description   string `json:"description"`
-	Keywords      string `json:"keywords"`
-	Canonical     string `json:"canonical"`
-	ProjectSchema string `json:"project_schema"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
+	Title         string `json:"title,omitempty"`
+	Description   string `json:"description,omitempty"`
+	Keywords      string `json:"keywords,omitempty"`
+	Canonical     string `json:"canonical,omitempty"`
+	ProjectSchema string `json:"project_schema,omitempty"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
 }
 
 type LocationInfo struct {
-	ShortAddress  string `json:"short_address"`
-	Longitude     string `json:"longitude"`
-	Latitude      string `json:"latitude"`
-	GoogleMapLink string `json:"google_map_link"`
+	ShortAddress  string `json:"short_address,omitempty"`
+	Longitude     string `json:"longitude,omitempty"`
+	Latitude      string `json:"latitude,omitempty"`
+	GoogleMapLink string `json:"google_map_link,omitempty"`
 }
 
 type Configurations struct {
-	Name string `json:"name"`
-	Type string `json:"type"` // apartment, villa, penthouse, studio
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"` // apartment, villa, penthouse, studio
 }

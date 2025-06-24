@@ -6,7 +6,7 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 )
 
-type GetProjectResponse struct {
+type Project struct {
 	ProjectID    string                 `json:"project_id"`
 	ProjectName  string                 `json:"project_name"`
 	Description  string                 `json:"description"`
@@ -31,14 +31,30 @@ type UpdateProjectResponse struct {
 	ProjectID string `json:"project_id"`
 }
 
-func GetProjectFromEnt(project *ent.Project) *GetProjectResponse {
+func GetProjectFromEnt(project *ent.Project) *Project {
 
-	return &GetProjectResponse{
+	return &Project{
 		ProjectID:   project.ID,
 		ProjectName: project.Name,
 		Description: project.Description,
 		Status:      project.Status,
 		MinPrice:    project.MinPrice,
 		MaxPrice:    project.MaxPrice,
+		PriceUnit:   project.PriceUnit,
+		TimelineInfo: schema.TimelineInfo{
+			ProjectLaunchDate:     project.TimelineInfo.ProjectLaunchDate,
+			ProjectPossessionDate: project.TimelineInfo.ProjectPossessionDate,
+		},
+		MetaInfo: project.MetaInfo,
+		WebCards: project.WebCards,
+		LocationInfo: schema.LocationInfo{
+			ShortAddress:  project.LocationInfo.ShortAddress,
+			Longitude:     project.LocationInfo.Longitude,
+			Latitude:      project.LocationInfo.Latitude,
+			GoogleMapLink: project.LocationInfo.GoogleMapLink,
+		},
+		IsFeatured: project.IsFeatured,
+		IsPremium:  project.IsPremium,
+		IsPriority: project.IsPriority,
 	}
 }

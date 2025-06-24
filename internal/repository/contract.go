@@ -12,7 +12,8 @@ type repository struct {
 type AppRepository interface {
 	GetUserDetailsByUsername(username string) (*ent.User, error)
 	GetProjectByID(id string) (*ent.Project, error)
-	AddProject(input domain.AddProjectInput) (string, error)
+	AddProject(input domain.Project) (string, error)
+	UpdateProject(input domain.Project) (*ent.Project, error)
 	ExistDeveloperByID(id string) (bool, error)
 	IsProjectDeleted(id string) (bool, error)
 }

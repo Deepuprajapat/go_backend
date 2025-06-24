@@ -14,7 +14,7 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (c *application) GetProjectByID(id string) (*response.GetProjectResponse, *imhttp.CustomError) {
+func (c *application) GetProjectByID(id string) (*response.Project, *imhttp.CustomError) {
 
 	// check if the project is deleted
 	isDeleted, err := c.repo.IsProjectDeleted(id)
@@ -37,7 +37,7 @@ func (c *application) GetProjectByID(id string) (*response.GetProjectResponse, *
 
 func (c *application) AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError) {
 
-	var project domain.AddProjectInput
+	var project domain.Project
 
 	// get developer from developer id
 	exist, err := c.repo.ExistDeveloperByID(input.DeveloperID)
@@ -65,6 +65,39 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 	}, nil
 }
 
-func (c *application) UpdateProject(input request.UpdateProjectRequest) (*response.UpdateProjectResponse, *imhttp.CustomError) {
-	return nil, nil
+func (c *application) UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError) {
+
+	var project domain.Project
+	// check if the project is deleted
+	isDeleted, err := c.repo.IsProjectDeleted(input.ProjectID)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check if project is deleted")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check if project is deleted", err.Error())
+	}
+	if isDeleted {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found or deleted", "Project not found or deleted")
+	}
+
+	project.ProjectID = input.ProjectID
+	project.ProjectName = input.Name
+	project.Status = input.Status
+	project.PriceUnit = input.PriceUnit
+	project.TimelineInfo = input.TimelineInfo
+	project.MetaInfo = input.MetaInfo
+	project.WebCards = input.WebCards
+	project.LocationInfo = input.LocationInfo
+	project.IsFeatured = input.IsFeatured
+	project.IsPremium = input.IsPremium
+	project.IsPriority = input.IsPriority
+	project.IsDeleted = input.IsDeleted
+	project.Description = input.Description
+
+	// check if the project is owned by the developer
+	updatedProject, err := c.repo.UpdateProject(project)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update project")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update project", err.Error())
+	}
+
+	return response.GetProjectFromEnt(updatedProject), nil
 }
