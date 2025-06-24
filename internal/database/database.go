@@ -2,12 +2,11 @@ package database
 
 import (
 	"context"
-	"fmt"
-	"log"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/lib/pq"
 )
 
@@ -15,17 +14,18 @@ import (
 func NewClient(dsn string) *ent.Client {
 	drv, err := entsql.Open(dialect.Postgres, dsn)
 	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
+		logger.Get().Fatal().Err(err).Msg("failed opening connection to postgres")
+
 	}
 
 	client := ent.NewClient(ent.Driver(drv))
 
 	// Run the auto migration tool
 	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
+		logger.Get().Fatal().Err(err).Msg("failed creating schema resources")
 	}
 
-	fmt.Println("Connected to PostgreSQL")
+	logger.Get().Info().Msg("Connected to PostgreSQL")
 
 	return client
 }

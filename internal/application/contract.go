@@ -1,10 +1,10 @@
 package application
 
 import (
-	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
+	imhttp "github.com/VI-IM/im_backend_go/shared"
 )
 
 type application struct {
@@ -12,10 +12,11 @@ type application struct {
 }
 
 type ApplicationInterface interface {
-	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, error)
-	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, error)
-	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, error)
-	GetProjectByID(id string) (*ent.Project, error)
+	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, *imhttp.CustomError)
+	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, *imhttp.CustomError)
+	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
+	GetProjectByID(id string) (*response.GetProjectResponse, *imhttp.CustomError)
+	UpdateProject(input request.UpdateProjectRequest) (*response.UpdateProjectResponse, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {

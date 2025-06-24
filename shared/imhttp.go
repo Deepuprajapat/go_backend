@@ -1,4 +1,4 @@
-package imhttp
+package shared
 
 import (
 	"encoding/json"

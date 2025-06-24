@@ -21,7 +21,7 @@ type (
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT" default:"8080"`
+		Port int    `envconfig:"PORT" default:"9999"`
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {

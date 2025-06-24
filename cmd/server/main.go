@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/application"
@@ -15,9 +14,8 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/VI-IM/im_backend_go/migration_jobs"
+	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -27,69 +25,67 @@ var (
 )
 
 func main() {
-	// Initialize zerolog
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Logger = log.Output(zerolog.ConsoleWriter{
-		Out:        os.Stdout,
-		TimeFormat: time.RFC3339,
-	})
+	// Initialize logger
+	logger.Init()
 	ctx := context.Background()
+
+	logger.Get().Info().Msg("Starting application...")
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
 		var err error
 		legacyDB, err = migration_jobs.NewLegacyDBConnection()
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to connect to legacy database")
+			logger.Get().Fatal().Err(err).Msg("Failed to connect to legacy database")
 		}
 		defer legacyDB.Close()
 
 		newDB, err = migration_jobs.NewNewDBConnection()
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to connect to new database")
+			logger.Get().Fatal().Err(err).Msg("Failed to connect to new database")
 		}
 		defer newDB.Close()
 
 		// Start a transaction for the entire migration process
 		txn, err = newDB.BeginTx(ctx, nil)
 		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to begin transaction")
+			logger.Get().Fatal().Err(err).Msg("Failed to begin transaction")
 		}
 		defer txn.Rollback()
 
 		// Execute migrations in sequence
 
-		log.Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
+		logger.Get().Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate localities")
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate localities")
 		}
 
-		log.Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
+		logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate developers")
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
 		}
 
-		log.Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
+		logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate projects")
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate projects")
 		}
 
-		log.Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
+		logger.Get().Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
-			log.Fatal().Err(err).Msg("Failed to migrate properties")
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate properties")
 		}
 
-		log.Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")
+		logger.Get().Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")
 		if err := txn.Commit(); err != nil {
-			log.Fatal().Err(err).Msg("Failed to commit transaction")
+			logger.Get().Fatal().Err(err).Msg("Failed to commit transaction")
 		}
 
-		log.Info().Msg("Migration completed successfully")
+		logger.Get().Info().Msg("Migration completed successfully")
 		return
 	}
 
 	// Load configuration
 	if err := config.LoadConfig(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to load configuration")
+		logger.Get().Fatal().Err(err).Msg("Failed to load configuration")
 	}
 
 	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
@@ -103,8 +99,8 @@ func main() {
 	router.Init(app)
 
 	// Start server
-	log.Info().Msgf("Server starting on port %d", config.GetConfig().Port)
+	logger.Get().Info().Msgf("Server starting on port %d", config.GetConfig().Port)
 	if err := http.ListenAndServe(":"+strconv.Itoa(config.GetConfig().Port), router.Router); err != nil {
-		log.Fatal().Err(err).Msg("Failed to start server")
+		logger.Get().Fatal().Err(err).Msg("Failed to start server")
 	}
 }
