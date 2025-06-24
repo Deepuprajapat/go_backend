@@ -34,6 +34,9 @@ func Init(app application.ApplicationInterface) {
 }
 
 /////   curl calls	/////
+//// ----- Get Project -----
+// curl -X GET http://localhost:9999/v1/api/projects/your-project-id
+
 //// ----- Add Project -----
 // curl -X POST http://localhost:9999/v1/api/projects \
 // -H "Content-Type: application/json" \
@@ -44,4 +47,16 @@ func Init(app application.ApplicationInterface) {
 //     "locality": "Downtown",
 //     "project_city": "Mumbai",
 //     "developer_id": "dev123"
+// }'
+
+//// ----- Update Project -----
+// curl -X PATCH http://localhost:9999/v1/api/projects/your-project-id \
+// -H "Content-Type: application/json" \
+// -d '{
+//     "project_name": "Updated Project Name",
+//     "description": "Updated project description",
+//     "status": "ACTIVE",
+//     "min_price": 5000000,
+//     "max_price": 10000000,
+//     "price_unit": "INR"
 // }'

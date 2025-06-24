@@ -325,11 +325,11 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 						Type: struct {
 							Value string `json:"value,omitempty"`
 						}{
-							Value: *project.ProjectConfigurations,
+							Value: safeStr(project.ProjectConfigurations),
 						},
 					},
 					WhyToChoose: schema.WhyToChoose{
-						ImageUrls: []string{safeStr(project.SitePlanImg)},
+						ImageUrls: imageURLs,
 						USP_List:  uspListNew,
 					},
 					KnowAbout: schema.KnowAbout{
@@ -375,8 +375,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 							BookingLink    string `json:"booking_link,omitempty"`
 						} `json:"contact_details,omitempty"`
 					}{
-						Description:       safeStr(project.ProjectAbout),
-						LogoURL:           safeStr(project.ProjectLogo),
+						Description:       safeStr(developer.About),
+						LogoURL:           safeStr(developer.DeveloperLogo),
 						EstablishmentYear: strconv.FormatInt(*developer.EstablishedYear, 10),
 						TotalProjects:     safeStr(developer.ProjectDoneNo),
 						ContactDetails: struct {
