@@ -155,9 +155,23 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				continue
 			}
 
+			var minPrice float64 = -1
+			var maxPrice float64 = -1
+
 			floorPlanItems := []schema.FloorPlanItem{}
 			configurationProducts := []schema.ProductConfiguration{}
 			for _, floorPlan := range *floorPlans {
+				
+				price := floorPlan.Price
+				if price > 0 {
+					if minPrice == -1 || price < minPrice {
+						minPrice = price
+					}
+					if maxPrice == -1 || price > maxPrice {
+						maxPrice = price
+					}
+				}
+
 				floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
 					Title:        safeStr(floorPlan.Title),
 					FlatType:     safeStr(floorPlan.Title),
@@ -171,6 +185,16 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Size:              strconv.FormatInt(*floorPlan.Size, 10),
 					Price:             strconv.FormatFloat(floorPlan.Price, 'f', -1, 64),
 				})
+			}
+
+			
+			finalMinPrice := 0
+			finalMaxPrice := 0
+			if minPrice != -1 {
+				finalMinPrice = int(minPrice)
+			}
+			if maxPrice != -1 {
+				finalMaxPrice = int(maxPrice)
 			}
 
 			amenities, err := FetchProjectAmenitiesByProjectID(ctx, project.ID)
@@ -264,6 +288,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				SetName(safeStr(project.ProjectName)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
+				SetMinPrice(finalMinPrice).
+				SetMaxPrice(finalMaxPrice).
 				SetTimelineInfo(schema.TimelineInfo{
 					ProjectLaunchDate:     safeStr(project.ProjectLaunchDate),
 					ProjectPossessionDate: safeStr(project.ProjectPossessionDate),

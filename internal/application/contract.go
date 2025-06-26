@@ -21,7 +21,7 @@ type ApplicationInterface interface {
 	GetPropertyByID(id string) (*response.Property, *imhttp.CustomError)
 	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
 	ListProjects() ([]*response.ProjectListResponse, *imhttp.CustomError)
-	ListLocations() ([]*response.Location, *imhttp.CustomError)
+	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {

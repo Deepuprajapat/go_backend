@@ -16,7 +16,7 @@ func NewLocationHandler(app application.ApplicationInterface) *LocationHandler {
 }
 
 func (h *LocationHandler) ListLocations(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	response, err := h.app.ListLocations()
+	response, err := h.app.GetAllLocations()
 	if err != nil {
 		return nil, err
 	}
