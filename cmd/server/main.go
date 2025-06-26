@@ -32,6 +32,7 @@ func main() {
 	logger.Get().Info().Msg("Starting application...")
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
+
 		var err error
 		legacyDB, err = migration_jobs.NewLegacyDBConnection()
 		if err != nil {

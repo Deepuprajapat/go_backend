@@ -439,7 +439,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 							Name:           safeStr(developer.DeveloperName),
 							ProjectAddress: safeStr(developer.DeveloperAddress),
 							Phone:          safeStr(developer.Phone),
-							BookingLink:    safeStr(developer.DeveloperURL),
+							BookingLink:    safeStr(project.ProjectBrochure),
 						},
 					},
 					Faqs: faqsNew,
