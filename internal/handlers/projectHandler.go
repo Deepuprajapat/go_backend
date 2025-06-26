@@ -99,3 +99,15 @@ func (h *ProjectHandler) DeleteProject(r *http.Request) (*imhttp.Response, *imht
 		Message:    "Project deleted successfully",
 	}, nil
 }
+
+func (h *ProjectHandler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	response, err := h.app.ListProjects()
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
+}

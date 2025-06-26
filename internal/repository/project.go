@@ -336,3 +336,14 @@ func (r *repository) DeleteProject(id string, hardDelete bool) error {
 	}
 	return nil
 }
+
+func (r *repository) GetAllProjects() ([]*ent.Project, error) {
+	projects, err := r.db.Project.Query().
+		Where(project.IsDeletedEQ(false)).
+		All(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to list projects")
+		return nil, err
+	}
+	return projects, nil
+}
