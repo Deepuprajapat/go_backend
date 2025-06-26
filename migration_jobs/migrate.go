@@ -157,6 +157,9 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 
 			var minPrice float64 = -1
 			var maxPrice float64 = -1
+			var minSize int64 = -1
+            var maxSize int64 = -1
+
 
 			floorPlanItems := []schema.FloorPlanItem{}
 			configurationProducts := []schema.ProductConfiguration{}
@@ -171,6 +174,16 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 						maxPrice = price
 					}
 				}
+
+				if floorPlan.Size != nil && *floorPlan.Size > 0 {
+                    size := *floorPlan.Size
+                    if minSize == -1 || size < minSize {
+                        minSize = size
+                    }
+                    if maxSize == -1 || size > maxSize {
+                        maxSize = size
+                    }
+                }
 
 				floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
 					Title:        safeStr(floorPlan.Title),
@@ -187,7 +200,19 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				})
 			}
 
-			
+
+			var sizeRange string
+            if minSize != -1 && maxSize != -1 {
+                if minSize == maxSize {
+                    sizeRange = fmt.Sprintf("%d sq.ft.", minSize)
+                } else {
+                    sizeRange = fmt.Sprintf("%d - %d sq.ft.", minSize, maxSize)
+                }
+            } else {
+                sizeRange = "N/A"
+            }
+
+			// Convert float prices to integers
 			finalMinPrice := 0
 			finalMaxPrice := 0
 			if minPrice != -1 {
@@ -316,7 +341,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 						Sizes: struct {
 							Value string `json:"value,omitempty"`
 						}{
-							Value: safeStr(project.ProjectArea),
+							Value: sizeRange,
 						},
 						Units: struct {
 							Value string `json:"value,omitempty"`

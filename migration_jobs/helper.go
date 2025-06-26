@@ -3,10 +3,7 @@ package migration_jobs
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
-	"strconv"
 	"strings"
-
 	"github.com/rs/zerolog/log"
 )
 
@@ -76,18 +73,3 @@ func parsePropertyImagesFromPropertyImages(propertyImages *string) ([]string, er
 	return propertyImagesList, nil
 }
 
-func parseFloor(floorStr *string) *int64 {
-	if floorStr == nil {
-		return nil
-	}
-	re := regexp.MustCompile(`\d+`)
-	matches := re.FindAllString(*floorStr, -1)
-	if len(matches) == 0 {
-		return nil
-	}
-	n, err := strconv.ParseInt(matches[len(matches)-1], 10, 64)
-	if err != nil {
-		return nil
-	}
-	return &n
-}
