@@ -14,8 +14,11 @@ type AppRepository interface {
 	GetProjectByID(id string) (*ent.Project, error)
 	AddProject(input domain.Project) (string, error)
 	UpdateProject(input domain.Project) (*ent.Project, error)
+	DeleteProject(id string, hardDelete bool) error
 	ExistDeveloperByID(id string) (bool, error)
 	IsProjectDeleted(id string) (bool, error)
+	GetPropertyByID(id string) (*ent.Property, error)
+	UpdateProperty(input domain.Property) (*ent.Property, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

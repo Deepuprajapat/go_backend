@@ -29,3 +29,18 @@ type UpdateProjectRequest struct {
 	IsPriority   bool                   `json:"is_priority,omitempty"`
 	IsDeleted    bool                   `json:"is_deleted,omitempty"`
 }
+
+type UpdatePropertyRequest struct {
+	PropertyID       string                     `json:"property_id"`
+	Name             string                     `json:"name"`
+	PropertyImages   []string                   `json:"property_images"`
+	WebCards         schema.WebCards            `json:"web_cards"`
+	PricingInfo      schema.PropertyPricingInfo `json:"pricing_info"`
+	PropertyReraInfo schema.PropertyReraInfo    `json:"property_rera_info"`
+	MetaInfo         schema.PropertyMetaInfo    `json:"meta_info"`
+	IsFeatured       bool                       `json:"is_featured"`
+	IsDeleted        bool                       `json:"is_deleted"`
+	DeveloperID      string                     `json:"developer_id"`
+	LocationID       string                     `json:"location_id"`
+	ProjectID        string                     `json:"project_id"`
+}

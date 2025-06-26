@@ -19,6 +19,7 @@ func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	authHandler := handlers.NewAuthHandler(app)
 	projectHandler := handlers.NewProjectHandler(app)
+	propertyHandler := handlers.NewPropertyHandler(app)
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -31,6 +32,11 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(projectHandler.GetProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(projectHandler.AddProject)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(projectHandler.UpdateProject)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(projectHandler.DeleteProject)).Methods(http.MethodDelete)
+
+	// property routes
+	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.GetProperty)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.UpdateProperty)).Methods(http.MethodPatch)
 }
 
 /////   curl calls	/////

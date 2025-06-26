@@ -17,6 +17,9 @@ type ApplicationInterface interface {
 	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
 	GetProjectByID(id string) (*response.Project, *imhttp.CustomError)
 	UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError)
+	DeleteProject(id string) *imhttp.CustomError
+	GetPropertyByID(id string) (*response.Property, *imhttp.CustomError)
+	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {

@@ -9,6 +9,7 @@ import (
 type Response struct {
 	Data       interface{} `json:"data"`
 	StatusCode int         `json:"status_code"`
+	Message    string      `json:"message"`
 }
 
 type AppHandler func(*http.Request) (*Response, *CustomError)

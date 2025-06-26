@@ -84,3 +84,18 @@ func (h *ProjectHandler) UpdateProject(r *http.Request) (*imhttp.Response, *imht
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *ProjectHandler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	projectID := vars["project_id"]
+
+	if err := h.app.DeleteProject(projectID); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       nil,
+		StatusCode: http.StatusOK,
+		Message:    "Project deleted successfully",
+	}, nil
+}

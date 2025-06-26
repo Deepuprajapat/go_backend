@@ -16,7 +16,6 @@ import (
 
 func (c *application) GetProjectByID(id string) (*response.Project, *imhttp.CustomError) {
 
-	// check if the project is deleted
 	isDeleted, err := c.repo.IsProjectDeleted(id)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to check if project is deleted")
@@ -31,7 +30,6 @@ func (c *application) GetProjectByID(id string) (*response.Project, *imhttp.Cust
 		logger.Get().Error().Err(err).Msg("Failed to get project")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project", err.Error())
 	}
-
 	return response.GetProjectFromEnt(project), nil
 }
 
@@ -39,7 +37,6 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 
 	var project domain.Project
 
-	// get developer from developer id
 	exist, err := c.repo.ExistDeveloperByID(input.DeveloperID)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to add project")
@@ -68,7 +65,6 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 func (c *application) UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError) {
 
 	var project domain.Project
-	// check if the project is deleted
 	isDeleted, err := c.repo.IsProjectDeleted(input.ProjectID)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to check if project is deleted")
@@ -92,7 +88,6 @@ func (c *application) UpdateProject(input request.UpdateProjectRequest) (*respon
 	project.IsDeleted = input.IsDeleted
 	project.Description = input.Description
 
-	// check if the project is owned by the developer
 	updatedProject, err := c.repo.UpdateProject(project)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update project")
@@ -100,4 +95,23 @@ func (c *application) UpdateProject(input request.UpdateProjectRequest) (*respon
 	}
 
 	return response.GetProjectFromEnt(updatedProject), nil
+}
+
+func (c *application) DeleteProject(id string) *imhttp.CustomError {
+
+	isDeleted, err := c.repo.IsProjectDeleted(id)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check if project is deleted")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check if project is deleted", err.Error())
+	}
+	if isDeleted {
+		return imhttp.NewCustomErr(http.StatusBadRequest, "Project is already deleted", "Project is already deleted")
+	}
+
+	if err := c.repo.DeleteProject(id, false); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete project")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete project", err.Error())
+	}
+
+	return nil
 }

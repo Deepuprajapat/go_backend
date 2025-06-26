@@ -308,3 +308,31 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 
 	return updatedProject, nil
 }
+
+func (r *repository) DeleteProject(id string, hardDelete bool) error {
+	if hardDelete {
+		// Perform hard delete
+		err := r.db.Project.DeleteOneID(id).Exec(context.Background())
+		if err != nil {
+			if ent.IsNotFound(err) {
+				return errors.New("project not found")
+			}
+			logger.Get().Error().Err(err).Msg("Failed to delete project")
+			return err
+		}
+		return nil
+	}
+
+	// Perform soft delete by updating IsDeleted flag
+	_, err := r.db.Project.UpdateOneID(id).
+		SetIsDeleted(true).
+		Save(context.Background())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return errors.New("project not found")
+		}
+		logger.Get().Error().Err(err).Msg("Failed to soft delete project")
+		return err
+	}
+	return nil
+}
