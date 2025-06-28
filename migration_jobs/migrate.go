@@ -637,98 +637,98 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 			webCard := schema.WebCards{
 				PropertyDetails: schema.PropertyDetails{
 					BuiltUpArea: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.BuiltupArea),
 					},
 					Sizes: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Size),
 					},
 					FloorNumber: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Floors),
 					},
 					Configuration: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(propertyConfiguration.ProjectConfigurationName),
 					},
 					PossessionStatus: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.PossessionStatus),
 					},
 					Balconies: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Balcony),
 					},
 					CoveredParking: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.CoveredParking),
 					},
 					Bedrooms: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Bedrooms),
 					},
 					PropertyType: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(propertyType.PropertyType),
 					},
 					AgeOfProperty: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.AgeOfProperty),
 					},
 					FurnishingType: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.FurnishingType),
 					},
 					ReraNumber: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Rera),
 					},
 					Facing: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Facing),
 					},
 					Bathrooms: struct {
-						Value string `json:"value"`
+						Value string `json:"value,omitempty"`
 					}{
 						Value: safeStr(property.Bathrooms),
 					},
 				},
 				WhyChooseUs: struct {
-					ImageUrls []string `json:"image_urls"`
-					USP_List  []string `json:"usp_list"`
+					ImageUrls []string `json:"image_urls,omitempty"`
+					USP_List  []string `json:"usp_list,omitempty"`
 				}{
 					ImageUrls: parsedImages,
 					USP_List:  uspList,
 				},
 				KnowAbout: struct {
-					Description string `json:"description"`
+					Description string `json:"description,omitempty"`
 				}{
 					Description: safeStr(property.About),
 				},
 				VideoPresentation: struct {
-					Title    string `json:"title"`
-					VideoUrl string `json:"video_url"`
+					Title    string `json:"title,omitempty"`
+					VideoUrl string `json:"video_url,omitempty"`
 				}{
 					Title:    safeStr(property.VideoPara),
 					VideoUrl: safeStr(property.PropertyVideo),
 				},
 				LocationMap: struct {
-					Description   string `json:"description"`
-					GoogleMapLink string `json:"google_map_link"`
+					Description   string `json:"description,omitempty"`
+					GoogleMapLink string `json:"google_map_link,omitempty"`
 				}{
 					Description:   safeStr(property.LocationPara),
 					GoogleMapLink: safeStr(property.LocaionMap),

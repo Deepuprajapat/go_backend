@@ -12,17 +12,25 @@ type application struct {
 }
 
 type ApplicationInterface interface {
+	// Auth
 	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, *imhttp.CustomError)
 	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, *imhttp.CustomError)
+
+	// Project
 	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
 	GetProjectByID(id string) (*response.Project, *imhttp.CustomError)
 	UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError)
 	DeleteProject(id string) *imhttp.CustomError
+
+	// Property
 	GetPropertyByID(id string) (*response.Property, *imhttp.CustomError)
 	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
+	GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError)
+	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
+
+	// Location
 	ListProjects() ([]*response.ProjectListResponse, *imhttp.CustomError)
 	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
-	GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {

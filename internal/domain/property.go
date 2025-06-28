@@ -5,6 +5,7 @@ import "github.com/VI-IM/im_backend_go/ent/schema"
 type Property struct {
 	PropertyID       string
 	Name             string
+	PropertyType     string
 	PropertyImages   []string
 	WebCards         schema.WebCards
 	PricingInfo      schema.PropertyPricingInfo

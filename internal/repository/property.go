@@ -8,6 +8,7 @@ import (
 	"github.com/VI-IM/im_backend_go/ent/property"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/shared/logger"
+	"github.com/google/uuid"
 )
 
 func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
@@ -182,13 +183,34 @@ func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, 
 	return properties, nil
 }
 
-func (r *repository) AddProperty(input domain.Property) (*ent.Property, error) {
-	property, err := r.db.Property.Create().
-		SetName(input.Name).
-		Save(context.Background())
+func (r *repository) AddProperty(input domain.Property) (string, error) {
+	project, err := r.db.Project.Get(context.Background(), input.ProjectID)
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to add property")
-		return nil, err
+		logger.Get().Error().Err(err).Msg("Failed to get project")
+		return "", err
 	}
-	return property, nil
+
+	propertyID := uuid.New().String()
+	property := r.db.Property.Create().
+		SetID(propertyID).
+		SetProjectID(input.ProjectID).
+		SetName(input.Name).
+		SetPropertyType(input.PropertyType).
+		SetWebCards(input.WebCards).
+		SetPricingInfo(input.PricingInfo).
+		SetPropertyReraInfo(input.PropertyReraInfo).
+		SetMetaInfo(input.MetaInfo)
+
+	if project.Edges.Developer.ID != "" {
+		property.SetDeveloperID(project.Edges.Developer.ID)
+	}
+	if project.Edges.Location.ID != "" {
+		property.SetLocationID(project.Edges.Location.ID)
+	}
+
+	if err = property.Exec(context.Background()); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to add property")
+		return "", err
+	}
+	return propertyID, nil
 }

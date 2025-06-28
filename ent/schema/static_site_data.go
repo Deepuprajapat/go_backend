@@ -26,6 +26,12 @@ func (StaticSiteData) Fields() []ent.Field {
 				Value string `json:"value"`
 			} `json:"categories"`
 		}{}),
+		field.JSON("property_types", PropertyTypes{}),
 		field.Time("created_at").Default(time.Now),
 	}
+}
+
+type PropertyTypes struct {
+	Commercial  []string `json:"commercial"`
+	Residential []string `json:"residential"`
 }

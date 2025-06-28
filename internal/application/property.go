@@ -79,3 +79,25 @@ func (c *application) GetPropertiesOfProject(projectID string) ([]*response.Prop
 
 	return propertyResponses, nil
 }
+
+func (c *application) AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError) {
+	var property domain.Property
+
+	property.ProjectID = input.ProjectID
+	property.Name = input.Name
+	property.PropertyType = input.PropertyType
+	property.WebCards.PropertyDetails.AgeOfProperty.Value = input.AgeOfProperty
+	property.WebCards.PropertyDetails.FloorNumber.Value = input.FloorNumber
+	property.WebCards.PropertyDetails.Facing.Value = input.Facing
+	property.WebCards.PropertyDetails.FurnishingType.Value = input.Furnishing
+	property.WebCards.PropertyDetails.Balconies.Value = input.BalconyCount
+	property.WebCards.PropertyDetails.Bedrooms.Value = input.BedroomsCount
+	property.WebCards.PropertyDetails.CoveredParking.Value = input.CoveredParking
+
+	propertyID, err := c.repo.AddProperty(property)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to add property")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add property", err.Error())
+	}
+	return &response.AddPropertyResponse{PropertyID: propertyID}, nil
+}

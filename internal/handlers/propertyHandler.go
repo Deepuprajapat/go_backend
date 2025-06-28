@@ -87,13 +87,18 @@ func (h *PropertyHandler) AddProperty(r *http.Request) (*imhttp.Response, *imhtt
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
-	response, err := h.app.AddProperty(input)
+	if input.ProjectID == "" || input.PropertyType == "" || input.AgeOfProperty == "" || input.FloorNumber == "" || input.Facing == "" || input.Furnishing == "" || input.BalconyCount == "" {
+		logger.Get().Error().Msg("Invalid request body")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
+	}
+
+	propertyID, err := h.app.AddProperty(input)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add property", err.Error())
 	}
 
 	return &imhttp.Response{
-		Data:       response,
+		Data:       propertyID,
 		StatusCode: http.StatusOK,
 	}, nil
 }

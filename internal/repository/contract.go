@@ -10,18 +10,28 @@ type repository struct {
 }
 
 type AppRepository interface {
+	// Auth
 	GetUserDetailsByUsername(username string) (*ent.User, error)
+
+	// Project
 	GetProjectByID(id string) (*ent.Project, error)
 	AddProject(input domain.Project) (string, error)
 	UpdateProject(input domain.Project) (*ent.Project, error)
 	DeleteProject(id string, hardDelete bool) error
-	ExistDeveloperByID(id string) (bool, error)
 	IsProjectDeleted(id string) (bool, error)
+	GetAllProjects() ([]*ent.Project, error)
+
+	// Developer
+	ExistDeveloperByID(id string) (bool, error)
+
+	// Location
+	ListLocations() ([]*ent.Location, error)
+
+	// Property
 	GetPropertyByID(id string) (*ent.Property, error)
 	UpdateProperty(input domain.Property) (*ent.Property, error)
-	GetAllProjects() ([]*ent.Project, error)
-	ListLocations() ([]*ent.Location, error)
 	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
+	AddProperty(input domain.Property) (string, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

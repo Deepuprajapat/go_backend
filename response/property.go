@@ -32,3 +32,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 		ProjectID:      property.ProjectID,
 	}
 }
+
+type AddPropertyResponse struct {
+	PropertyID string `json:"property_id"`
+}

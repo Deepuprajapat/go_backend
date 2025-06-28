@@ -46,9 +46,14 @@ type UpdatePropertyRequest struct {
 }
 
 type AddPropertyRequest struct {
-	ProjectID        string                  `json:"project_id"`
-	Name             string                  `json:"name"`
-	PropertyImages   []string                `json:"property_images"`
-	PropertyReraInfo schema.PropertyReraInfo `json:"property_rera_info"`
-	MetaInfo         schema.PropertyMetaInfo `json:"meta_info"`
+	ProjectID      string `json:"project_id"`
+	Name           string `json:"name"`
+	PropertyType   string `json:"property_type"`
+	AgeOfProperty  string `json:"age_of_property"`
+	FloorNumber    string `json:"floor_number"`
+	Facing         string `json:"facing"`
+	Furnishing     string `json:"furnishing"`
+	BalconyCount   string `json:"balcony_count"`
+	BedroomsCount  string `json:"bedrooms_count"`
+	CoveredParking string `json:"covered_parking"`
 }
