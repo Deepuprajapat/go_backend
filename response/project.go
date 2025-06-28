@@ -49,9 +49,6 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 		ProjectName: project.Name,
 		Description: project.Description,
 		Status:      project.Status,
-		MinPrice:    project.MinPrice,
-		MaxPrice:    project.MaxPrice,
-		PriceUnit:   project.PriceUnit,
 		TimelineInfo: schema.TimelineInfo{
 			ProjectLaunchDate:     project.TimelineInfo.ProjectLaunchDate,
 			ProjectPossessionDate: project.TimelineInfo.ProjectPossessionDate,
@@ -78,7 +75,6 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		IsPremium:     project.IsPremium,
 		Images:        project.WebCards.Images,
 		Configuration: project.WebCards.Details.Configuration.Value,
-		MinPrice:      project.MinPrice,
 		Sizes:         project.WebCards.Details.Sizes.Value,
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	entproject "github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 	"github.com/rs/zerolog/log"
@@ -158,13 +159,12 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 			var minPrice float64 = -1
 			var maxPrice float64 = -1
 			var minSize int64 = -1
-            var maxSize int64 = -1
-
+			var maxSize int64 = -1
 
 			floorPlanItems := []schema.FloorPlanItem{}
 			configurationProducts := []schema.ProductConfiguration{}
 			for _, floorPlan := range *floorPlans {
-				
+
 				price := floorPlan.Price
 				if price > 0 {
 					if minPrice == -1 || price < minPrice {
@@ -176,14 +176,14 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				}
 
 				if floorPlan.Size != nil && *floorPlan.Size > 0 {
-                    size := *floorPlan.Size
-                    if minSize == -1 || size < minSize {
-                        minSize = size
-                    }
-                    if maxSize == -1 || size > maxSize {
-                        maxSize = size
-                    }
-                }
+					size := *floorPlan.Size
+					if minSize == -1 || size < minSize {
+						minSize = size
+					}
+					if maxSize == -1 || size > maxSize {
+						maxSize = size
+					}
+				}
 
 				floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
 					Title:        safeStr(floorPlan.Title),
@@ -200,27 +200,18 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				})
 			}
 
-
 			var sizeRange string
-            if minSize != -1 && maxSize != -1 {
-                if minSize == maxSize {
-                    sizeRange = fmt.Sprintf("%d sq.ft.", minSize)
-                } else {
-                    sizeRange = fmt.Sprintf("%d - %d sq.ft.", minSize, maxSize)
-                }
-            } else {
-                sizeRange = "N/A"
-            }
+			if minSize != -1 && maxSize != -1 {
+				if minSize == maxSize {
+					sizeRange = fmt.Sprintf("%d sq.ft.", minSize)
+				} else {
+					sizeRange = fmt.Sprintf("%d - %d sq.ft.", minSize, maxSize)
+				}
+			} else {
+				sizeRange = "N/A"
+			}
 
-			// Convert float prices to integers
-			finalMinPrice := 0
-			finalMaxPrice := 0
-			if minPrice != -1 {
-				finalMinPrice = int(minPrice)
-			}
-			if maxPrice != -1 {
-				finalMaxPrice = int(maxPrice)
-			}
+			// Convert float prices to integers (calculated but not used in current migration)
 
 			amenities, err := FetchProjectAmenitiesByProjectID(ctx, project.ID)
 			if err != nil {
@@ -274,7 +265,15 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 			}
 
 			projectImagesNew := []LProjectImage{}
+			var isLogoSeeded bool
 			for _, image := range *projectImages {
+				if !isLogoSeeded {
+					projectImagesNew = append(projectImagesNew, LProjectImage{
+						ImageURL:     *project.ProjectLogo,
+						ImageAltName: project.AltProjectLogo,
+					})
+					isLogoSeeded = true
+				}
 				projectImagesNew = append(projectImagesNew, LProjectImage{
 					ImageURL:     image.ImageURL,
 					ImageAltName: image.ImageAltName,
@@ -307,14 +306,17 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				log.Error().Msgf("Locality ID mapping not found for project ID %d", project.ID)
 				continue
 			}
+			projectConfigurationType, err := FetchProjectConfigurationByID(ctx, *project.PropertyConfigTypeID)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to fetch project configuration type for project ID %d", project.ID)
+				continue
+			}
 
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
-				SetMinPrice(finalMinPrice).
-				SetMaxPrice(finalMaxPrice).
 				SetTimelineInfo(schema.TimelineInfo{
 					ProjectLaunchDate:     safeStr(project.ProjectLaunchDate),
 					ProjectPossessionDate: safeStr(project.ProjectPossessionDate),
@@ -376,11 +378,11 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 						Type: struct {
 							Value string `json:"value,omitempty"`
 						}{
-							Value: safeStr(project.ProjectConfigurations),
+							Value: safeStr(projectConfigurationType.PropertyType),
 						},
 					},
 					WhyToChoose: schema.WhyToChoose{
-						ImageUrls: imageURLs,
+						ImageUrls: imageURLs[1:],
 						USP_List:  uspListNew,
 					},
 					KnowAbout: schema.KnowAbout{
@@ -450,6 +452,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Longitude:     "",
 					GoogleMapLink: safeStr(project.ProjectLocationURL),
 				}).
+				SetProjectType(entproject.ProjectType(*projectConfigurationType.PropertyType)).
 				SetIsFeatured(project.IsFeatured).
 				SetIsPremium(project.IsPremium).
 				SetIsPriority(project.IsPriority).

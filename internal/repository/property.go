@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/property"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
@@ -22,7 +23,7 @@ func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
 }
 
 func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error) {
-	
+
 	oldProperty, err := r.GetPropertyByID(input.PropertyID)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get property")
@@ -38,7 +39,6 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		property.SetPropertyImages(input.PropertyImages)
 	}
 
-	
 	newWebCards := oldProperty.WebCards
 	hasWebCardChanges := false
 
@@ -101,7 +101,6 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		}
 	}
 
-	
 	if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 || len(input.WebCards.WhyChooseUs.USP_List) > 0 {
 		if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 {
 			newWebCards.WhyChooseUs.ImageUrls = input.WebCards.WhyChooseUs.ImageUrls
@@ -166,4 +165,30 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		return nil, err
 	}
 	return updatedProperty, nil
+}
+
+func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, error) {
+	if projectID == "" {
+		return nil, errors.New("projectID is required")
+	}
+
+	properties, err := r.db.Property.Query().
+		Where(property.ProjectID(projectID)).
+		All(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get properties of project")
+		return nil, err
+	}
+	return properties, nil
+}
+
+func (r *repository) AddProperty(input domain.Property) (*ent.Property, error) {
+	property, err := r.db.Property.Create().
+		SetName(input.Name).
+		Save(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to add property")
+		return nil, err
+	}
+	return property, nil
 }

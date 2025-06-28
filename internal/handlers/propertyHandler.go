@@ -60,3 +60,40 @@ func (h *PropertyHandler) UpdateProperty(r *http.Request) (*imhttp.Response, *im
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *PropertyHandler) GetPropertiesOfProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	projectID := vars["project_id"]
+	if projectID == "" {
+		logger.Get().Error().Msg("Project ID is required")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Project ID is required", "Project ID is required")
+	}
+
+	response, err := h.app.GetPropertiesOfProject(projectID)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get properties of project", err.Error())
+	}
+
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *PropertyHandler) AddProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	var input request.AddPropertyRequest
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		logger.Get().Error().Msg("Invalid request body")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	response, err := h.app.AddProperty(input)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add property", err.Error())
+	}
+
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
+}

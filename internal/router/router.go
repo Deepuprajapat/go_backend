@@ -37,6 +37,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(projectHandler.ListProjects)).Methods(http.MethodGet)
 
 	// property routes
+	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(propertyHandler.GetPropertyOfProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.GetProperty)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.UpdateProperty)).Methods(http.MethodPatch)
 

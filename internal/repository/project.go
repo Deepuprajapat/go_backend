@@ -86,9 +86,6 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	if input.Status != "" {
 		project.SetStatus(input.Status)
 	}
-	if input.PriceUnit != "" {
-		project.SetPriceUnit(input.PriceUnit)
-	}
 
 	// Handle TimelineInfo updates
 	if input.TimelineInfo != (schema.TimelineInfo{}) {
@@ -177,14 +174,25 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Update WhyToChoose if provided
-	if len(input.WebCards.WhyToChoose.ImageUrls) > 0 || len(input.WebCards.WhyToChoose.USP_List) > 0 {
-		if len(input.WebCards.WhyToChoose.ImageUrls) > 0 {
-			newWebCards.WhyToChoose.ImageUrls = input.WebCards.WhyToChoose.ImageUrls
-		}
-		if len(input.WebCards.WhyToChoose.USP_List) > 0 {
-			newWebCards.WhyToChoose.USP_List = input.WebCards.WhyToChoose.USP_List
-		}
+	if len(input.WebCards.WhyToChoose.ImageUrls) > 0 {
+		newWebCards.WhyToChoose.ImageUrls = input.WebCards.WhyToChoose.ImageUrls
 		hasWebCardChanges = true
+	}
+
+	if len(input.WebCards.WhyToChoose.USP_List) > 0 {
+		if len(newWebCards.WhyToChoose.USP_List) == 0 {
+			newWebCards.WhyToChoose.USP_List = make([]string, len(input.WebCards.WhyToChoose.USP_List))
+		}
+
+		for i, usp := range input.WebCards.WhyToChoose.USP_List {
+			if i >= len(newWebCards.WhyToChoose.USP_List) || newWebCards.WhyToChoose.USP_List[i] != usp {
+				if i >= len(newWebCards.WhyToChoose.USP_List) {
+					newWebCards.WhyToChoose.USP_List = append(newWebCards.WhyToChoose.USP_List, "")
+				}
+				newWebCards.WhyToChoose.USP_List[i] = usp
+				hasWebCardChanges = true
+			}
+		}
 	}
 
 	// Update KnowAbout if provided
@@ -289,12 +297,6 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	// Handle other fields
 	if input.Description != "" {
 		project.SetDescription(input.Description)
-	}
-	if input.MinPrice != 0 {
-		project.SetMinPrice(input.MinPrice)
-	}
-	if input.MaxPrice != 0 {
-		project.SetMaxPrice(input.MaxPrice)
 	}
 	if input.IsDeleted {
 		project.SetIsDeleted(input.IsDeleted)

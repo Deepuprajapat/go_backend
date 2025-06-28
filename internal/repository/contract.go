@@ -21,6 +21,7 @@ type AppRepository interface {
 	UpdateProperty(input domain.Property) (*ent.Property, error)
 	GetAllProjects() ([]*ent.Project, error)
 	ListLocations() ([]*ent.Location, error)
+	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

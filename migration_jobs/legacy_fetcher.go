@@ -537,3 +537,19 @@ func FetchPropertyConfigurationTypeByID(ctx context.Context, id int64) (*LProper
 
 	return &propertyConfigurationType, nil
 }
+func FetchProjectConfigurationByID(ctx context.Context, id int64) (*LPropertyConfigurationType, error) {
+	query := `SELECT * FROM project_configuration_type WHERE id = ?`
+	rows, err := legacyDB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var projectConfiguration LPropertyConfigurationType
+	for rows.Next() {
+		if err := rows.Scan(&projectConfiguration.ID, &projectConfiguration.ConfigurationTypeName, &projectConfiguration.CreatedDate, &projectConfiguration.PropertyType, &projectConfiguration.UpdatedDate); err != nil {
+			return nil, err
+		}
+	}
+	return &projectConfiguration, nil
+}

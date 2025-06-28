@@ -56,7 +56,6 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 	property.LocationID = input.LocationID
 	property.ProjectID = input.ProjectID
 
-
 	updatedProperty, err := c.repo.UpdateProperty(property)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update property")
@@ -64,4 +63,19 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 	}
 
 	return response.GetPropertyFromEnt(updatedProperty), nil
+}
+
+func (c *application) GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError) {
+	properties, err := c.repo.GetPropertiesOfProject(projectID)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get properties of project")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get properties of project", err.Error())
+	}
+
+	var propertyResponses []*response.Property
+	for _, property := range properties {
+		propertyResponses = append(propertyResponses, response.GetPropertyFromEnt(property))
+	}
+
+	return propertyResponses, nil
 }

@@ -44,3 +44,11 @@ type UpdatePropertyRequest struct {
 	LocationID       string                     `json:"location_id"`
 	ProjectID        string                     `json:"project_id"`
 }
+
+type AddPropertyRequest struct {
+	ProjectID        string                  `json:"project_id"`
+	Name             string                  `json:"name"`
+	PropertyImages   []string                `json:"property_images"`
+	PropertyReraInfo schema.PropertyReraInfo `json:"property_rera_info"`
+	MetaInfo         schema.PropertyMetaInfo `json:"meta_info"`
+}

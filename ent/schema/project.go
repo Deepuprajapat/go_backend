@@ -17,10 +17,8 @@ func (Project) Fields() []ent.Field {
 		field.String("name"),
 		field.Text("description"),
 		field.String("status").GoType(enums.ProjectStatus("")),
-		field.Int("min_price").Default(0), // update on every add property
-		field.Int("max_price").Default(0), // update on every add property
-		field.String("price_unit").Default("cr"),
 		field.JSON("timeline_info", TimelineInfo{}).Optional(),
+		field.Enum("project_type").Values("RESIDENTIAL", "COMMERCIAL"),
 		field.JSON("meta_info", SEOMeta{}).Optional(),
 		field.JSON("web_cards", ProjectWebCards{}).Optional(),
 		field.JSON("location_info", LocationInfo{}).Optional(),
