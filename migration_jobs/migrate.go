@@ -12,6 +12,7 @@ import (
 	entproject "github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,6 +26,7 @@ var (
 	legacyToNewProjectIDMAP   = make(map[int64]string)
 	legacyToNewDeveloperIDMAP = make(map[int64]string)
 	legacyToNewLocalityIDMAP  = make(map[int64]string)
+	staticSiteWebCardsID      string
 )
 
 // Helper functions to safely access maps
@@ -815,4 +817,37 @@ func safeStrToInt(s *string) int {
 
 func strPtr(s string) *string {
 	return &s
+}
+
+func MigrateStaticSiteData(ctx context.Context, txn *ent.Tx) error {
+	log.Info().Msg("fetching property configurations --------->>>> success")
+	residentialConfigs := []string{
+		"1BHK", "2BHK", "2.5BHK", "3BHK", "3.5BHK", "4BHK", "4.5BHK",
+		"5BHK", "5.5BHK", "6BHK", "6.5BHK", "7BHK", "7.5BHK", "8BHK", "8.5BHK",
+		"VILLAS", "PENTHOUSE", "DUPLEX", "SIMPLEX", "STUDIO APARTMENT", "PLOTS",
+		"INDEPENDENT FLOOR",
+	}
+
+	commercialConfigs := []string{
+		"SHOPS", "SUITS", "OFFICE", "RETAIL SHOP", "RENTAL SPACES",
+		"LEASE SPACES", "FOODCOURT", "ANCHOR SPACES", "CO-WORKING SPACES",
+		"VIRTUAL SPACES",
+	}
+
+	// Create residential configurations
+	staticSiteWebCardsID = uuid.New().String()
+	propertyTypes := schema.PropertyTypes{
+		Commercial:  commercialConfigs,
+		Residential: residentialConfigs,
+	}
+	if err := txn.StaticSiteData.Create().
+		SetID(staticSiteWebCardsID).
+		SetPropertyTypes(propertyTypes).
+		Exec(ctx); err != nil {
+		log.Error().Err(err).Msgf("Failed to insert residential configuration: %s", staticSiteWebCardsID)
+		return err
+	}
+
+	log.Info().Msg("Property configurations migrated successfully --------->>>> success")
+	return nil
 }

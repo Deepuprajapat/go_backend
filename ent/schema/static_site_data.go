@@ -13,7 +13,7 @@ type StaticSiteData struct {
 
 func (StaticSiteData) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
+		field.String("id").Unique(),
 		field.JSON("about_us", []byte{}),
 		field.JSON("how_we_work", []byte{}),
 		field.JSON("testimonials", []byte{}),

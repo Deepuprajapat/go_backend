@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/property"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/shared/logger"
@@ -184,7 +185,11 @@ func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, 
 }
 
 func (r *repository) AddProperty(input domain.Property) (string, error) {
-	project, err := r.db.Project.Get(context.Background(), input.ProjectID)
+	project, err := r.db.Project.Query().
+		Where(project.ID(input.ProjectID)).
+		WithDeveloper().
+		WithLocation().
+		First(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get project")
 		return "", err
