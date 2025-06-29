@@ -3,9 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
+	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/gorilla/mux"
@@ -101,13 +103,40 @@ func (h *ProjectHandler) DeleteProject(r *http.Request) (*imhttp.Response, *imht
 }
 
 func (h *ProjectHandler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	response, err := h.app.ListProjects()
+	// Parse pagination parameters from query
+	pagination := &request.PaginationRequest{
+		Page:     1,
+		PageSize: 10,
+	}
+
+	if page := r.URL.Query().Get("page"); page != "" {
+		if pageNum, err := strconv.Atoi(page); err == nil {
+			pagination.Page = pageNum
+		}
+	}
+
+	if pageSize := r.URL.Query().Get("page_size"); pageSize != "" {
+		if pageSizeNum, err := strconv.Atoi(pageSize); err == nil {
+			pagination.PageSize = pageSizeNum
+		}
+	}
+
+	pagination.Validate()
+
+	projects, totalItems, err := h.app.ListProjects(pagination)
 	if err != nil {
 		return nil, err
 	}
 
+	paginatedResponse := response.NewPaginatedResponse(
+		projects,
+		pagination.Page,
+		pagination.PageSize,
+		totalItems,
+	)
+
 	return &imhttp.Response{
-		Data:       response,
+		Data:       paginatedResponse,
 		StatusCode: http.StatusOK,
 	}, nil
 }

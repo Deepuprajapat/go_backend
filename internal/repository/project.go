@@ -339,13 +339,27 @@ func (r *repository) DeleteProject(id string, hardDelete bool) error {
 	return nil
 }
 
-func (r *repository) GetAllProjects() ([]*ent.Project, error) {
+func (r *repository) GetAllProjects(offset, limit int) ([]*ent.Project, int, error) {
+	ctx := context.Background()
+
+	// Get total count
+	total, err := r.db.Project.Query().
+		Where(project.IsDeletedEQ(false)).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results
 	projects, err := r.db.Project.Query().
 		Where(project.IsDeletedEQ(false)).
-		All(context.Background())
+		Order(ent.Desc(project.FieldID)). // Order by ID as a fallback since CreatedAt is not available
+		Offset(offset).
+		Limit(limit).
+		All(ctx)
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to list projects")
-		return nil, err
+		return nil, 0, err
 	}
-	return projects, nil
+
+	return projects, total, nil
 }

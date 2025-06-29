@@ -54,7 +54,7 @@ func main() {
 		defer txn.Rollback()
 
 		logger.Get().Info().Msg("Migrating static site data------------>>>>>>>>>>>>>>>>>>>>")
-		if err := migration_jobs.MigratePropertyConfiguration(ctx, txn); err != nil {
+		if err := migration_jobs.MigrateStaticSiteData(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate static site data")
 		}
 

@@ -29,7 +29,7 @@ type ApplicationInterface interface {
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
 
 	// Location
-	ListProjects() ([]*response.ProjectListResponse, *imhttp.CustomError)
+	ListProjects(pagination *request.PaginationRequest) ([]*response.ProjectListResponse, int, *imhttp.CustomError)
 	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
 }
 
