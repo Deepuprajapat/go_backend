@@ -21,6 +21,8 @@ func (Property) Fields() []ent.Field {
 		field.JSON("meta_info", PropertyMetaInfo{}).Optional(),
 		field.JSON("property_rera_info", PropertyReraInfo{}),
 		field.JSON("search_context", []string{}).Optional(),
+		field.Bool("is_deleted").Default(false),
+		field.Bool("is_featured").Default(false),
 		field.String("project_id").Optional(),
 		field.String("developer_id").Optional(),
 		field.String("location_id").Optional(),

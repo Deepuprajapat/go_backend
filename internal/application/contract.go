@@ -27,6 +27,12 @@ type ApplicationInterface interface {
 	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
 	GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError)
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
+	ListProperties(pagination *request.PaginationRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
+	DeleteProperty(id string) *imhttp.CustomError
+
+	// Developer
+	ListDevelopers(pagination *request.PaginationRequest) ([]*response.Developer, int, *imhttp.CustomError)
+	GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError)
 
 	// Location
 	ListProjects(pagination *request.PaginationRequest) ([]*response.ProjectListResponse, int, *imhttp.CustomError)

@@ -23,6 +23,8 @@ type AppRepository interface {
 
 	// Developer
 	ExistDeveloperByID(id string) (bool, error)
+	GetAllDevelopers(offset, limit int) ([]*ent.Developer, int, error)
+	GetDeveloperByID(id string) (*ent.Developer, error)
 
 	// Location
 	ListLocations() ([]*ent.Location, error)
@@ -32,6 +34,9 @@ type AppRepository interface {
 	UpdateProperty(input domain.Property) (*ent.Property, error)
 	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
 	AddProperty(input domain.Property) (string, error)
+	GetAllProperties(offset, limit int) ([]*ent.Property, int, error)
+	DeleteProperty(id string, hardDelete bool) error
+	IsPropertyDeleted(id string) (bool, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

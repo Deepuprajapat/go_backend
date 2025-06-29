@@ -219,3 +219,72 @@ func (r *repository) AddProperty(input domain.Property) (string, error) {
 	}
 	return propertyID, nil
 }
+
+func (r *repository) GetAllProperties(offset, limit int) ([]*ent.Property, int, error) {
+	ctx := context.Background()
+
+	// Get total count
+	total, err := r.db.Property.Query().
+		Where(property.IsDeletedEQ(false)).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated results with developer and location info
+	properties, err := r.db.Property.Query().
+		Where(property.IsDeletedEQ(false)).
+		Order(ent.Desc(property.FieldID)).
+		Offset(offset).
+		Limit(limit).
+		WithDeveloper().
+		WithLocation().
+		All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return properties, total, nil
+}
+
+func (r *repository) DeleteProperty(id string, hardDelete bool) error {
+	if hardDelete {
+		// Perform hard delete
+		err := r.db.Property.DeleteOneID(id).Exec(context.Background())
+		if err != nil {
+			if ent.IsNotFound(err) {
+				return errors.New("property not found")
+			}
+			logger.Get().Error().Err(err).Msg("Failed to delete property")
+			return err
+		}
+		return nil
+	}
+
+	// Perform soft delete by updating IsDeleted flag
+	_, err := r.db.Property.UpdateOneID(id).
+		SetIsDeleted(true).
+		Save(context.Background())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return errors.New("property not found")
+		}
+		logger.Get().Error().Err(err).Msg("Failed to soft delete property")
+		return err
+	}
+	return nil
+}
+
+func (r *repository) IsPropertyDeleted(id string) (bool, error) {
+	property, err := r.db.Property.Query().
+		Where(property.ID(id)).
+		Only(context.Background())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return false, nil
+		}
+		logger.Get().Error().Err(err).Msg("Failed to check if property is deleted")
+		return false, err
+	}
+	return property.IsDeleted, nil
+}

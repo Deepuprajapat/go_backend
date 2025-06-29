@@ -782,6 +782,8 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 					Keywords:    safeStr(property.MetaKeywords),
 					Canonical:   safeStr(property.PropertyURL),
 				}).
+				SetIsFeatured(property.IsFeatured).
+				SetIsDeleted(property.IsDeleted).
 				SetDeveloperID(*developerID).
 				SetLocationID(*localityID)
 

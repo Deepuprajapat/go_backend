@@ -21,6 +21,7 @@ func Init(app application.ApplicationInterface) {
 	projectHandler := handlers.NewProjectHandler(app)
 	propertyHandler := handlers.NewPropertyHandler(app)
 	locationHandler := handlers.NewLocationHandler(app)
+	developerHandler := handlers.NewDeveloperHandler(app)
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -41,6 +42,12 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.GetProperty)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.UpdateProperty)).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(propertyHandler.AddProperty)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/properties", imhttp.AppHandler(propertyHandler.ListProperties)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.DeleteProperty)).Methods(http.MethodDelete)
+
+	// developer routes
+	Router.Handle("/v1/api/developers", imhttp.AppHandler(developerHandler.ListDevelopers)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(developerHandler.GetDeveloper)).Methods(http.MethodGet)
 
 	// location routes
 	Router.Handle("/v1/api/locations", imhttp.AppHandler(locationHandler.ListLocations)).Methods(http.MethodGet)

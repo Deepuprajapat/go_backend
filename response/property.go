@@ -36,3 +36,27 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 type AddPropertyResponse struct {
 	PropertyID string `json:"property_id"`
 }
+
+type PropertyListResponse struct {
+	ID               string   `json:"id"`
+	Name             string   `json:"name"`
+	PossessionStatus string   `json:"possession_status"`
+	BuiltUpArea      string   `json:"built_up_area"`
+	Facing           string   `json:"facing"`
+	Images           []string `json:"images"`
+	Location         string   `json:"location"`
+	DeveloperName    string   `json:"developer_name"`
+}
+
+func GetPropertyListResponse(property *ent.Property, developerName string, location string) *PropertyListResponse {
+	return &PropertyListResponse{
+		ID:               property.ID,
+		Name:             property.Name,
+		PossessionStatus: property.WebCards.PropertyDetails.PossessionStatus.Value,
+		BuiltUpArea:      property.WebCards.PropertyDetails.BuiltUpArea.Value,
+		Facing:           property.WebCards.PropertyDetails.Facing.Value,
+		Images:           property.PropertyImages,
+		Location:         location,
+		DeveloperName:    developerName,
+	}
+}

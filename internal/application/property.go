@@ -101,3 +101,43 @@ func (c *application) AddProperty(input request.AddPropertyRequest) (*response.A
 	}
 	return &response.AddPropertyResponse{PropertyID: propertyID}, nil
 }
+
+func (c *application) ListProperties(pagination *request.PaginationRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError) {
+	properties, totalItems, err := c.repo.GetAllProperties(pagination.GetOffset(), pagination.GetLimit())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to list properties")
+		return nil, 0, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list properties", err.Error())
+	}
+
+	var propertyResponses []*response.PropertyListResponse
+	for _, property := range properties {
+		var developerName, location string
+		if property.Edges.Developer != nil {
+			developerName = property.Edges.Developer.Name
+		}
+		if property.Edges.Location != nil {
+			location = property.Edges.Location.LocalityName
+		}
+		propertyResponses = append(propertyResponses, response.GetPropertyListResponse(property, developerName, location))
+	}
+
+	return propertyResponses, totalItems, nil
+}
+
+func (c *application) DeleteProperty(id string) *imhttp.CustomError {
+	isDeleted, err := c.repo.IsPropertyDeleted(id)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check if property is deleted")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check if property is deleted", err.Error())
+	}
+	if isDeleted {
+		return imhttp.NewCustomErr(http.StatusBadRequest, "Property is already deleted", "Property is already deleted")
+	}
+
+	if err := c.repo.DeleteProperty(id, false); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete property")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete property", err.Error())
+	}
+
+	return nil
+}

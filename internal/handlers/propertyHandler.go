@@ -3,9 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
+	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/gorilla/mux"
@@ -100,5 +102,63 @@ func (h *PropertyHandler) AddProperty(r *http.Request) (*imhttp.Response, *imhtt
 	return &imhttp.Response{
 		Data:       propertyID,
 		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *PropertyHandler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	// Parse pagination parameters from query
+	pagination := &request.PaginationRequest{
+		Page:     1,
+		PageSize: 10,
+	}
+
+	if page := r.URL.Query().Get("page"); page != "" {
+		if pageNum, err := strconv.Atoi(page); err == nil {
+			pagination.Page = pageNum
+		}
+	}
+
+	if pageSize := r.URL.Query().Get("page_size"); pageSize != "" {
+		if pageSizeNum, err := strconv.Atoi(pageSize); err == nil {
+			pagination.PageSize = pageSizeNum
+		}
+	}
+
+	pagination.Validate()
+
+	properties, totalItems, err := h.app.ListProperties(pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	paginatedResponse := response.NewPaginatedResponse(
+		properties,
+		pagination.Page,
+		pagination.PageSize,
+		totalItems,
+	)
+
+	return &imhttp.Response{
+		Data:       paginatedResponse,
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *PropertyHandler) DeleteProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	propertyID := vars["property_id"]
+	if propertyID == "" {
+		logger.Get().Error().Msg("Property ID is required")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Property ID is required", "Property ID is required")
+	}
+
+	if err := h.app.DeleteProperty(propertyID); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       nil,
+		StatusCode: http.StatusOK,
+		Message:    "Property deleted successfully",
 	}, nil
 }
