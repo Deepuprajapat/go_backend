@@ -75,3 +75,20 @@ func (h *DeveloperHandler) GetDeveloper(r *http.Request) (*imhttp.Response, *imh
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *DeveloperHandler) DeleteDeveloper(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	developerID := vars["developer_id"]
+	if developerID == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Developer ID is required", "Developer ID is required")
+	}
+
+	if err := h.app.DeleteDeveloper(developerID); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		StatusCode: http.StatusOK,
+		Message:    "Developer deleted successfully",
+	}, nil
+}

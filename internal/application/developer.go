@@ -33,3 +33,11 @@ func (c *application) GetDeveloperByID(id string) (*response.Developer, *imhttp.
 
 	return response.GetDeveloperFromEnt(developer), nil
 }
+
+func (c *application) DeleteDeveloper(id string) *imhttp.CustomError {
+	if err := c.repo.SoftDeleteDeveloper(id); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete developer")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete developer", err.Error())
+	}
+	return nil
+}

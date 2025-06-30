@@ -14,11 +14,12 @@ func (Developer) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
 		field.String("name"),
-		field.String("legal_name"),
-		field.String("identifier"),
+		field.String("legal_name").Optional(),
+		field.String("identifier").Optional(),
 		field.Int("established_year"),
-		field.JSON("media_content", DeveloperMediaContent{}),
+		field.JSON("media_content", DeveloperMediaContent{}).Optional(),
 		field.Bool("is_verified").Default(false),
+		field.Bool("is_active").Default(true),
 	}
 }
 

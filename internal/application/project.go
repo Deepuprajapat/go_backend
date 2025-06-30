@@ -75,7 +75,7 @@ func (c *application) UpdateProject(input request.UpdateProjectRequest) (*respon
 	}
 
 	project.ProjectID = input.ProjectID
-	project.ProjectName = input.Name
+	project.ProjectName = input.ProjectName
 	project.Status = input.Status
 	project.PriceUnit = input.PriceUnit
 	project.TimelineInfo = input.TimelineInfo

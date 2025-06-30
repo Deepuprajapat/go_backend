@@ -22,3 +22,21 @@ func (c *application) GetAllLocations() ([]*response.Location, *imhttp.CustomErr
 
 	return locationResponses, nil
 }
+
+func (c *application) GetLocationByID(id string) (*response.Location, *imhttp.CustomError) {
+	location, err := c.repo.GetLocationByID(id)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get location")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get location", err.Error())
+	}
+
+	return response.GetLocationFromEnt(location), nil
+}
+
+func (c *application) DeleteLocation(id string) *imhttp.CustomError {
+	if err := c.repo.SoftDeleteLocation(id); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete location")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete location", err.Error())
+	}
+	return nil
+}

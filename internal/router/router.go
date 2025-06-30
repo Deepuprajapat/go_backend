@@ -22,6 +22,7 @@ func Init(app application.ApplicationInterface) {
 	propertyHandler := handlers.NewPropertyHandler(app)
 	locationHandler := handlers.NewLocationHandler(app)
 	developerHandler := handlers.NewDeveloperHandler(app)
+	amenityHandler := handlers.NewAmenityHandler(app)
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -48,9 +49,18 @@ func Init(app application.ApplicationInterface) {
 	// developer routes
 	Router.Handle("/v1/api/developers", imhttp.AppHandler(developerHandler.ListDevelopers)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(developerHandler.GetDeveloper)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(developerHandler.DeleteDeveloper)).Methods(http.MethodDelete)
 
 	// location routes
 	Router.Handle("/v1/api/locations", imhttp.AppHandler(locationHandler.ListLocations)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(locationHandler.GetLocation)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(locationHandler.DeleteLocation)).Methods(http.MethodDelete)
+
+	// amenity routes
+	Router.Handle("/v1/api/amenities", imhttp.AppHandler(amenityHandler.GetAmenities)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(amenityHandler.GetAmenity)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/amenities", imhttp.AppHandler(amenityHandler.CreateAmenity)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(amenityHandler.UpdateAmenity)).Methods(http.MethodPatch)
 }
 
 /////   curl calls	/////

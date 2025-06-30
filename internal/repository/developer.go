@@ -44,3 +44,10 @@ func (r *repository) GetDeveloperByID(id string) (*ent.Developer, error) {
 	}
 	return developer, nil
 }
+
+func (r *repository) SoftDeleteDeveloper(id string) error {
+	_, err := r.db.Developer.UpdateOneID(id).
+		SetIsActive(false).
+		Save(context.Background())
+	return err
+}

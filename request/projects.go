@@ -16,7 +16,7 @@ type AddProjectRequest struct {
 
 type UpdateProjectRequest struct {
 	ProjectID    string                 `json:"project_id" validate:"required"`
-	Name         string                 `json:"name,omitempty"`
+	ProjectName         string                 `json:"project_name,omitempty"`
 	Description  string                 `json:"description,omitempty"`
 	Status       enums.ProjectStatus    `json:"status,omitempty"`
 	PriceUnit    string                 `json:"price_unit,omitempty"`

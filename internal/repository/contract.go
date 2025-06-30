@@ -25,9 +25,12 @@ type AppRepository interface {
 	ExistDeveloperByID(id string) (bool, error)
 	GetAllDevelopers(offset, limit int) ([]*ent.Developer, int, error)
 	GetDeveloperByID(id string) (*ent.Developer, error)
+	SoftDeleteDeveloper(id string) error
 
 	// Location
 	ListLocations() ([]*ent.Location, error)
+	GetLocationByID(id string) (*ent.Location, error)
+	SoftDeleteLocation(id string) error
 
 	// Property
 	GetPropertyByID(id string) (*ent.Property, error)
@@ -37,6 +40,10 @@ type AppRepository interface {
 	GetAllProperties(offset, limit int) ([]*ent.Property, int, error)
 	DeleteProperty(id string, hardDelete bool) error
 	IsPropertyDeleted(id string) (bool, error)
+
+	// Static Site Data
+	GetStaticSiteData() (*ent.StaticSiteData, error)
+	UpdateStaticSiteData(data *ent.StaticSiteData) error
 }
 
 func NewRepository(db *ent.Client) AppRepository {

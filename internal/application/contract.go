@@ -33,10 +33,19 @@ type ApplicationInterface interface {
 	// Developer
 	ListDevelopers(pagination *request.PaginationRequest) ([]*response.Developer, int, *imhttp.CustomError)
 	GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError)
+	DeleteDeveloper(id string) *imhttp.CustomError
 
 	// Location
 	ListProjects(pagination *request.PaginationRequest) ([]*response.ProjectListResponse, int, *imhttp.CustomError)
 	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
+	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
+	DeleteLocation(id string) *imhttp.CustomError
+
+	// Amenity
+	GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)
+	GetAmenityByID(id string) (*response.SingleAmenityResponse, *imhttp.CustomError)
+	CreateAmenity(req *request.CreateAmenityRequest) *imhttp.CustomError
+	UpdateAmenity(id string, req *request.UpdateAmenityRequest) *imhttp.CustomError
 }
 
 func NewApplication(repo repository.AppRepository) ApplicationInterface {
