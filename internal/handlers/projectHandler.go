@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -13,15 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type ProjectHandler struct {
-	app application.ApplicationInterface
-}
-
-func NewProjectHandler(app application.ApplicationInterface) *ProjectHandler {
-	return &ProjectHandler{app: app}
-}
-
-func (h *ProjectHandler) GetProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	projectID := vars["project_id"]
 
@@ -36,7 +27,7 @@ func (h *ProjectHandler) GetProject(r *http.Request) (*imhttp.Response, *imhttp.
 	}, nil
 }
 
-func (h *ProjectHandler) AddProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) AddProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	var input request.AddProjectRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -61,7 +52,7 @@ func (h *ProjectHandler) AddProject(r *http.Request) (*imhttp.Response, *imhttp.
 	}, nil
 }
 
-func (h *ProjectHandler) UpdateProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) UpdateProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	projectID := vars["project_id"]
 	if projectID == "" {
@@ -87,7 +78,7 @@ func (h *ProjectHandler) UpdateProject(r *http.Request) (*imhttp.Response, *imht
 	}, nil
 }
 
-func (h *ProjectHandler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	projectID := vars["project_id"]
 
@@ -102,7 +93,7 @@ func (h *ProjectHandler) DeleteProject(r *http.Request) (*imhttp.Response, *imht
 	}, nil
 }
 
-func (h *ProjectHandler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// Parse pagination parameters from query
 	pagination := &request.PaginationRequest{
 		Page:     1,

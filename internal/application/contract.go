@@ -1,6 +1,9 @@
 package application
 
 import (
+	"io"
+
+	"github.com/VI-IM/im_backend_go/internal/client"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
@@ -8,7 +11,8 @@ import (
 )
 
 type application struct {
-	repo repository.AppRepository
+	repo     repository.AppRepository
+	s3Client client.S3ClientInterface
 }
 
 type ApplicationInterface interface {
@@ -46,8 +50,11 @@ type ApplicationInterface interface {
 	GetAmenityByID(id string) (*response.SingleAmenityResponse, *imhttp.CustomError)
 	CreateAmenity(req *request.CreateAmenityRequest) *imhttp.CustomError
 	UpdateAmenity(id string, req *request.UpdateAmenityRequest) *imhttp.CustomError
+
+	// Upload File
+	UploadFile(file io.Reader, request request.UploadFileRequest) (string, *imhttp.CustomError)
 }
 
-func NewApplication(repo repository.AppRepository) ApplicationInterface {
-	return &application{repo: repo}
+func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {
+	return &application{repo: repo, s3Client: s3Client}
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -13,15 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type PropertyHandler struct {
-	app application.ApplicationInterface
-}
-
-func NewPropertyHandler(app application.ApplicationInterface) *PropertyHandler {
-	return &PropertyHandler{app: app}
-}
-
-func (h *PropertyHandler) GetProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	propertyID := vars["property_id"]
 
@@ -37,7 +28,7 @@ func (h *PropertyHandler) GetProperty(r *http.Request) (*imhttp.Response, *imhtt
 	}, nil
 }
 
-func (h *PropertyHandler) UpdateProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) UpdateProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	propertyID := vars["property_id"]
 	if propertyID == "" {
@@ -63,7 +54,7 @@ func (h *PropertyHandler) UpdateProperty(r *http.Request) (*imhttp.Response, *im
 	}, nil
 }
 
-func (h *PropertyHandler) GetPropertiesOfProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetPropertiesOfProject(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	projectID := vars["project_id"]
 	if projectID == "" {
@@ -82,7 +73,7 @@ func (h *PropertyHandler) GetPropertiesOfProject(r *http.Request) (*imhttp.Respo
 	}, nil
 }
 
-func (h *PropertyHandler) AddProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) AddProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	var input request.AddPropertyRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		logger.Get().Error().Msg("Invalid request body")
@@ -105,7 +96,7 @@ func (h *PropertyHandler) AddProperty(r *http.Request) (*imhttp.Response, *imhtt
 	}, nil
 }
 
-func (h *PropertyHandler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// Parse pagination parameters from query
 	pagination := &request.PaginationRequest{
 		Page:     1,
@@ -144,7 +135,7 @@ func (h *PropertyHandler) ListProperties(r *http.Request) (*imhttp.Response, *im
 	}, nil
 }
 
-func (h *PropertyHandler) DeleteProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) DeleteProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	propertyID := vars["property_id"]
 	if propertyID == "" {

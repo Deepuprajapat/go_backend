@@ -4,22 +4,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
-type DeveloperHandler struct {
-	app application.ApplicationInterface
-}
-
-func NewDeveloperHandler(app application.ApplicationInterface) *DeveloperHandler {
-	return &DeveloperHandler{app: app}
-}
-
-func (h *DeveloperHandler) ListDevelopers(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) ListDevelopers(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// Parse pagination parameters from query
 	pagination := &request.PaginationRequest{
 		Page:     1,
@@ -58,7 +49,7 @@ func (h *DeveloperHandler) ListDevelopers(r *http.Request) (*imhttp.Response, *i
 	}, nil
 }
 
-func (h *DeveloperHandler) GetDeveloper(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetDeveloper(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	developerID := vars["developer_id"]
 	if developerID == "" {
@@ -76,7 +67,7 @@ func (h *DeveloperHandler) GetDeveloper(r *http.Request) (*imhttp.Response, *imh
 	}, nil
 }
 
-func (h *DeveloperHandler) DeleteDeveloper(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) DeleteDeveloper(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	developerID := vars["developer_id"]
 	if developerID == "" {

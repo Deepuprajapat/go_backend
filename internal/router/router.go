@@ -17,50 +17,48 @@ var (
 // Init initializes the router with all routes and middleware
 func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
-	authHandler := handlers.NewAuthHandler(app)
-	projectHandler := handlers.NewProjectHandler(app)
-	propertyHandler := handlers.NewPropertyHandler(app)
-	locationHandler := handlers.NewLocationHandler(app)
-	developerHandler := handlers.NewDeveloperHandler(app)
-	amenityHandler := handlers.NewAmenityHandler(app)
+	handler := handlers.NewHandler(app)
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
 
 	// auth routes
-	Router.Handle("/v1/api/auth/generate-token", imhttp.AppHandler(authHandler.GenerateToken)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/auth/refresh-token", imhttp.AppHandler(handlers.RefreshToken)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/auth/generate-token", imhttp.AppHandler(handler.GenerateToken)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/auth/refresh-token", imhttp.AppHandler(handler.RefreshToken)).Methods(http.MethodPost)
 
 	// project routes
-	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(projectHandler.GetProject)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/projects", imhttp.AppHandler(projectHandler.AddProject)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(projectHandler.UpdateProject)).Methods(http.MethodPatch)
-	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(projectHandler.DeleteProject)).Methods(http.MethodDelete)
-	Router.Handle("/v1/api/projects", imhttp.AppHandler(projectHandler.ListProjects)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.GetProject)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.UpdateProject)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.DeleteProject)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
+
+	// upload file routes
+	Router.Handle("/v1/api/upload", imhttp.AppHandler(handler.UploadFile)).Methods(http.MethodPost)
 
 	// property routes
-	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(propertyHandler.GetPropertiesOfProject)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.GetProperty)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.UpdateProperty)).Methods(http.MethodPatch)
-	Router.Handle("/v1/api/properties", imhttp.AppHandler(propertyHandler.AddProperty)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/properties", imhttp.AppHandler(propertyHandler.ListProperties)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(propertyHandler.DeleteProperty)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(handler.GetPropertiesOfProject)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.UpdateProperty)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.AddProperty)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.DeleteProperty)).Methods(http.MethodDelete)
 
 	// developer routes
-	Router.Handle("/v1/api/developers", imhttp.AppHandler(developerHandler.ListDevelopers)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(developerHandler.GetDeveloper)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(developerHandler.DeleteDeveloper)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/developers", imhttp.AppHandler(handler.ListDevelopers)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(handler.GetDeveloper)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/developers/{developer_id}", imhttp.AppHandler(handler.DeleteDeveloper)).Methods(http.MethodDelete)
 
 	// location routes
-	Router.Handle("/v1/api/locations", imhttp.AppHandler(locationHandler.ListLocations)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(locationHandler.GetLocation)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(locationHandler.DeleteLocation)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/locations", imhttp.AppHandler(handler.ListLocations)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(handler.GetLocation)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(handler.DeleteLocation)).Methods(http.MethodDelete)
 
 	// amenity routes
-	Router.Handle("/v1/api/amenities", imhttp.AppHandler(amenityHandler.GetAmenities)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(amenityHandler.GetAmenity)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/amenities", imhttp.AppHandler(amenityHandler.CreateAmenity)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(amenityHandler.UpdateAmenity)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.GetAmenities)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.GetAmenity)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.CreateAmenity)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.UpdateAmenity)).Methods(http.MethodPatch)
 }
 
 /////   curl calls	/////

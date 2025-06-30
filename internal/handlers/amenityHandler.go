@@ -4,21 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/request"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
-type AmenityHandler struct {
-	app application.ApplicationInterface
-}
-
-func NewAmenityHandler(app application.ApplicationInterface) *AmenityHandler {
-	return &AmenityHandler{app: app}
-}
-
-func (h *AmenityHandler) GetAmenities(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetAmenities(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	amenities, err := h.app.GetAmenities()
 	if err != nil {
 		return nil, err
@@ -30,7 +21,7 @@ func (h *AmenityHandler) GetAmenities(r *http.Request) (*imhttp.Response, *imhtt
 	}, nil
 }
 
-func (h *AmenityHandler) GetAmenity(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetAmenity(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	amenityID := vars["amenity_id"]
 	if amenityID == "" {
@@ -48,7 +39,7 @@ func (h *AmenityHandler) GetAmenity(r *http.Request) (*imhttp.Response, *imhttp.
 	}, nil
 }
 
-func (h *AmenityHandler) CreateAmenity(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) CreateAmenity(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	var req request.CreateAmenityRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
@@ -75,7 +66,7 @@ func (h *AmenityHandler) CreateAmenity(r *http.Request) (*imhttp.Response, *imht
 	}, nil
 }
 
-func (h *AmenityHandler) UpdateAmenity(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) UpdateAmenity(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	amenityID := vars["amenity_id"]
 	if amenityID == "" {

@@ -3,20 +3,11 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/VI-IM/im_backend_go/internal/application"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
-type LocationHandler struct {
-	app application.ApplicationInterface
-}
-
-func NewLocationHandler(app application.ApplicationInterface) *LocationHandler {
-	return &LocationHandler{app: app}
-}
-
-func (h *LocationHandler) ListLocations(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) ListLocations(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	response, err := h.app.GetAllLocations()
 	if err != nil {
 		return nil, err
@@ -28,7 +19,7 @@ func (h *LocationHandler) ListLocations(r *http.Request) (*imhttp.Response, *imh
 	}, nil
 }
 
-func (h *LocationHandler) GetLocation(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) GetLocation(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	locationID := vars["location_id"]
 	if locationID == "" {
@@ -46,7 +37,7 @@ func (h *LocationHandler) GetLocation(r *http.Request) (*imhttp.Response, *imhtt
 	}, nil
 }
 
-func (h *LocationHandler) DeleteLocation(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+func (h *Handler) DeleteLocation(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	locationID := vars["location_id"]
 	if locationID == "" {

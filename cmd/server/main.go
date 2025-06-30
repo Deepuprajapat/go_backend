@@ -9,6 +9,7 @@ import (
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/application"
+	s3client "github.com/VI-IM/im_backend_go/internal/client"
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
 	"github.com/VI-IM/im_backend_go/internal/repository"
@@ -98,8 +99,13 @@ func main() {
 
 	defer client.Close()
 
+	s3Client, err := s3client.NewS3Client(config.GetConfig().S3.Bucket)
+	if err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to create S3 client")
+	}
+
 	repo := repository.NewRepository(client)
-	app := application.NewApplication(repo)
+	app := application.NewApplication(repo, s3Client)
 
 	// Initialize router
 	router.Init(app)
