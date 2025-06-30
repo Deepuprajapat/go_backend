@@ -79,6 +79,12 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	project := r.db.Project.UpdateOneID(input.ProjectID)
+	tx, err := r.db.Tx(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to create transaction")
+		return nil, err
+	}
+	defer tx.Rollback()
 
 	if input.ProjectName != "" {
 		project.SetName(input.ProjectName)
@@ -180,19 +186,8 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	if len(input.WebCards.WhyToChoose.USP_List) > 0 {
-		if len(newWebCards.WhyToChoose.USP_List) == 0 {
-			newWebCards.WhyToChoose.USP_List = make([]string, len(input.WebCards.WhyToChoose.USP_List))
-		}
-
-		for i, usp := range input.WebCards.WhyToChoose.USP_List {
-			if i >= len(newWebCards.WhyToChoose.USP_List) || newWebCards.WhyToChoose.USP_List[i] != usp {
-				if i >= len(newWebCards.WhyToChoose.USP_List) {
-					newWebCards.WhyToChoose.USP_List = append(newWebCards.WhyToChoose.USP_List, "")
-				}
-				newWebCards.WhyToChoose.USP_List[i] = usp
-				hasWebCardChanges = true
-			}
-		}
+		newWebCards.WhyToChoose.USP_List = input.WebCards.WhyToChoose.USP_List
+		hasWebCardChanges = true
 	}
 
 	// Update KnowAbout if provided
@@ -212,6 +207,9 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 			newWebCards.FloorPlan.Description = input.WebCards.FloorPlan.Description
 		}
 		if len(input.WebCards.FloorPlan.Products) > 0 {
+			if len(newWebCards.FloorPlan.Products) == 0 {
+				newWebCards.FloorPlan.Products = make([]schema.FloorPlanItem, len(input.WebCards.FloorPlan.Products))
+			}
 			newWebCards.FloorPlan.Products = input.WebCards.FloorPlan.Products
 		}
 		hasWebCardChanges = true
@@ -223,18 +221,10 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 			newWebCards.PriceList.Description = input.WebCards.PriceList.Description
 		}
 		if len(input.WebCards.PriceList.BHKOptionsWithPrices) > 0 {
+			if len(newWebCards.PriceList.BHKOptionsWithPrices) == 0 {
+				newWebCards.PriceList.BHKOptionsWithPrices = make([]schema.ProductConfiguration, len(input.WebCards.PriceList.BHKOptionsWithPrices))
+			}
 			newWebCards.PriceList.BHKOptionsWithPrices = input.WebCards.PriceList.BHKOptionsWithPrices
-		}
-		hasWebCardChanges = true
-	}
-
-	// Update Amenities if provided
-	if len(input.WebCards.Amenities.CategoriesWithAmenities) > 0 || input.WebCards.Amenities.Description != "" {
-		if input.WebCards.Amenities.Description != "" {
-			newWebCards.Amenities.Description = input.WebCards.Amenities.Description
-		}
-		if len(input.WebCards.Amenities.CategoriesWithAmenities) > 0 {
-			newWebCards.Amenities.CategoriesWithAmenities = input.WebCards.Amenities.CategoriesWithAmenities
 		}
 		hasWebCardChanges = true
 	}
@@ -245,7 +235,8 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 			newWebCards.VideoPresentation.Description = input.WebCards.VideoPresentation.Description
 		}
 		if len(input.WebCards.VideoPresentation.URL) > 0 {
-			newWebCards.VideoPresentation.URL = input.WebCards.VideoPresentation.URL
+			newWebCards.VideoPresentation.URL = make([]byte, len(input.WebCards.VideoPresentation.URL))
+			copy(newWebCards.VideoPresentation.URL, input.WebCards.VideoPresentation.URL)
 		}
 		hasWebCardChanges = true
 	}
@@ -256,8 +247,60 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 			newWebCards.PaymentPlans.Description = input.WebCards.PaymentPlans.Description
 		}
 		if len(input.WebCards.PaymentPlans.Plans) > 0 {
+			if len(newWebCards.PaymentPlans.Plans) == 0 {
+				newWebCards.PaymentPlans.Plans = make([]schema.Plan, len(input.WebCards.PaymentPlans.Plans))
+			}
 			newWebCards.PaymentPlans.Plans = input.WebCards.PaymentPlans.Plans
 		}
+		hasWebCardChanges = true
+	}
+
+	// Update SitePlan if provided
+	if input.WebCards.SitePlan.Description != "" || input.WebCards.SitePlan.Image != "" {
+		if input.WebCards.SitePlan.Description != "" {
+			newWebCards.SitePlan.Description = input.WebCards.SitePlan.Description
+		}
+		if input.WebCards.SitePlan.Image != "" {
+			newWebCards.SitePlan.Image = input.WebCards.SitePlan.Image
+		}
+		hasWebCardChanges = true
+	}
+
+	// Update About if provided
+	if input.WebCards.About.Description != "" || input.WebCards.About.LogoURL != "" || input.WebCards.About.EstablishmentYear != "" || input.WebCards.About.TotalProjects != "" || input.WebCards.About.ContactDetails.Name != "" || input.WebCards.About.ContactDetails.ProjectAddress != "" || input.WebCards.About.ContactDetails.Phone != "" || input.WebCards.About.ContactDetails.BookingLink != "" {
+		if input.WebCards.About.Description != "" {
+			newWebCards.About.Description = input.WebCards.About.Description
+		}
+		if input.WebCards.About.LogoURL != "" {
+			newWebCards.About.LogoURL = input.WebCards.About.LogoURL
+		}
+		if input.WebCards.About.EstablishmentYear != "" {
+			newWebCards.About.EstablishmentYear = input.WebCards.About.EstablishmentYear
+		}
+		if input.WebCards.About.TotalProjects != "" {
+			newWebCards.About.TotalProjects = input.WebCards.About.TotalProjects
+		}
+		if input.WebCards.About.ContactDetails.Name != "" {
+			newWebCards.About.ContactDetails.Name = input.WebCards.About.ContactDetails.Name
+		}
+		if input.WebCards.About.ContactDetails.ProjectAddress != "" {
+			newWebCards.About.ContactDetails.ProjectAddress = input.WebCards.About.ContactDetails.ProjectAddress
+		}
+		if input.WebCards.About.ContactDetails.Phone != "" {
+			newWebCards.About.ContactDetails.Phone = input.WebCards.About.ContactDetails.Phone
+		}
+		if input.WebCards.About.ContactDetails.BookingLink != "" {
+			newWebCards.About.ContactDetails.BookingLink = input.WebCards.About.ContactDetails.BookingLink
+		}
+		hasWebCardChanges = true
+	}
+
+	// Update Faqs if provided
+	if len(input.WebCards.Faqs) > 0 {
+		if len(newWebCards.Faqs) == 0 {
+			newWebCards.Faqs = make([]schema.FAQ, len(input.WebCards.Faqs))
+		}
+		newWebCards.Faqs = input.WebCards.Faqs
 		hasWebCardChanges = true
 	}
 
@@ -305,6 +348,11 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	updatedProject, err := project.Save(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update project")
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to commit transaction")
 		return nil, err
 	}
 
