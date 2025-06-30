@@ -35,8 +35,14 @@ func (h *Handler) RefreshToken(r *http.Request) (*imhttp.Response, *imhttp.Custo
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
 	}
 
+	resp, err := h.app.RefreshToken(req.RefreshToken)
+	if err != nil {
+		log.Error().Err(err).Msg("Error refreshing token")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Refresh token failed", err.Error())
+	}
+
 	return &imhttp.Response{
-		Data:       "Token refreshed",
+		Data:       resp,
 		StatusCode: http.StatusOK,
 	}, nil
 }

@@ -21,7 +21,6 @@ func (h AppHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if _, err := w.Write(errResponse); err != nil {
 			log.Printf("error writing error response: %v", err)
 		}
-
 		return
 	}
 
@@ -79,4 +78,24 @@ func NewCustomErr(statusCode int, errMsg, msg string) *CustomError {
 
 func (ce *CustomError) Error() string {
 	return ce.ErrorMessage
+}
+
+
+func BadRequest(msg string) *CustomError {
+	return NewCustomErr(http.StatusBadRequest, "bad_request", msg)
+}
+
+func InternalError(msg string) *CustomError {
+	return NewCustomErr(http.StatusInternalServerError, "internal_server_error", msg)
+}
+
+func Unauthorized(msg string) *CustomError {
+	return NewCustomErr(http.StatusUnauthorized, "unauthorized", msg)
+}
+
+func JSON(_ http.ResponseWriter, statusCode int, data interface{}) (*Response, *CustomError) {
+	return &Response{
+		Data:       data,
+		StatusCode: statusCode,
+	}, nil
 }

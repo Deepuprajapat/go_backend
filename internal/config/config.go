@@ -25,7 +25,7 @@ type (
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
-		DB_Port    int    `envconfig:"DB_PORT"`
+		DB_Port    int    `envconfig:"DB_PORT" default:"8080"`
 		DB_HOST    string `envconfig:"DB_HOST"`
 		ConnString string `envconfig:"CONN_STRG"`
 	}
