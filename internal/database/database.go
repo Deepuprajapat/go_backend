@@ -23,7 +23,7 @@ func NewClient(dsn string) *ent.Client {
 	// Run the auto migration tool
 	if err := client.Schema.Create(context.Background()); err != nil {
 		logger.Get().Fatal().Err(err).Msg("failed creating schema resources")
-	}
+	}	
 
 	logger.Get().Info().Msg("Connected to PostgreSQL")
 
