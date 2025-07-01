@@ -35,6 +35,7 @@ type ProjectListResponse struct {
 	ProjectID     string   `json:"project_id"`
 	ProjectName   string   `json:"project_name"`
 	ShortAddress  string   `json:"short_address"`
+	Canonical     string   `json:"canonical"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
 	MinPrice      int      `json:"min_price"`
@@ -76,5 +77,6 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		Images:        project.WebCards.Images,
 		Configuration: project.WebCards.Details.Configuration.Value,
 		Sizes:         project.WebCards.Details.Sizes.Value,
+		Canonical:     project.MetaInfo.Canonical,
 	}
 }
