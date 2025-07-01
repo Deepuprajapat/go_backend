@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	s3client "github.com/VI-IM/im_backend_go/internal/client"
@@ -17,6 +16,7 @@ import (
 	"github.com/VI-IM/im_backend_go/migration_jobs"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
+	"github.com/joho/godotenv"
 )
 
 var (
@@ -31,6 +31,11 @@ func main() {
 	ctx := context.Background()
 
 	logger.Get().Info().Msg("Starting application...")
+
+	// Load .env file
+	if err := godotenv.Load(); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Error loading .env file")
+	}
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
 
@@ -95,11 +100,13 @@ func main() {
 		logger.Get().Fatal().Err(err).Msg("Failed to load configuration")
 	}
 
-	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
+	// Log configuration values
+	cfg := config.GetConfig()
 
+	client := database.NewClient(cfg.Database.URL)
 	defer client.Close()
 
-	s3Client, err := s3client.NewS3Client(config.GetConfig().S3.Bucket)
+	s3Client, err := s3client.NewS3Client(cfg.S3.Bucket)
 	if err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to create S3 client")
 	}
@@ -111,8 +118,8 @@ func main() {
 	router.Init(app)
 
 	// Start server
-	logger.Get().Info().Msgf("Server starting on port %d", config.GetConfig().Port)
-	if err := http.ListenAndServe(":"+strconv.Itoa(config.GetConfig().Port), router.Router); err != nil {
+	logger.Get().Info().Msgf("Server starting on port %d", cfg.Port)
+	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), router.Router); err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to start server")
 	}
 }

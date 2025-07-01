@@ -21,16 +21,16 @@ type (
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT" default:"9999"`
+		Port int    `envconfig:"PORT"`
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
-		DB_Port    int    `envconfig:"DB_PORT" default:"8080"`
+		DB_Port    int    `envconfig:"DB_PORT"`
 		DB_HOST    string `envconfig:"DB_HOST"`
-		ConnString string `envconfig:"CONN_STRG"`
+		URL        string `envconfig:"DATABASE_URL"`
 	}
 	JWTConfig struct {
-		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET" default:"MY_KEY"`
+		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET"`
 		ExpiresIn         string        `envconfig:"JWT_EXPIRATION_DURATION" default:"24h"`
 		ExpiresInDuration time.Duration `envconfig:"-"`
 	}
@@ -39,7 +39,7 @@ type (
 	}
 
 	S3 struct {
-		Bucket      string `envconfig:"S3_BUCKET" default:"vi-im-dev"`
+		Bucket      string `envconfig:"S3_BUCKET"`
 		Region      string `envconfig:"S3_REGION"`
 		AccessKeyID string `envconfig:"S3_ACCESS_KEY_ID"`
 		SecretKey   string `envconfig:"S3_SECRET_KEY"`
