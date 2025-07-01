@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
 )
 
@@ -16,7 +17,7 @@ var (
 )
 
 func NewNewDBConnection() (*ent.Client, error) {
-	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
+	client := database.NewClient(config.GetConfig().Database.URL)
 
 	// Run the auto migration tool
 	if err := client.Schema.Create(context.Background()); err != nil {
