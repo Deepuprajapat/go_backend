@@ -92,7 +92,36 @@ func (h *Handler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.Cust
 }
 
 func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	projects, err := h.app.ListProjects()
+	// Create filter request
+	filters := &request.ProjectFilterRequest{}
+
+	// Parse query parameters
+	if configurations := r.URL.Query()["configurations"]; len(configurations) > 0 {
+		filters.Configurations = configurations
+	}
+	if isPremium := r.URL.Query().Get("is_premium"); isPremium == "true" {
+		filters.IsPremium = true
+	}
+	if isPriority := r.URL.Query().Get("is_priority"); isPriority == "true" {
+		filters.IsPriority = true
+	}
+	if isFeatured := r.URL.Query().Get("is_featured"); isFeatured == "true" {
+		filters.IsFeatured = true
+	}
+	if locationID := r.URL.Query().Get("location_id"); locationID != "" {
+		filters.LocationID = locationID
+	}
+	if developerID := r.URL.Query().Get("developer_id"); developerID != "" {
+		filters.DeveloperID = developerID
+	}
+	if name := r.URL.Query().Get("name"); name != "" {
+		filters.Name = name
+	}
+	if projectType := r.URL.Query().Get("type"); projectType != "" {
+		filters.Type = projectType
+	}
+
+	projects, err := h.app.ListProjects(filters.ToMap())
 	if err != nil {
 		return nil, err
 	}
