@@ -116,11 +116,11 @@ func (c *application) DeleteProject(id string) *imhttp.CustomError {
 	return nil
 }
 
-func (c *application) ListProjects(pagination *request.PaginationRequest) ([]*response.ProjectListResponse, int, *imhttp.CustomError) {
-	projects, totalItems, err := c.repo.GetAllProjects(pagination.GetOffset(), pagination.GetLimit())
+func (c *application) ListProjects() ([]*response.ProjectListResponse, *imhttp.CustomError) {
+	projects, err := c.repo.GetAllProjects()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list projects")
-		return nil, 0, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list projects", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list projects", err.Error())
 	}
 
 	var projectResponses []*response.ProjectListResponse
@@ -128,5 +128,5 @@ func (c *application) ListProjects(pagination *request.PaginationRequest) ([]*re
 		projectResponses = append(projectResponses, response.GetProjectListResponse(project))
 	}
 
-	return projectResponses, totalItems, nil
+	return projectResponses, nil
 }

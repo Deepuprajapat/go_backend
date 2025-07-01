@@ -40,7 +40,7 @@ type ApplicationInterface interface {
 	DeleteDeveloper(id string) *imhttp.CustomError
 
 	// Location
-	ListProjects(pagination *request.PaginationRequest) ([]*response.ProjectListResponse, int, *imhttp.CustomError)
+	ListProjects() ([]*response.ProjectListResponse, *imhttp.CustomError)
 	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
 	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
 	DeleteLocation(id string) *imhttp.CustomError

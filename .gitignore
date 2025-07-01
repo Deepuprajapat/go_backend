@@ -88,3 +88,6 @@ mysql_data/
 
 # Misc
 *.out 
+
+*.md
+

@@ -39,7 +39,7 @@ type (
 	}
 
 	S3 struct {
-		Bucket      string `envconfig:"S3_BUCKET"`
+		Bucket      string `envconfig:"S3_BUCKET" default:"vi-im-dev"`
 		Region      string `envconfig:"S3_REGION"`
 		AccessKeyID string `envconfig:"S3_ACCESS_KEY_ID"`
 		SecretKey   string `envconfig:"S3_SECRET_KEY"`
