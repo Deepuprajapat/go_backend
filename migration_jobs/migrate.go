@@ -319,8 +319,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				SetName(safeStr(project.ProjectName)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
-				SetMinPrice(strconv.FormatFloat(minPrice, 'f', -1, 64)).
-				SetMaxPrice(strconv.FormatFloat(maxPrice, 'f', -1, 64)).
 				SetTimelineInfo(schema.TimelineInfo{
 					ProjectLaunchDate:     safeStr(project.ProjectLaunchDate),
 					ProjectPossessionDate: safeStr(project.ProjectPossessionDate),
