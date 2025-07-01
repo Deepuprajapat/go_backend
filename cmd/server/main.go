@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	s3client "github.com/VI-IM/im_backend_go/internal/client"
@@ -16,7 +17,6 @@ import (
 	"github.com/VI-IM/im_backend_go/migration_jobs"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -31,11 +31,6 @@ func main() {
 	ctx := context.Background()
 
 	logger.Get().Info().Msg("Starting application...")
-
-	// Load .env file
-	if err := godotenv.Load(); err != nil {
-		logger.Get().Fatal().Err(err).Msg("Error loading .env file")
-	}
 
 	if len(os.Args) > 1 && os.Args[1] == "run-migration" {
 
