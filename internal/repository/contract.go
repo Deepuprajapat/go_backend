@@ -19,7 +19,7 @@ type AppRepository interface {
 	UpdateProject(input domain.Project) (*ent.Project, error)
 	DeleteProject(id string, hardDelete bool) error
 	IsProjectDeleted(id string) (bool, error)
-	GetAllProjects() ([]*ent.Project, error)
+	GetAllProjects(filters map[string]interface{}) ([]*ent.Project, error)
 
 	// Developer
 	ExistDeveloperByID(id string) (bool, error)

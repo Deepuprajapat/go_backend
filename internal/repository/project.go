@@ -6,6 +6,8 @@ import (
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
+	"github.com/VI-IM/im_backend_go/ent/location"
+	"github.com/VI-IM/im_backend_go/ent/predicate"
 	"github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
@@ -387,13 +389,57 @@ func (r *repository) DeleteProject(id string, hardDelete bool) error {
 	return nil
 }
 
-func (r *repository) GetAllProjects() ([]*ent.Project, error) {
+func (r *repository) GetAllProjects(filters map[string]interface{}) ([]*ent.Project, error) {
 	ctx := context.Background()
 
-	// Get all projects without pagination
-	projects, err := r.db.Project.Query().
-		Where(project.IsDeletedEQ(false)).
-		Order(ent.Desc(project.FieldID)). // Order by ID as a fallback since CreatedAt is not available
+	// Start building the query
+	query := r.db.Project.Query().Where(project.IsDeletedEQ(false))
+
+	// Apply filters if any are set
+	if len(filters) > 0 {
+		predicates := []predicate.Project{}
+
+		// Apply boolean filters
+		if isPremium, ok := filters["is_premium"].(bool); ok && isPremium {
+			predicates = append(predicates, project.IsPremiumEQ(true))
+		}
+		if isPriority, ok := filters["is_priority"].(bool); ok && isPriority {
+			predicates = append(predicates, project.IsPriorityEQ(true))
+		}
+		if isFeatured, ok := filters["is_featured"].(bool); ok && isFeatured {
+			predicates = append(predicates, project.IsFeaturedEQ(true))
+		}
+
+		// Apply location filter
+		if locationID, ok := filters["location_id"].(string); ok && locationID != "" {
+			query = query.Where(project.HasLocationWith(location.ID(locationID)))
+		}
+
+		// Apply developer filter
+		if developerID, ok := filters["developer_id"].(string); ok && developerID != "" {
+			query = query.Where(project.HasDeveloperWith(developer.ID(developerID)))
+		}
+
+		// Apply name filter
+		if name, ok := filters["name"].(string); ok && name != "" {
+			query = query.Where(project.NameContainsFold(name))
+		}
+
+		// Apply type filter
+		if projectType, ok := filters["type"].(string); ok && projectType != "" {
+			query = query.Where(project.ProjectTypeEQ(project.ProjectType(projectType)))
+		}
+
+		if len(predicates) > 0 {
+			query = query.Where(project.Or(predicates...))
+		}
+	}
+
+	// Execute the query with eager loading of related entities
+	projects, err := query.
+		Order(ent.Desc(project.FieldID)).
+		WithDeveloper().
+		WithLocation().
 		All(ctx)
 	if err != nil {
 		return nil, err

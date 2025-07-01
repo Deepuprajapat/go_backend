@@ -98,6 +98,7 @@ func main() {
 	// Log configuration values
 	cfg := config.GetConfig()
 
+
 	client := database.NewClient(cfg.Database.URL)
 	defer client.Close()
 

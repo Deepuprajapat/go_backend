@@ -17,6 +17,8 @@ func (Project) Fields() []ent.Field {
 		field.String("name"),
 		field.Text("description"),
 		field.String("status").GoType(enums.ProjectStatus("")),
+		field.String("min_price").Default("0").Optional(),
+		field.String("max_price").Default("0").Optional(),
 		field.JSON("timeline_info", TimelineInfo{}).Optional(),
 		field.Enum("project_type").Values("RESIDENTIAL", "COMMERCIAL"),
 		field.JSON("meta_info", SEOMeta{}).Optional(),
@@ -72,16 +74,6 @@ type ProjectWebCards struct {
 type FAQ struct {
 	Question string `json:"question,omitempty"`
 	Answer   string `json:"answer,omitempty"`
-}
-
-// project info
-type ProjectInfo struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Area        string `json:"area,omitempty"`
-	LogoURL     string `json:"logo_url,omitempty"`
-	MinPrice    string `json:"min_price,omitempty"`
-	MaxPrice    string `json:"max_price,omitempty"`
 }
 
 // project details

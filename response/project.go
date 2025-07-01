@@ -1,6 +1,8 @@
 package response
 
 import (
+	"strconv"
+
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
@@ -41,15 +43,26 @@ type ProjectListResponse struct {
 	MinPrice      int      `json:"min_price"`
 	Sizes         string   `json:"sizes"`
 	IsPremium     bool     `json:"is_premium"`
+	FullDetails   *Project `json:"full_details,omitempty"`
 }
 
 func GetProjectFromEnt(project *ent.Project) *Project {
+	minPrice := 0
+	maxPrice := 0
+	if project.MinPrice != "" {
+		minPrice, _ = strconv.Atoi(project.MinPrice)
+	}
+	if project.MaxPrice != "" {
+		maxPrice, _ = strconv.Atoi(project.MaxPrice)
+	}
 
 	return &Project{
 		ProjectID:   project.ID,
 		ProjectName: project.Name,
 		Description: project.Description,
 		Status:      project.Status,
+		MinPrice:    minPrice,
+		MaxPrice:    maxPrice,
 		TimelineInfo: schema.TimelineInfo{
 			ProjectLaunchDate:     project.TimelineInfo.ProjectLaunchDate,
 			ProjectPossessionDate: project.TimelineInfo.ProjectPossessionDate,
@@ -69,6 +82,11 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 }
 
 func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
+	minPrice := 0
+	if project.MinPrice != "" {
+		minPrice, _ = strconv.Atoi(project.MinPrice)
+	}
+
 	return &ProjectListResponse{
 		ProjectID:     project.ID,
 		ProjectName:   project.Name,
@@ -76,6 +94,7 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		IsPremium:     project.IsPremium,
 		Images:        project.WebCards.Images,
 		Configuration: project.WebCards.Details.Configuration.Value,
+		MinPrice:      minPrice,
 		Sizes:         project.WebCards.Details.Sizes.Value,
 		Canonical:     project.MetaInfo.Canonical,
 	}
