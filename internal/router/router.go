@@ -59,6 +59,9 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.GetAmenity)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.CreateAmenity)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.UpdateAmenity)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/amenities/category", imhttp.AppHandler(handler.AddAmenitiesToCategory)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/amenities/category", imhttp.AppHandler(handler.DeleteAmenitiesFromCategory)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/amenities/category/all", imhttp.AppHandler(handler.DeleteCategory)).Methods(http.MethodDelete)
 
 	// blog routes
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)

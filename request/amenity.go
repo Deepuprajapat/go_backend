@@ -17,3 +17,20 @@ type UpdateAmenityRequest struct {
 	Icon     string `json:"icon"`
 	Value    string `json:"value"`
 }
+
+// New request type for adding amenities to a category
+type AddAmenitiesToCategoryRequest struct {
+	Category string      `json:"category" validate:"required"`
+	Items    []Amenities `json:"items" validate:"required"`
+}
+
+// Request type for deleting amenities from a category
+type DeleteAmenitiesFromCategoryRequest struct {
+	Category string   `json:"category" validate:"required"`
+	Values   []string `json:"values" validate:"required"` // List of amenity values to delete
+}
+
+// Request type for deleting a category with all its amenities
+type DeleteCategoryRequest struct {
+	Category string `json:"category" validate:"required"`
+}

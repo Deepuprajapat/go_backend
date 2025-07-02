@@ -50,6 +50,9 @@ type ApplicationInterface interface {
 	GetAmenityByID(id string) (*response.SingleAmenityResponse, *imhttp.CustomError)
 	AddCategoryWithAmenities(req *request.CreateAmenityRequest) *imhttp.CustomError
 	UpdateAmenity(id string, req *request.UpdateAmenityRequest) *imhttp.CustomError
+	AddAmenitiesToCategory(req *request.AddAmenitiesToCategoryRequest) *imhttp.CustomError
+	DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
+	DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
 
 	// Upload File
 	UploadFile(file io.Reader, request request.UploadFileRequest) (string, *imhttp.CustomError)

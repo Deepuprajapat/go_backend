@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -193,7 +194,167 @@ func (c *application) UpdateAmenity(id string, req *request.UpdateAmenityRequest
 	return nil
 }
 
-// add amemities to category
-// delete amenity from category
-// delete category with its amenities
+func (c *application) AddAmenitiesToCategory(req *request.AddAmenitiesToCategoryRequest) *imhttp.CustomError {
+	// Get the current static site data
+	staticData, err := c.repo.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add amenities", err.Error())
+	}
+
+	// Check if the category exists
+	exist, err := c.repo.CheckCategoryExists(req.Category)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check category existence")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add amenities", err.Error())
+	}
+	if !exist {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Category not found", "Category not found")
+	}
+
+	// Check for duplicate amenity values in the request
+	valueMap := make(map[string]bool)
+	for _, item := range req.Items {
+		if item.Icon == "" {
+			return imhttp.NewCustomErr(http.StatusBadRequest, "Icon is required", "Icon field cannot be empty")
+		}
+		if item.Value == "" {
+			return imhttp.NewCustomErr(http.StatusBadRequest, "Value is required", "Value field cannot be empty")
+		}
+		if valueMap[item.Value] {
+			return imhttp.NewCustomErr(http.StatusConflict, "Duplicate amenity values in request", "Each amenity value must be unique")
+		}
+		valueMap[item.Value] = true
+	}
+
+	// Check for duplicate values in existing amenities
+	for _, amenity := range staticData.CategoriesWithAmenities.Categories[req.Category] {
+		if valueMap[amenity.Value] {
+			return imhttp.NewCustomErr(http.StatusConflict, "Amenity already exists in category", "Amenity value must be unique within category")
+		}
+	}
+
+	// Add new amenities to the category
+	for _, item := range req.Items {
+		staticData.CategoriesWithAmenities.Categories[req.Category] = append(
+			staticData.CategoriesWithAmenities.Categories[req.Category],
+			struct {
+				Icon  string `json:"icon"`
+				Value string `json:"value"`
+			}{
+				Icon:  item.Icon,
+				Value: item.Value,
+			},
+		)
+	}
+
+	// Update static site data
+	if err := c.repo.UpdateStaticSiteData(staticData); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add amenities", err.Error())
+	}
+
+	return nil
+}
+
+func (c *application) DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError {
+	// Get the current static site data
+	staticData, err := c.repo.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete amenities", err.Error())
+	}
+
+	// Check if the category exists
+	exist, err := c.repo.CheckCategoryExists(req.Category)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check category existence")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete amenities", err.Error())
+	}
+	if !exist {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Category not found", "Category not found")
+	}
+
+	// Create a map of values to delete for O(1) lookup
+	valuesToDelete := make(map[string]bool)
+	for _, value := range req.Values {
+		valuesToDelete[value] = true
+	}
+
+	// Create a new slice to hold the amenities we want to keep
+	var newAmenities []struct {
+		Icon  string `json:"icon"`
+		Value string `json:"value"`
+	}
+
+	// Track which values were actually found and deleted
+	deletedValues := make(map[string]bool)
+
+	// Filter out the amenities that should be deleted
+	for _, amenity := range staticData.CategoriesWithAmenities.Categories[req.Category] {
+		if !valuesToDelete[amenity.Value] {
+			newAmenities = append(newAmenities, amenity)
+		} else {
+			deletedValues[amenity.Value] = true
+		}
+	}
+
+	// Check if any requested values were not found
+	var notFoundValues []string
+	for _, value := range req.Values {
+		if !deletedValues[value] {
+			notFoundValues = append(notFoundValues, value)
+		}
+	}
+	if len(notFoundValues) > 0 {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Some amenities not found", fmt.Sprintf("The following amenities were not found: %v", notFoundValues))
+	}
+
+	// Update the category with the filtered amenities
+	staticData.CategoriesWithAmenities.Categories[req.Category] = newAmenities
+
+	// If the category is now empty, optionally remove it
+	if len(newAmenities) == 0 {
+		delete(staticData.CategoriesWithAmenities.Categories, req.Category)
+	}
+
+	// Update static site data
+	if err := c.repo.UpdateStaticSiteData(staticData); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete amenities", err.Error())
+	}
+
+	return nil
+}
+
+func (c *application) DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError {
+	// Get the current static site data
+	staticData, err := c.repo.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete category", err.Error())
+	}
+
+	// Check if the category exists
+	exist, err := c.repo.CheckCategoryExists(req.Category)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check category existence")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete category", err.Error())
+	}
+	if !exist {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Category not found", "Category not found")
+	}
+
+	// Delete the category and all its amenities
+	delete(staticData.CategoriesWithAmenities.Categories, req.Category)
+
+	// Update static site data
+	if err := c.repo.UpdateStaticSiteData(staticData); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete category", err.Error())
+	}
+
+	return nil
+}
+
 // patch update static site data which is active
