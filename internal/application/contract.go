@@ -42,7 +42,7 @@ type ApplicationInterface interface {
 	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
 	GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError)
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
-	ListProperties(pagination *request.PaginationRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
+	ListProperties(pagination *request.PaginationRequest, filters map[string]interface{}) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
 	DeleteProperty(id string) *imhttp.CustomError
 
 	// Amenity

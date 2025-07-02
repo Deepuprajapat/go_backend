@@ -220,23 +220,15 @@ func (r *repository) AddProperty(input domain.Property) (string, error) {
 	return propertyID, nil
 }
 
-func (r *repository) GetAllProperties(offset, limit int) ([]*ent.Property, int, error) {
+func (r *repository) GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error) {
 	ctx := context.Background()
 
-	// Get total count
-	total, err := r.db.Property.Query().
-		Where(property.IsDeletedEQ(false)).
-		Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
+	// Start building the query
+	query := r.db.Property.Query().Where(property.IsDeletedEQ(false))
 
-	// Get paginated results with developer and location info
-	properties, err := r.db.Property.Query().
-		Where(property.IsDeletedEQ(false)).
+	// Get all properties first
+	properties, err := query.
 		Order(ent.Desc(property.FieldID)).
-		Offset(offset).
-		Limit(limit).
 		WithDeveloper().
 		WithLocation().
 		All(ctx)
@@ -244,7 +236,43 @@ func (r *repository) GetAllProperties(offset, limit int) ([]*ent.Property, int, 
 		return nil, 0, err
 	}
 
-	return properties, total, nil
+	// Apply filters in memory
+	filteredProperties := make([]*ent.Property, 0)
+	for _, p := range properties {
+		// Check if property matches all filters
+		matches := true
+
+		if propertyType, ok := filters["property_type"].(string); ok && propertyType != "" {
+			if p.WebCards.PropertyDetails.PropertyType.Value != propertyType {
+				matches = false
+			}
+		}
+
+		if configuration, ok := filters["configuration"].(string); ok && configuration != "" {
+			if p.WebCards.PropertyDetails.Configuration.Value != configuration {
+				matches = false
+			}
+		}
+
+		if matches {
+			filteredProperties = append(filteredProperties, p)
+		}
+	}
+
+	// Calculate total after filtering
+	total := len(filteredProperties)
+
+	// Apply pagination in memory
+	start := offset
+	end := offset + limit
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+
+	return filteredProperties[start:end], total, nil
 }
 
 func (r *repository) DeleteProperty(id string, hardDelete bool) error {

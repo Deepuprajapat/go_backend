@@ -17,4 +17,3 @@ type SignupResponse struct {
 	Phone     string `json:"phone"`
 	CreatedAt string `json:"created_at"`
 }
-

@@ -37,7 +37,7 @@ type AppRepository interface {
 	UpdateProperty(input domain.Property) (*ent.Property, error)
 	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
 	AddProperty(input domain.Property) (string, error)
-	GetAllProperties(offset, limit int) ([]*ent.Property, int, error)
+	GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error)
 	DeleteProperty(id string, hardDelete bool) error
 	IsPropertyDeleted(id string) (bool, error)
 
