@@ -59,6 +59,10 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.GetAmenity)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.CreateAmenity)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.UpdateAmenity)).Methods(http.MethodPatch)
+
+	// blog routes
+	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.GetBlog)).Methods(http.MethodGet)
 }
 
 /////   curl calls	/////

@@ -12,7 +12,7 @@ type Blogs struct {
 
 func (Blogs) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique(),
+		field.String("id").Unique(),
 		field.JSON("seo_meta_info", SEOMetaInfo{}),
 		field.String("blog_url"),
 		field.JSON("blog_content", BlogContent{}),

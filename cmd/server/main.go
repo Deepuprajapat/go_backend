@@ -69,6 +69,7 @@ func main() {
 		logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
+
 		}
 
 		logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
@@ -80,6 +81,12 @@ func main() {
 		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate properties")
 		}
+
+		logger.Get().Info().Msg("Migrating blogs------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateBlogs(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate blogs")
+		}
+
 
 		logger.Get().Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")
 		if err := txn.Commit(); err != nil {
@@ -97,7 +104,6 @@ func main() {
 
 	// Log configuration values
 	cfg := config.GetConfig()
-
 
 	client := database.NewClient(cfg.Database.URL)
 	defer client.Close()

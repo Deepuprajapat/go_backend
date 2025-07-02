@@ -17,14 +17,25 @@ type application struct {
 
 type ApplicationInterface interface {
 	// Auth
-	GetAccessToken(username string, password string) (*response.GenerateTokenResponse, *imhttp.CustomError)
+	GetAccessToken(username, password string) (*response.GenerateTokenResponse, *imhttp.CustomError)
 	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, *imhttp.CustomError)
 
 	// Project
-	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
 	GetProjectByID(id string) (*response.Project, *imhttp.CustomError)
+	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
 	UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError)
 	DeleteProject(id string) *imhttp.CustomError
+	ListProjects(filters map[string]interface{}) ([]*response.ProjectListResponse, *imhttp.CustomError)
+
+	// Developer
+	ListDevelopers(pagination *request.PaginationRequest) ([]*response.Developer, int, *imhttp.CustomError)
+	GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError)
+	DeleteDeveloper(id string) *imhttp.CustomError
+
+	// Location
+	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
+	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
+	DeleteLocation(id string) *imhttp.CustomError
 
 	// Property
 	GetPropertyByID(id string) (*response.Property, *imhttp.CustomError)
@@ -34,17 +45,6 @@ type ApplicationInterface interface {
 	ListProperties(pagination *request.PaginationRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
 	DeleteProperty(id string) *imhttp.CustomError
 
-	// Developer
-	ListDevelopers(pagination *request.PaginationRequest) ([]*response.Developer, int, *imhttp.CustomError)
-	GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError)
-	DeleteDeveloper(id string) *imhttp.CustomError
-
-	// Location
-	ListProjects(filters map[string]interface{}) ([]*response.ProjectListResponse, *imhttp.CustomError)
-	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
-	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
-	DeleteLocation(id string) *imhttp.CustomError
-
 	// Amenity
 	GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)
 	GetAmenityByID(id string) (*response.SingleAmenityResponse, *imhttp.CustomError)
@@ -53,6 +53,10 @@ type ApplicationInterface interface {
 
 	// Upload File
 	UploadFile(file io.Reader, request request.UploadFileRequest) (string, *imhttp.CustomError)
+
+	// Blogs
+	ListBlogs(pagination *request.PaginationRequest) (*response.BlogListResponse, *imhttp.CustomError)
+	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {

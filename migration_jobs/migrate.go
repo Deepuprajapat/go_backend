@@ -3,6 +3,7 @@ package migration_jobs
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -851,5 +852,66 @@ func MigrateStaticSiteData(ctx context.Context, txn *ent.Tx) error {
 	}
 
 	log.Info().Msg("Property configurations migrated successfully --------->>>> success")
+	return nil
+}
+
+func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
+	log.Info().Msg("Fetching blogs")
+	blogs, err := FetchAllBlogs(ctx)
+	if err != nil {
+		return err
+	}
+	log.Info().Msg("Fetched blogs --------->>>> success")
+
+	processBlogBatch := func(ctx context.Context, batch []LBlog) error {
+		for _, blog := range batch {
+			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(blog.ID, 10))))[:16]
+			// Parse images from JSON string
+			var images []string
+			if blog.Images != nil {
+				if err := json.Unmarshal([]byte(*blog.Images), &images); err != nil {
+					log.Error().Err(err).Msgf("Failed to parse images for blog ID %d", blog.ID)
+				}
+			}
+
+			// Create blog content
+			blogContent := schema.BlogContent{
+				Title:       safeStr(blog.MetaTitle),
+				Description: safeStr(blog.Description),
+			}
+			if len(images) > 0 {
+				blogContent.Image = images[0]
+				blogContent.ImageAlt = safeStr(blog.Alt)
+			}
+
+			// Create SEO meta info
+			seoMetaInfo := schema.SEOMetaInfo{
+				BlogSchema:  safeStr(blog.BlogSchema),
+				Canonical:   safeStr(blog.Canonical),
+				Title:       safeStr(blog.MetaTitle),
+				Keywords:    safeStr(blog.MetaKeywords),
+				Description: safeStr(blog.Description),
+			}
+
+			// Create blog entry
+			if err := txn.Blogs.Create().
+				SetID(id).
+				SetBlogURL(safeStr(blog.BlogURL)).
+				SetBlogContent(blogContent).
+				SetSeoMetaInfo(seoMetaInfo).
+				SetIsPriority(blog.IsPriority).
+				Exec(ctx); err != nil {
+				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)
+				continue
+			}
+		}
+		return nil
+	}
+
+	if err := processBatch(ctx, blogs, batchSize, processBlogBatch); err != nil {
+		return err
+	}
+
+	log.Info().Msg("Blogs migrated successfully --------->>>> success")
 	return nil
 }

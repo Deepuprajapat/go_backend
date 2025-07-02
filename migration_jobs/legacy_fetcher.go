@@ -553,3 +553,40 @@ func FetchProjectConfigurationByID(ctx context.Context, id int64) (*LPropertyCon
 	}
 	return &projectConfiguration, nil
 }
+
+func FetchAllBlogs(ctx context.Context) ([]LBlog, error) {
+	query := `SELECT id, alt, blog_schema, blog_url, canonical, created_date, description, headings, images, 
+					 is_priority, sub_headings, updated_date, user_id, meta_keywords, meta_title 
+			  FROM blogs`
+	rows, err := legacyDB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var blogs []LBlog
+	for rows.Next() {
+		var blog LBlog
+		if err := rows.Scan(
+			&blog.ID,
+			&blog.Alt,
+			&blog.BlogSchema,
+			&blog.BlogURL,
+			&blog.Canonical,
+			&blog.CreatedDate,
+			&blog.Description,
+			&blog.Headings,
+			&blog.Images,
+			&blog.IsPriority,
+			&blog.SubHeadings,
+			&blog.UpdatedDate,
+			&blog.UserID,
+			&blog.MetaKeywords,
+			&blog.MetaTitle,
+		); err != nil {
+			return nil, err
+		}
+		blogs = append(blogs, blog)
+	}
+	return blogs, nil
+}

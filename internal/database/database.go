@@ -12,6 +12,7 @@ import (
 
 // NewClient creates a new ent client
 func NewClient(dsn string) *ent.Client {
+
 	drv, err := entsql.Open(dialect.Postgres, dsn)
 	if err != nil {
 		logger.Get().Fatal().Err(err).Msg("failed opening connection to postgres")
@@ -23,7 +24,7 @@ func NewClient(dsn string) *ent.Client {
 	// Run the auto migration tool
 	if err := client.Schema.Create(context.Background()); err != nil {
 		logger.Get().Fatal().Err(err).Msg("failed creating schema resources")
-	}	
+	}
 
 	logger.Get().Info().Msg("Connected to PostgreSQL")
 

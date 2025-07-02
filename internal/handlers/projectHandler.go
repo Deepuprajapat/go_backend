@@ -92,36 +92,36 @@ func (h *Handler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.Cust
 }
 
 func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	// Create filter request
-	filters := &request.ProjectFilterRequest{}
+	// Create filter map
+	filters := make(map[string]interface{})
 
 	// Parse query parameters
 	if configurations := r.URL.Query()["configurations"]; len(configurations) > 0 {
-		filters.Configurations = configurations
+		filters["configurations"] = configurations
 	}
 	if isPremium := r.URL.Query().Get("is_premium"); isPremium == "true" {
-		filters.IsPremium = true
+		filters["is_premium"] = true
 	}
 	if isPriority := r.URL.Query().Get("is_priority"); isPriority == "true" {
-		filters.IsPriority = true
+		filters["is_priority"] = true
 	}
 	if isFeatured := r.URL.Query().Get("is_featured"); isFeatured == "true" {
-		filters.IsFeatured = true
+		filters["is_featured"] = true
 	}
 	if locationID := r.URL.Query().Get("location_id"); locationID != "" {
-		filters.LocationID = locationID
+		filters["location_id"] = locationID
 	}
 	if developerID := r.URL.Query().Get("developer_id"); developerID != "" {
-		filters.DeveloperID = developerID
+		filters["developer_id"] = developerID
 	}
 	if name := r.URL.Query().Get("name"); name != "" {
-		filters.Name = name
+		filters["name"] = name
 	}
 	if projectType := r.URL.Query().Get("type"); projectType != "" {
-		filters.Type = projectType
+		filters["type"] = projectType
 	}
 
-	projects, err := h.app.ListProjects(filters.ToMap())
+	projects, err := h.app.ListProjects(filters)
 	if err != nil {
 		return nil, err
 	}

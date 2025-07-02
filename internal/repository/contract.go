@@ -44,6 +44,10 @@ type AppRepository interface {
 	// Static Site Data
 	GetStaticSiteData() (*ent.StaticSiteData, error)
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
+
+	// Blogs
+	GetAllBlogs(offset, limit int) ([]*ent.Blogs, int, error)
+	GetBlogByID(id string) (*ent.Blogs, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {
