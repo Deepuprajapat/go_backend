@@ -2,6 +2,7 @@ package application
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
@@ -57,42 +58,48 @@ func (c *application) GetAmenityByID(id string) (*response.SingleAmenityResponse
 	return nil, imhttp.NewCustomErr(http.StatusNotFound, "Amenity not found", "Amenity not found")
 }
 
-func (c *application) CreateAmenity(req *request.CreateAmenityRequest) *imhttp.CustomError {
+func (c *application) AddCategoryWithAmenities(req *request.CreateAmenityRequest) *imhttp.CustomError {
+
+	// Check if the amenity already exists
+	var categoryName string
+	for category, _ := range req.Category {
+		categoryName = strings.ToLower(category)
+	}
+
+	exist, err := c.repo.CheckCategoryExists(categoryName)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get amenity")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
+	}
+	if exist {
+		return imhttp.NewCustomErr(http.StatusConflict, "Amenity already exists", "Amenity already exists")
+	}
+
 	staticData, err := c.repo.GetStaticSiteData()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get static site data")
 		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
 	}
-
-	// Check if the amenity value already exists in any category
-	for _, amenities := range staticData.CategoriesWithAmenities.Categories {
-		for _, amenity := range amenities {
-			if amenity.Value == req.Value {
-				return imhttp.NewCustomErr(http.StatusConflict, "Amenity with this value already exists", "Duplicate amenity value")
-			}
-		}
-	}
-
-	// Create new amenity
-	newAmenity := struct {
-		Icon  string `json:"icon"`
-		Value string `json:"value"`
-	}{
-		Icon:  req.Icon,
-		Value: req.Value,
-	}
-
 	// Add to existing category or create new category
+
 	if staticData.CategoriesWithAmenities.Categories == nil {
 		staticData.CategoriesWithAmenities.Categories = make(map[string][]struct {
 			Icon  string `json:"icon"`
 			Value string `json:"value"`
 		})
 	}
-	staticData.CategoriesWithAmenities.Categories[req.Category] = append(
-		staticData.CategoriesWithAmenities.Categories[req.Category],
-		newAmenity,
-	)
+
+	for category, amenities := range req.Category {
+		for _, amenity := range amenities {
+			staticData.CategoriesWithAmenities.Categories[category] = append(staticData.CategoriesWithAmenities.Categories[category], struct {
+				Icon  string `json:"icon"`
+				Value string `json:"value"`
+			}{
+				Icon:  amenity.Icon,
+				Value: amenity.Value,
+			})
+		}
+	}
 
 	// Update static site data
 	if err := c.repo.UpdateStaticSiteData(staticData); err != nil {
@@ -185,3 +192,8 @@ func (c *application) UpdateAmenity(id string, req *request.UpdateAmenityRequest
 
 	return nil
 }
+
+// add amemities to category
+// delete amenity from category
+// delete category with its amenities
+// patch update static site data which is active

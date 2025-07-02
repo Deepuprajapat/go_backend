@@ -1,14 +1,13 @@
 package schema
 
 import (
-	"time"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 type StaticSiteData struct {
-	ent.Schema
+	Base
 }
 
 func (StaticSiteData) Fields() []ent.Field {
@@ -27,7 +26,15 @@ func (StaticSiteData) Fields() []ent.Field {
 			} `json:"categories"`
 		}{}).Optional(),
 		field.JSON("property_types", PropertyTypes{}),
-		field.Time("created_at").Default(time.Now),
+		field.Bool("is_active").Default(true),
+	}
+}
+
+// Indexes of the StaticSiteData.
+func (StaticSiteData) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("is_active"),
+		index.Fields("categories_with_amenities"),
 	}
 }
 

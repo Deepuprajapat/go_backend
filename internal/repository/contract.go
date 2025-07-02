@@ -48,6 +48,9 @@ type AppRepository interface {
 	// Blogs
 	GetAllBlogs(offset, limit int) ([]*ent.Blogs, int, error)
 	GetBlogByID(id string) (*ent.Blogs, error)
+
+	// Amenities
+	CheckCategoryExists(category string) (bool, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

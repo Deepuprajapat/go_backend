@@ -46,17 +46,21 @@ func (h *Handler) CreateAmenity(r *http.Request) (*imhttp.Response, *imhttp.Cust
 	}
 
 	// Manual validation
-	if req.Category == "" {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category is required", "Category field cannot be empty")
-	}
-	if req.Icon == "" {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Icon is required", "Icon field cannot be empty")
-	}
-	if req.Value == "" {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Value is required", "Value field cannot be empty")
+	for _, category := range req.Category {
+		if category == nil {
+			return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Amenities are required", "Amenities field cannot be empty")
+		}
+		for _, amenity := range category {
+			if amenity.Icon == "" {
+				return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Icon is required", "Icon field cannot be empty")
+			}
+			if amenity.Value == "" {
+				return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Value is required", "Value field cannot be empty")
+			}
+		}
 	}
 
-	if err := h.app.CreateAmenity(&req); err != nil {
+	if err := h.app.AddCategoryWithAmenities(&req); err != nil {
 		return nil, err
 	}
 

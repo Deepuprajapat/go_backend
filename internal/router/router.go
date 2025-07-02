@@ -63,6 +63,8 @@ func Init(app application.ApplicationInterface) {
 	// blog routes
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.GetBlog)).Methods(http.MethodGet)
+
+	//
 }
 
 /////   curl calls	/////
