@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/VI-IM/im_backend_go/request"
@@ -39,5 +40,40 @@ func (c *application) GetBlogByID(id string) (*response.BlogResponse, *imhttp.Cu
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found", "Blog not found")
 	}
 
+	if blog.IsDeleted {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog has been deleted", "Blog has been deleted")
+	}
+
 	return response.GetBlogFromEnt(blog), nil
+}
+
+func (c *application) CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError) {
+	blog, err := c.repo.CreateBlog(ctx, req.BlogURL, req.BlogContent, req.SEOMetaInfo, req.IsPriority)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to create blog")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create blog", err.Error())
+	}
+
+	return response.GetBlogFromEnt(blog), nil
+}
+
+func (c *application) DeleteBlog(ctx context.Context, id string) *imhttp.CustomError {
+	// Check if blog exists
+	blog, err := c.repo.GetBlogByID(id)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get blog")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get blog", err.Error())
+	}
+	if blog == nil {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Blog not found", "Blog not found")
+	}
+
+	// Delete the blog
+	err = c.repo.DeleteBlog(ctx, id)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete blog")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete blog", err.Error())
+	}
+
+	return nil
 }

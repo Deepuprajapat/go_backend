@@ -120,6 +120,11 @@ func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.Custo
 	if projectType := r.URL.Query().Get("type"); projectType != "" {
 		filters["type"] = projectType
 	}
+	if city := r.URL.Query().Get("city"); city != "" {
+        filters["city"] = city
+    }
+
+	
 
 	projects, err := h.app.ListProjects(filters)
 	if err != nil {

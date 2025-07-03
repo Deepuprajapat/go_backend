@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 )
 
@@ -48,6 +51,8 @@ type AppRepository interface {
 	// Blogs
 	GetAllBlogs() ([]*ent.Blogs, error)
 	GetBlogByID(id string) (*ent.Blogs, error)
+	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
+	DeleteBlog(ctx context.Context, id string) error
 
 	// Amenities
 	CheckCategoryExists(category string) (bool, error)

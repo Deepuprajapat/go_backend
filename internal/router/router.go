@@ -66,6 +66,8 @@ func Init(app application.ApplicationInterface) {
 	// blog routes
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.GetBlog)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.CreateBlog)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.DeleteBlog)).Methods(http.MethodDelete)
 
 	//
 }

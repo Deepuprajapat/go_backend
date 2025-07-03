@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
@@ -423,6 +424,13 @@ func (r *repository) GetAllProjects(filters map[string]interface{}) ([]*ent.Proj
 		// Apply name filter
 		if name, ok := filters["name"].(string); ok && name != "" {
 			query = query.Where(project.NameContainsFold(name))
+		}
+
+		if city, ok := filters["city"].(string); ok && city != "" {
+			// Remove quotes if present
+			city = strings.Trim(city, "\"")
+			// Filter projects that have a location with matching city
+			query = query.Where(project.HasLocationWith(location.CityEQ(city)))
 		}
 
 		// Apply type filter
