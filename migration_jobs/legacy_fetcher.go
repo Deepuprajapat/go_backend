@@ -570,7 +570,7 @@ func FetchAllBlogs(ctx context.Context) ([]LBlog, error) {
 		if err := rows.Scan(
 			&blog.ID,
 			&blog.Alt,
-			&blog.BlogSchema,
+			&blog.BlogSchema, 
 			&blog.BlogURL,
 			&blog.Canonical,
 			&blog.CreatedDate,

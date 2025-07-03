@@ -237,4 +237,5 @@ type LBlog struct {
 	UserID       *int64  `json:"user_id"`
 	MetaKeywords *string `json:"meta_keywords"`
 	MetaTitle    *string `json:"meta_title"`
+	IsDeleted    bool    `json:"is_deleted"`
 }

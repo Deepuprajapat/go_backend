@@ -19,6 +19,8 @@ type BlogListItem struct {
 	Title       string             `json:"title"`
 	Description string             `json:"description"`
 	IsPriority  bool               `json:"is_priority"`
+	CreatedAt   int64              `json:"created_at"`
+	UpdatedAt   int64              `json:"updated_at"`
 }
 
 func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
@@ -38,6 +40,8 @@ func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
 		Title:       blog.BlogContent.Title,
 		Description: blog.BlogContent.Description,
 		IsPriority:  blog.IsPriority,
+		CreatedAt:   blog.CreatedAt,
+		UpdatedAt:   blog.UpdatedAt,
 	}
 }
 

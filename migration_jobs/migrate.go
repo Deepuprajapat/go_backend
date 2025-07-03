@@ -903,6 +903,9 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				SetBlogContent(blogContent).
 				SetSeoMetaInfo(seoMetaInfo).
 				SetIsPriority(blog.IsPriority).
+				SetCreatedAt(*blog.CreatedDate).
+				SetUpdatedAt(int64(safeInt(blog.UpdatedDate))).
+				SetIsDeleted(blog.IsDeleted).
 				Exec(ctx); err != nil {
 				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)
 				continue
