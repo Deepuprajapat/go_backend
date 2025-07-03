@@ -54,6 +54,7 @@ type ApplicationInterface interface {
 	AddAmenitiesToCategory(req *request.AddAmenitiesToCategoryRequest) *imhttp.CustomError
 	DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
 	DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
+	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
 
 	// Upload File
 	UploadFile(file io.Reader, request request.UploadFileRequest) (string, *imhttp.CustomError)
@@ -63,6 +64,7 @@ type ApplicationInterface interface {
 	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
+	UpdateBlog(ctx context.Context, id string, req *request.UpdateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {

@@ -62,12 +62,14 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/amenities/category", imhttp.AppHandler(handler.AddAmenitiesToCategory)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/amenities/category", imhttp.AppHandler(handler.DeleteAmenitiesFromCategory)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/amenities/category/all", imhttp.AppHandler(handler.DeleteCategory)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/static-site-data", imhttp.AppHandler(handler.UpdateStaticSiteData)).Methods(http.MethodPatch)
 
 	// blog routes
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.GetBlog)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.CreateBlog)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.DeleteBlog)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
 
 	//
 }

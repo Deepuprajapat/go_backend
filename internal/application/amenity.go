@@ -63,7 +63,7 @@ func (c *application) AddCategoryWithAmenities(req *request.CreateAmenityRequest
 
 	// Check if the amenity already exists
 	var categoryName string
-	for category, _ := range req.Category {
+	for category := range req.Category {
 		categoryName = strings.ToLower(category)
 	}
 
@@ -352,6 +352,38 @@ func (c *application) DeleteCategory(req *request.DeleteCategoryRequest) *imhttp
 	if err := c.repo.UpdateStaticSiteData(staticData); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update static site data")
 		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete category", err.Error())
+	}
+
+	return nil
+}
+
+func (c *application) UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError {
+	// Get current static site data
+	staticData, err := c.repo.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get static site data", err.Error())
+	}
+
+	// Check if static site data is active
+	if !staticData.IsActive {
+		return imhttp.NewCustomErr(http.StatusForbidden, "Cannot update inactive static site data", "Static site data must be active to update")
+	}
+
+	// Update fields if provided
+	if req.PropertyTypes != nil {
+		staticData.PropertyTypes = *req.PropertyTypes
+	}
+	if req.CategoriesWithAmenities.Categories != nil {
+		staticData.CategoriesWithAmenities.Categories = req.CategoriesWithAmenities.Categories
+	}
+	staticData.IsActive = req.IsActive
+
+	// Save updates
+	err = c.repo.UpdateStaticSiteData(staticData)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update static site data", err.Error())
 	}
 
 	return nil

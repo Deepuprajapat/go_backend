@@ -53,6 +53,7 @@ type AppRepository interface {
 	GetBlogByID(id string) (*ent.Blogs, error)
 	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
+	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
 
 	// Amenities
 	CheckCategoryExists(category string) (bool, error)

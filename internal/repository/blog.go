@@ -10,12 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type BlogRepository interface {
-	GetAllBlogs() ([]*ent.Blogs, error)
-	GetBlogByID(id string) (*ent.Blogs, error)
-	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
-	DeleteBlog(ctx context.Context, id string) error
-}
+// type BlogRepository interface {
+// 	GetAllBlogs() ([]*ent.Blogs, error)
+// 	GetBlogByID(id string) (*ent.Blogs, error)
+// 	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
+// 	DeleteBlog(ctx context.Context, id string) error
+// 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
+// }
 
 func (r *repository) GetAllBlogs() ([]*ent.Blogs, error) {
 	ctx := context.Background()
@@ -81,4 +82,38 @@ func (r *repository) DeleteBlog(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (r *repository) UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error) {
+	// First check if blog exists
+	blog, err := r.GetBlogByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if blog == nil {
+		return nil, nil // Blog doesn't exist
+	}
+
+	update := r.db.Blogs.UpdateOneID(id)
+
+	if blogURL != nil {
+		update.SetBlogURL(*blogURL)
+	}
+	if blogContent != nil {
+		update.SetBlogContent(*blogContent)
+	}
+	if seoMetaInfo != nil {
+		update.SetSeoMetaInfo(*seoMetaInfo)
+	}
+	if isPriority != nil {
+		update.SetIsPriority(*isPriority)
+	}
+
+	blog, err = update.Save(ctx)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update blog")
+		return nil, err
+	}
+
+	return blog, nil
 }

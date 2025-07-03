@@ -77,3 +77,18 @@ func (c *application) DeleteBlog(ctx context.Context, id string) *imhttp.CustomE
 
 	return nil
 }
+
+func (c *application) UpdateBlog(ctx context.Context, id string, req *request.UpdateBlogRequest) (*response.BlogResponse, *imhttp.CustomError) {
+	// Update blog in repository
+	blog, err := c.repo.UpdateBlog(ctx, id, req.BlogURL, req.BlogContent, req.SEOMetaInfo, req.IsPriority)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update blog")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update blog", err.Error())
+	}
+
+	if blog == nil {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found", "Blog not found")
+	}
+
+	return response.GetBlogFromEnt(blog), nil
+}

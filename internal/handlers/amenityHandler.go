@@ -165,3 +165,23 @@ func (h *Handler) DeleteCategory(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		Message:    "Category and its amenities deleted successfully",
 	}, nil
 }
+
+func (h *Handler) UpdateStaticSiteData(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	var req request.UpdateStaticSiteDataRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
+	}
+
+	if err := h.app.UpdateStaticSiteData(&req); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		StatusCode: http.StatusOK,
+		Message:    "Static site data updated successfully",
+	}, nil
+}

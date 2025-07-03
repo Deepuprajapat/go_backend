@@ -38,7 +38,7 @@ type DeleteCategoryRequest struct {
 
 // Request type for updating static site data
 type UpdateStaticSiteDataRequest struct {
-	PropertyTypes           schema.PropertyTypes `json:"property_types,omitempty"`
+	PropertyTypes           *schema.PropertyTypes `json:"property_types,omitempty"`
 	CategoriesWithAmenities struct {
 		Categories map[string][]struct {
 			Icon  string `json:"icon"`

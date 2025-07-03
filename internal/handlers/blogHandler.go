@@ -70,3 +70,27 @@ func (h *Handler) DeleteBlog(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *Handler) UpdateBlog(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	blogID := vars["blog_id"]
+
+	var req request.UpdateBlogRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	if err := h.validate.Struct(req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
+	}
+
+	blog, err := h.app.UpdateBlog(r.Context(), blogID, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       blog,
+		StatusCode: http.StatusOK,
+	}, nil
+}
