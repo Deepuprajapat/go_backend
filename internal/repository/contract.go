@@ -46,7 +46,7 @@ type AppRepository interface {
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
 
 	// Blogs
-	GetAllBlogs(offset, limit int) ([]*ent.Blogs, int, error)
+	GetAllBlogs() ([]*ent.Blogs, error)
 	GetBlogByID(id string) (*ent.Blogs, error)
 
 	// Amenities

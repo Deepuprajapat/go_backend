@@ -67,6 +67,7 @@ type ProjectFilterRequest struct {
 	DeveloperID    string   `json:"developer_id"`
 	Name           string   `json:"name"`
 	Type           string   `json:"type"`
+	City           string   `json:"city"`
 }
 
 func (r *ProjectFilterRequest) ToMap() map[string]interface{} {
@@ -94,6 +95,9 @@ func (r *ProjectFilterRequest) ToMap() map[string]interface{} {
 	}
 	if r.Type != "" {
 		filters["type"] = r.Type
+	}
+	if r.City != "" {
+		filters["city"] = r.City
 	}
 	return filters
 }

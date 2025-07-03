@@ -13,6 +13,14 @@ type BlogResponse struct {
 	IsPriority  bool               `json:"is_priority"`
 }
 
+type BlogListItem struct {
+	ID          string             `json:"id"`
+	Image       string             `json:"image"`
+	Title       string             `json:"title"`
+	Description string             `json:"description"`
+	IsPriority  bool               `json:"is_priority"`
+}
+
 func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
 	return &BlogResponse{
 		ID:          blog.ID,
@@ -23,7 +31,16 @@ func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
 	}
 }
 
+func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
+	return &BlogListItem{
+		ID:          blog.ID,
+		Image:       blog.BlogContent.Image,
+		Title:       blog.BlogContent.Title,
+		Description: blog.BlogContent.Description,
+		IsPriority:  blog.IsPriority,
+	}
+}
+
 type BlogListResponse struct {
-	Blogs      []*BlogResponse `json:"blogs"`
-	TotalCount int             `json:"total_count"`
+	Blogs []*BlogListItem `json:"blogs"`
 }

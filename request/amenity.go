@@ -1,5 +1,9 @@
 package request
 
+import (
+	"github.com/VI-IM/im_backend_go/ent/schema"
+)
+
 type Amenities struct {
 	Icon  string `json:"icon"`
 	Value string `json:"value"`
@@ -18,19 +22,28 @@ type UpdateAmenityRequest struct {
 	Value    string `json:"value"`
 }
 
-// New request type for adding amenities to a category
 type AddAmenitiesToCategoryRequest struct {
 	Category string      `json:"category" validate:"required"`
 	Items    []Amenities `json:"items" validate:"required"`
 }
 
-// Request type for deleting amenities from a category
 type DeleteAmenitiesFromCategoryRequest struct {
 	Category string   `json:"category" validate:"required"`
-	Values   []string `json:"values" validate:"required"` // List of amenity values to delete
+	Values   []string `json:"values" validate:"required"`
 }
 
-// Request type for deleting a category with all its amenities
 type DeleteCategoryRequest struct {
 	Category string `json:"category" validate:"required"`
+}
+
+// Request type for updating static site data
+type UpdateStaticSiteDataRequest struct {
+	PropertyTypes           schema.PropertyTypes `json:"property_types,omitempty"`
+	CategoriesWithAmenities struct {
+		Categories map[string][]struct {
+			Icon  string `json:"icon"`
+			Value string `json:"value"`
+		} `json:"categories,omitempty"`
+	} `json:"categories_with_amenities,omitempty"`
+	IsActive bool `json:"is_active,omitempty"`
 }

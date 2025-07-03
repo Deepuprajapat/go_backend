@@ -10,25 +10,21 @@ import (
 )
 
 func (c *application) ListBlogs(pagination *request.PaginationRequest) (*response.BlogListResponse, *imhttp.CustomError) {
-	// Calculate offset
-	offset := (pagination.Page - 1) * pagination.PageSize
-
 	// Get blogs from repository
-	blogs, total, err := c.repo.GetAllBlogs(offset, pagination.PageSize)
+	blogs, err := c.repo.GetAllBlogs()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get blogs")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get blogs", err.Error())
 	}
 
 	// Convert to response type
-	blogResponses := make([]*response.BlogResponse, len(blogs))
+	blogResponses := make([]*response.BlogListItem, len(blogs))
 	for i, blog := range blogs {
-		blogResponses[i] = response.GetBlogFromEnt(blog)
+		blogResponses[i] = response.GetBlogListItemFromEnt(blog)
 	}
 
 	return &response.BlogListResponse{
-		Blogs:      blogResponses,
-		TotalCount: total,
+		Blogs: blogResponses,
 	}, nil
 }
 

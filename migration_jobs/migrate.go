@@ -856,6 +856,10 @@ func MigrateStaticSiteData(ctx context.Context, txn *ent.Tx) error {
 }
 
 func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
+	if txn == nil {
+		log.Fatal().Msg("Transaction (txn) is nil")
+	}
+
 	log.Info().Msg("Fetching blogs")
 	blogs, err := FetchAllBlogs(ctx)
 	if err != nil {
@@ -865,6 +869,7 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 
 	processBlogBatch := func(ctx context.Context, batch []LBlog) error {
 		for _, blog := range batch {
+
 			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(blog.ID, 10))))[:16]
 			// Parse images from JSON string
 			var images []string
@@ -874,9 +879,8 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				}
 			}
 
-			// Create blog content
 			blogContent := schema.BlogContent{
-				Title:       safeStr(blog.MetaTitle),
+				Title:       safeStr(blog.Headings),
 				Description: safeStr(blog.Description),
 			}
 			if len(images) > 0 {
@@ -886,11 +890,10 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 
 			// Create SEO meta info
 			seoMetaInfo := schema.SEOMetaInfo{
-				BlogSchema:  safeStr(blog.BlogSchema),
-				Canonical:   safeStr(blog.Canonical),
-				Title:       safeStr(blog.MetaTitle),
-				Keywords:    safeStr(blog.MetaKeywords),
-				Description: safeStr(blog.Description),
+				BlogSchema: safeStr(blog.BlogSchema),
+				Canonical:  safeStr(blog.Canonical),
+				Title:      safeStr(blog.MetaTitle),
+				Keywords:   safeStr(blog.MetaKeywords),
 			}
 
 			// Create blog entry

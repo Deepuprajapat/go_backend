@@ -8,28 +8,19 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (r *repository) GetAllBlogs(offset, limit int) ([]*ent.Blogs, int, error) {
+func (r *repository) GetAllBlogs() ([]*ent.Blogs, error) {
 	ctx := context.Background()
 
-	// Get total count
-	total, err := r.db.Blogs.Query().Count(ctx)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get total blog count")
-		return nil, 0, err
-	}
-
-	// Get paginated blogs
+	// Get all blogs
 	blogList, err := r.db.Blogs.Query().
 		Order(ent.Desc(blogs.FieldID)).
-		Offset(offset).
-		Limit(limit).
 		All(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get blogs")
-		return nil, 0, err
+		return nil, err
 	}
 
-	return blogList, total, nil
+	return blogList, nil
 }
 
 func (r *repository) GetBlogByID(id string) (*ent.Blogs, error) {
