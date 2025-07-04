@@ -13,7 +13,11 @@ import (
 )
 
 func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
-	property, err := r.db.Property.Get(context.Background(), id)
+	property, err := r.db.Property.Query().
+		Where(property.ID(id)).
+		WithDeveloper().
+		WithProject().
+		First(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("property not found")
@@ -176,6 +180,8 @@ func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, 
 
 	properties, err := r.db.Property.Query().
 		Where(property.ProjectID(projectID)).
+		WithDeveloper().
+		WithProject().
 		All(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get properties of project")

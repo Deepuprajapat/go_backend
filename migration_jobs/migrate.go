@@ -318,6 +318,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
+				SetMinPrice(strconv.FormatFloat(minPrice, 'f', -1, 64)).
+				SetMaxPrice(strconv.FormatFloat(maxPrice, 'f', -1, 64)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
 				SetTimelineInfo(schema.TimelineInfo{
@@ -770,6 +772,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				SetID(id).
 				SetName(*property.PropertyName).
 				SetPropertyImages(parsedImages).
+				SetPropertyType(safeStr(propertyType.PropertyType)).
 				SetWebCards(webCard).
 				SetPricingInfo(schema.PropertyPricingInfo{
 					Price: strconv.FormatFloat(property.Price, 'f', -1, 64),
