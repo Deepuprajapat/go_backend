@@ -690,7 +690,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 					PropertyType: struct {
 						Value string `json:"value,omitempty"`
 					}{
-						Value: safeStr(propertyType.PropertyType),
+						Value: safeStr(propertyType.ConfigurationTypeName),
 					},
 					AgeOfProperty: struct {
 						Value string `json:"value,omitempty"`
