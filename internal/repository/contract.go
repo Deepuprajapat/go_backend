@@ -47,6 +47,7 @@ type AppRepository interface {
 	// Static Site Data
 	GetStaticSiteData() (*ent.StaticSiteData, error)
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
+	CheckCategoryExists(category string) (bool, error)
 
 	// Blogs
 	GetAllBlogs() ([]*ent.Blogs, error)
@@ -54,9 +55,6 @@ type AppRepository interface {
 	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
-
-	// Amenities
-	CheckCategoryExists(category string) (bool, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

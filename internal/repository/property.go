@@ -48,6 +48,7 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 	newWebCards := oldProperty.WebCards
 	hasWebCardChanges := false
 
+	// property details
 	if input.WebCards.PropertyDetails != (oldProperty.WebCards.PropertyDetails) {
 		if input.WebCards.PropertyDetails.BuiltUpArea.Value != "" {
 			newWebCards.PropertyDetails.BuiltUpArea.Value = input.WebCards.PropertyDetails.BuiltUpArea.Value
@@ -107,6 +108,7 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		}
 	}
 
+	// why choose us
 	if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 || len(input.WebCards.WhyChooseUs.USP_List) > 0 {
 		if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 {
 			newWebCards.WhyChooseUs.ImageUrls = input.WebCards.WhyChooseUs.ImageUrls
@@ -117,11 +119,13 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		hasWebCardChanges = true
 	}
 
+	// know about
 	if input.WebCards.KnowAbout.Description != "" {
 		newWebCards.KnowAbout.Description = input.WebCards.KnowAbout.Description
 		hasWebCardChanges = true
 	}
 
+	// video presentation
 	if input.WebCards.VideoPresentation.Title != "" || input.WebCards.VideoPresentation.VideoUrl != "" {
 		if input.WebCards.VideoPresentation.Title != "" {
 			newWebCards.VideoPresentation.Title = input.WebCards.VideoPresentation.Title
@@ -132,12 +136,24 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		hasWebCardChanges = true
 	}
 
+	// location map
 	if input.WebCards.LocationMap.Description != "" || input.WebCards.LocationMap.GoogleMapLink != "" {
 		if input.WebCards.LocationMap.Description != "" {
 			newWebCards.LocationMap.Description = input.WebCards.LocationMap.Description
 		}
 		if input.WebCards.LocationMap.GoogleMapLink != "" {
 			newWebCards.LocationMap.GoogleMapLink = input.WebCards.LocationMap.GoogleMapLink
+		}
+		hasWebCardChanges = true
+	}
+
+	// property floor plan
+	if input.WebCards.PropertyFloorPlan.Title != "" || len(input.WebCards.PropertyFloorPlan.Plans) > 0 {
+		if input.WebCards.PropertyFloorPlan.Title != "" {
+			newWebCards.PropertyFloorPlan.Title = input.WebCards.PropertyFloorPlan.Title
+		}
+		if len(input.WebCards.PropertyFloorPlan.Plans) > 0 {
+			newWebCards.PropertyFloorPlan.Plans = input.WebCards.PropertyFloorPlan.Plans
 		}
 		hasWebCardChanges = true
 	}

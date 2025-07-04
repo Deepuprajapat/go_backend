@@ -47,13 +47,15 @@ type ApplicationInterface interface {
 	DeleteProperty(id string) *imhttp.CustomError
 
 	// Amenity
-	GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)
-	GetAmenityByID(id string) (*response.SingleAmenityResponse, *imhttp.CustomError)
+	GetAllCategoriesWithAmenities() (*response.AmenityResponse, *imhttp.CustomError)
+	// GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)
+	// GetAmenityByName(name string) (*response.SingleAmenityResponse, *imhttp.CustomError)
 	AddCategoryWithAmenities(req *request.CreateAmenityRequest) *imhttp.CustomError
-	UpdateAmenity(id string, req *request.UpdateAmenityRequest) *imhttp.CustomError
-	AddAmenitiesToCategory(req *request.AddAmenitiesToCategoryRequest) *imhttp.CustomError
-	DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
-	DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
+	// UpdateAmenity(id string, req *request.UpdateAmenityRequest) *imhttp.CustomError
+	// AddAmenitiesToCategory(req *request.AddAmenitiesToCategoryRequest) *imhttp.CustomError
+	// DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
+	// DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
+	// UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
 	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
 
 	// Upload File

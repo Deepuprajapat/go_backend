@@ -49,3 +49,8 @@ func (r *repository) CheckCategoryExists(category string) (bool, error) {
 
 	return isExist, nil
 }
+
+func (r *repository) AddCategoryWithAmenities(data *ent.StaticSiteData) error {
+
+	return r.UpdateStaticSiteData(data)
+}

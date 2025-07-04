@@ -639,6 +639,12 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				}
 			}
 
+			ImageUrlWithType := make(map[string]string)
+			if property.FloorPara != nil && *property.FloorPara != "" {
+				ImageUrlWithType["2D"] = safeStr(property.FloorImage2D)
+				ImageUrlWithType["3D"] = safeStr(property.FloorImage3D)
+			}
+
 			webCard := schema.WebCards{
 				PropertyDetails: schema.PropertyDetails{
 					BuiltUpArea: struct {
@@ -718,6 +724,15 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				}{
 					ImageUrls: parsedImages,
 					USP_List:  uspList,
+				},
+				PropertyFloorPlan: schema.PropertyFloorPlan{
+					Title: safeStr(property.FloorPara),
+					Plans: []map[string]string{
+						{
+							"2D": ImageUrlWithType["2D"],
+							"3D": ImageUrlWithType["3D"],
+						},
+					},
 				},
 				KnowAbout: struct {
 					Description string `json:"description,omitempty"`

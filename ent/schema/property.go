@@ -70,16 +70,8 @@ type WebCards struct {
 }
 
 type PropertyFloorPlan struct {
-	Title string         `json:"title,omitempty"`
-	Plans []PropertyPlan `json:"plans,omitempty"`
-}
-
-type PropertyPlan struct {
-	Title        string `json:"title,omitempty"`
-	FlatType     string `json:"flat_type,omitempty"`
-	Price        string `json:"price,omitempty"`
-	BuildingArea string `json:"building_area,omitempty"`
-	Image        string `json:"image,omitempty"`
+	Title string              `json:"title,omitempty"`
+	Plans []map[string]string `json:"plans,omitempty"`
 }
 
 // area details

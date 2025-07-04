@@ -55,13 +55,11 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(handler.DeleteLocation)).Methods(http.MethodDelete)
 
 	// amenity routes
-	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.GetAmenities)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.GetAmenity)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.CreateAmenity)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/amenities/{amenity_id}", imhttp.AppHandler(handler.UpdateAmenity)).Methods(http.MethodPatch)
-	Router.Handle("/v1/api/amenities/category", imhttp.AppHandler(handler.AddAmenitiesToCategory)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/amenities/category", imhttp.AppHandler(handler.DeleteAmenitiesFromCategory)).Methods(http.MethodDelete)
-	Router.Handle("/v1/api/amenities/category/all", imhttp.AppHandler(handler.DeleteCategory)).Methods(http.MethodDelete)
+	// get GetAllCategoriesWithAmenities
+	// add CategoryWithAmenities -- done
+	// patch static site data
+
+	Router.Handle("/v1/api/amenities", imhttp.AppHandler(handler.GetAllCategoriesWithAmenities)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/static-site-data", imhttp.AppHandler(handler.UpdateStaticSiteData)).Methods(http.MethodPatch)
 
 	// blog routes
