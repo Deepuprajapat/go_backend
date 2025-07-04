@@ -13,7 +13,11 @@ import (
 )
 
 func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
-	property, err := r.db.Property.Get(context.Background(), id)
+	property, err := r.db.Property.Query().
+		Where(property.ID(id)).
+		WithDeveloper().
+		WithProject().
+		First(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("property not found")
@@ -44,6 +48,7 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 	newWebCards := oldProperty.WebCards
 	hasWebCardChanges := false
 
+	// property details
 	if input.WebCards.PropertyDetails != (oldProperty.WebCards.PropertyDetails) {
 		if input.WebCards.PropertyDetails.BuiltUpArea.Value != "" {
 			newWebCards.PropertyDetails.BuiltUpArea.Value = input.WebCards.PropertyDetails.BuiltUpArea.Value
@@ -103,6 +108,7 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		}
 	}
 
+	// why choose us
 	if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 || len(input.WebCards.WhyChooseUs.USP_List) > 0 {
 		if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 {
 			newWebCards.WhyChooseUs.ImageUrls = input.WebCards.WhyChooseUs.ImageUrls
@@ -113,11 +119,13 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		hasWebCardChanges = true
 	}
 
+	// know about
 	if input.WebCards.KnowAbout.Description != "" {
 		newWebCards.KnowAbout.Description = input.WebCards.KnowAbout.Description
 		hasWebCardChanges = true
 	}
 
+	// video presentation
 	if input.WebCards.VideoPresentation.Title != "" || input.WebCards.VideoPresentation.VideoUrl != "" {
 		if input.WebCards.VideoPresentation.Title != "" {
 			newWebCards.VideoPresentation.Title = input.WebCards.VideoPresentation.Title
@@ -128,12 +136,24 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		hasWebCardChanges = true
 	}
 
+	// location map
 	if input.WebCards.LocationMap.Description != "" || input.WebCards.LocationMap.GoogleMapLink != "" {
 		if input.WebCards.LocationMap.Description != "" {
 			newWebCards.LocationMap.Description = input.WebCards.LocationMap.Description
 		}
 		if input.WebCards.LocationMap.GoogleMapLink != "" {
 			newWebCards.LocationMap.GoogleMapLink = input.WebCards.LocationMap.GoogleMapLink
+		}
+		hasWebCardChanges = true
+	}
+
+	// property floor plan
+	if input.WebCards.PropertyFloorPlan.Title != "" || len(input.WebCards.PropertyFloorPlan.Plans) > 0 {
+		if input.WebCards.PropertyFloorPlan.Title != "" {
+			newWebCards.PropertyFloorPlan.Title = input.WebCards.PropertyFloorPlan.Title
+		}
+		if len(input.WebCards.PropertyFloorPlan.Plans) > 0 {
+			newWebCards.PropertyFloorPlan.Plans = input.WebCards.PropertyFloorPlan.Plans
 		}
 		hasWebCardChanges = true
 	}
@@ -176,6 +196,8 @@ func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, 
 
 	properties, err := r.db.Property.Query().
 		Where(property.ProjectID(projectID)).
+		WithDeveloper().
+		WithProject().
 		All(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get properties of project")
@@ -220,23 +242,15 @@ func (r *repository) AddProperty(input domain.Property) (string, error) {
 	return propertyID, nil
 }
 
-func (r *repository) GetAllProperties(offset, limit int) ([]*ent.Property, int, error) {
+func (r *repository) GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error) {
 	ctx := context.Background()
 
-	// Get total count
-	total, err := r.db.Property.Query().
-		Where(property.IsDeletedEQ(false)).
-		Count(ctx)
-	if err != nil {
-		return nil, 0, err
-	}
+	// Start building the query
+	query := r.db.Property.Query().Where(property.IsDeletedEQ(false))
 
-	// Get paginated results with developer and location info
-	properties, err := r.db.Property.Query().
-		Where(property.IsDeletedEQ(false)).
+	// Get all properties first
+	properties, err := query.
 		Order(ent.Desc(property.FieldID)).
-		Offset(offset).
-		Limit(limit).
 		WithDeveloper().
 		WithLocation().
 		All(ctx)
@@ -244,7 +258,43 @@ func (r *repository) GetAllProperties(offset, limit int) ([]*ent.Property, int, 
 		return nil, 0, err
 	}
 
-	return properties, total, nil
+	// Apply filters in memory
+	filteredProperties := make([]*ent.Property, 0)
+	for _, p := range properties {
+		// Check if property matches all filters
+		matches := true
+
+		if propertyType, ok := filters["property_type"].(string); ok && propertyType != "" {
+			if p.WebCards.PropertyDetails.PropertyType.Value != propertyType {
+				matches = false
+			}
+		}
+
+		if configuration, ok := filters["configuration"].(string); ok && configuration != "" {
+			if p.WebCards.PropertyDetails.Configuration.Value != configuration {
+				matches = false
+			}
+		}
+
+		if matches {
+			filteredProperties = append(filteredProperties, p)
+		}
+	}
+
+	// Calculate total after filtering
+	total := len(filteredProperties)
+
+	// Apply pagination in memory
+	start := offset
+	end := offset + limit
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+
+	return filteredProperties[start:end], total, nil
 }
 
 func (r *repository) DeleteProperty(id string, hardDelete bool) error {

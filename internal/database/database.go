@@ -12,6 +12,7 @@ import (
 
 // NewClient creates a new ent client
 func NewClient(dsn string) *ent.Client {
+
 	drv, err := entsql.Open(dialect.Postgres, dsn)
 	if err != nil {
 		logger.Get().Fatal().Err(err).Msg("failed opening connection to postgres")

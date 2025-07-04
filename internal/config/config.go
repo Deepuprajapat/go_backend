@@ -21,16 +21,16 @@ type (
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT" default:"9999"`
+		Port int    `envconfig:"PORT"`
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
-		DB_Port    int    `envconfig:"DB_PORT" default:"8080"`
+		DB_Port    int    `envconfig:"DB_PORT"`
 		DB_HOST    string `envconfig:"DB_HOST"`
-		ConnString string `envconfig:"CONN_STRG"`
+		URL        string `envconfig:"DATABASE_URL"`
 	}
 	JWTConfig struct {
-		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET" default:"MY_KEY"`
+		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET"`
 		ExpiresIn         string        `envconfig:"JWT_EXPIRATION_DURATION" default:"24h"`
 		ExpiresInDuration time.Duration `envconfig:"-"`
 	}

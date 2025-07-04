@@ -3,6 +3,7 @@ package migration_jobs
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -317,6 +318,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
+				SetMinPrice(strconv.FormatFloat(minPrice, 'f', -1, 64)).
+				SetMaxPrice(strconv.FormatFloat(maxPrice, 'f', -1, 64)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
 				SetTimelineInfo(schema.TimelineInfo{
@@ -636,6 +639,12 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				}
 			}
 
+			ImageUrlWithType := make(map[string]string)
+			if property.FloorPara != nil && *property.FloorPara != "" {
+				ImageUrlWithType["2D"] = safeStr(property.FloorImage2D)
+				ImageUrlWithType["3D"] = safeStr(property.FloorImage3D)
+			}
+
 			webCard := schema.WebCards{
 				PropertyDetails: schema.PropertyDetails{
 					BuiltUpArea: struct {
@@ -716,6 +725,15 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 					ImageUrls: parsedImages,
 					USP_List:  uspList,
 				},
+				PropertyFloorPlan: schema.PropertyFloorPlan{
+					Title: safeStr(property.FloorPara),
+					Plans: []map[string]string{
+						{
+							"2D": ImageUrlWithType["2D"],
+							"3D": ImageUrlWithType["3D"],
+						},
+					},
+				},
 				KnowAbout: struct {
 					Description string `json:"description,omitempty"`
 				}{
@@ -769,6 +787,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				SetID(id).
 				SetName(*property.PropertyName).
 				SetPropertyImages(parsedImages).
+				SetPropertyType(safeStr(propertyType.PropertyType)).
 				SetWebCards(webCard).
 				SetPricingInfo(schema.PropertyPricingInfo{
 					Price: strconv.FormatFloat(property.Price, 'f', -1, 64),
@@ -851,5 +870,72 @@ func MigrateStaticSiteData(ctx context.Context, txn *ent.Tx) error {
 	}
 
 	log.Info().Msg("Property configurations migrated successfully --------->>>> success")
+	return nil
+}
+
+func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
+	if txn == nil {
+		log.Fatal().Msg("Transaction (txn) is nil")
+	}
+
+	log.Info().Msg("Fetching blogs")
+	blogs, err := FetchAllBlogs(ctx)
+	if err != nil {
+		return err
+	}
+	log.Info().Msg("Fetched blogs --------->>>> success")
+
+	processBlogBatch := func(ctx context.Context, batch []LBlog) error {
+		for _, blog := range batch {
+
+			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(blog.ID, 10))))[:16]
+			// Parse images from JSON string
+			var images []string
+			if blog.Images != nil {
+				if err := json.Unmarshal([]byte(*blog.Images), &images); err != nil {
+					log.Error().Err(err).Msgf("Failed to parse images for blog ID %d", blog.ID)
+				}
+			}
+
+			blogContent := schema.BlogContent{
+				Title:       safeStr(blog.Headings),
+				Description: safeStr(blog.Description),
+			}
+			if len(images) > 0 {
+				blogContent.Image = images[0]
+				blogContent.ImageAlt = safeStr(blog.Alt)
+			}
+
+			// Create SEO meta info
+			seoMetaInfo := schema.SEOMetaInfo{
+				BlogSchema: safeStr(blog.BlogSchema),
+				Canonical:  safeStr(blog.Canonical),
+				Title:      safeStr(blog.MetaTitle),
+				Keywords:   safeStr(blog.MetaKeywords),
+			}
+
+			// Create blog entry
+			if err := txn.Blogs.Create().
+				SetID(id).
+				SetBlogURL(safeStr(blog.BlogURL)).
+				SetBlogContent(blogContent).
+				SetSeoMetaInfo(seoMetaInfo).
+				SetIsPriority(blog.IsPriority).
+				SetCreatedAt(*blog.CreatedDate).
+				SetUpdatedAt(int64(safeInt(blog.UpdatedDate))).
+				SetIsDeleted(blog.IsDeleted).
+				Exec(ctx); err != nil {
+				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)
+				continue
+			}
+		}
+		return nil
+	}
+
+	if err := processBatch(ctx, blogs, batchSize, processBlogBatch); err != nil {
+		return err
+	}
+
+	log.Info().Msg("Blogs migrated successfully --------->>>> success")
 	return nil
 }

@@ -35,11 +35,14 @@ type ProjectListResponse struct {
 	ProjectID     string   `json:"project_id"`
 	ProjectName   string   `json:"project_name"`
 	ShortAddress  string   `json:"short_address"`
+	Canonical     string   `json:"canonical"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
 	MinPrice      int      `json:"min_price"`
 	Sizes         string   `json:"sizes"`
 	IsPremium     bool     `json:"is_premium"`
+	VideoURL      []byte   `json:"video_url"`
+	FullDetails   *Project `json:"full_details,omitempty"`
 }
 
 func GetProjectFromEnt(project *ent.Project) *Project {
@@ -68,6 +71,7 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 }
 
 func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
+
 	return &ProjectListResponse{
 		ProjectID:     project.ID,
 		ProjectName:   project.Name,
@@ -76,5 +80,7 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		Images:        project.WebCards.Images,
 		Configuration: project.WebCards.Details.Configuration.Value,
 		Sizes:         project.WebCards.Details.Sizes.Value,
+		VideoURL:      project.WebCards.VideoPresentation.URL,
+		Canonical:     project.MetaInfo.Canonical,
 	}
 }

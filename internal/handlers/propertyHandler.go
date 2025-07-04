@@ -117,7 +117,18 @@ func (h *Handler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.Cus
 
 	pagination.Validate()
 
-	properties, totalItems, err := h.app.ListProperties(pagination)
+	// Create filter map
+	filters := make(map[string]interface{})
+
+	// Parse query parameters
+	if configuration := r.URL.Query().Get("configuration"); configuration != "" {
+		filters["configuration"] = configuration
+	}
+	if propertyType := r.URL.Query().Get("property_type"); propertyType != "" {
+		filters["property_type"] = propertyType
+	}
+
+	properties, totalItems, err := h.app.ListProperties(pagination, filters)
 	if err != nil {
 		return nil, err
 	}

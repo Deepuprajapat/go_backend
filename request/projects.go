@@ -16,7 +16,7 @@ type AddProjectRequest struct {
 
 type UpdateProjectRequest struct {
 	ProjectID    string                 `json:"project_id" validate:"required"`
-	ProjectName         string                 `json:"project_name,omitempty"`
+	ProjectName  string                 `json:"project_name,omitempty"`
 	Description  string                 `json:"description,omitempty"`
 	Status       enums.ProjectStatus    `json:"status,omitempty"`
 	PriceUnit    string                 `json:"price_unit,omitempty"`
@@ -56,4 +56,48 @@ type AddPropertyRequest struct {
 	BalconyCount   string `json:"balcony_count"`
 	BedroomsCount  string `json:"bedrooms_count"`
 	CoveredParking string `json:"covered_parking"`
+}
+
+type ProjectFilterRequest struct {
+	Configurations []string `json:"configurations"` // List of configurations like "1BHK", "2BHK", etc.
+	IsPremium      bool     `json:"is_premium"`
+	IsPriority     bool     `json:"is_priority"`
+	IsFeatured     bool     `json:"is_featured"`
+	LocationID     string   `json:"location_id"`
+	DeveloperID    string   `json:"developer_id"`
+	Name           string   `json:"name"`
+	Type           string   `json:"type"`
+	City           string   `json:"city"`
+}
+
+func (r *ProjectFilterRequest) ToMap() map[string]interface{} {
+	filters := make(map[string]interface{})
+	if len(r.Configurations) > 0 {
+		filters["configurations"] = r.Configurations
+	}
+	if r.IsPremium {
+		filters["is_premium"] = r.IsPremium
+	}
+	if r.IsPriority {
+		filters["is_priority"] = r.IsPriority
+	}
+	if r.IsFeatured {
+		filters["is_featured"] = r.IsFeatured
+	}
+	if r.LocationID != "" {
+		filters["location_id"] = r.LocationID
+	}
+	if r.DeveloperID != "" {
+		filters["developer_id"] = r.DeveloperID
+	}
+	if r.Name != "" {
+		filters["name"] = r.Name
+	}
+	if r.Type != "" {
+		filters["type"] = r.Type
+	}
+	if r.City != "" {
+		filters["city"] = r.City
+	}
+	return filters
 }

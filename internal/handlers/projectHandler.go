@@ -3,10 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/VI-IM/im_backend_go/request"
-	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/gorilla/mux"
@@ -94,40 +92,47 @@ func (h *Handler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.Cust
 }
 
 func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	// Parse pagination parameters from query
-	pagination := &request.PaginationRequest{
-		Page:     1,
-		PageSize: 10,
+	// Create filter map
+	filters := make(map[string]interface{})
+
+	// Parse query parameters
+	if configurations := r.URL.Query()["configurations"]; len(configurations) > 0 {
+		filters["configurations"] = configurations
 	}
-
-	if page := r.URL.Query().Get("page"); page != "" {
-		if pageNum, err := strconv.Atoi(page); err == nil {
-			pagination.Page = pageNum
-		}
+	if isPremium := r.URL.Query().Get("is_premium"); isPremium == "true" {
+		filters["is_premium"] = true
 	}
-
-	if pageSize := r.URL.Query().Get("page_size"); pageSize != "" {
-		if pageSizeNum, err := strconv.Atoi(pageSize); err == nil {
-			pagination.PageSize = pageSizeNum
-		}
+	if isPriority := r.URL.Query().Get("is_priority"); isPriority == "true" {
+		filters["is_priority"] = true
 	}
+	if isFeatured := r.URL.Query().Get("is_featured"); isFeatured == "true" {
+		filters["is_featured"] = true
+	}
+	if locationID := r.URL.Query().Get("location_id"); locationID != "" {
+		filters["location_id"] = locationID
+	}
+	if developerID := r.URL.Query().Get("developer_id"); developerID != "" {
+		filters["developer_id"] = developerID
+	}
+	if name := r.URL.Query().Get("name"); name != "" {
+		filters["name"] = name
+	}
+	if projectType := r.URL.Query().Get("type"); projectType != "" {
+		filters["type"] = projectType
+	}
+	if city := r.URL.Query().Get("city"); city != "" {
+        filters["city"] = city
+    }
 
-	pagination.Validate()
+	
 
-	projects, totalItems, err := h.app.ListProjects(pagination)
+	projects, err := h.app.ListProjects(filters)
 	if err != nil {
 		return nil, err
 	}
 
-	paginatedResponse := response.NewPaginatedResponse(
-		projects,
-		pagination.Page,
-		pagination.PageSize,
-		totalItems,
-	)
-
 	return &imhttp.Response{
-		Data:       paginatedResponse,
+		Data:       projects,
 		StatusCode: http.StatusOK,
 	}, nil
 }

@@ -45,9 +45,9 @@ func main() {
 		if err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to connect to new database")
 		}
-		defer newDB.Close()
+		defer newDB.Close()                
 
-		// Start a transaction for the entire migration process
+		// // Start a transaction for the entire migration process
 		txn, err = newDB.BeginTx(ctx, nil)
 		if err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to begin transaction")
@@ -69,6 +69,7 @@ func main() {
 		logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
+
 		}
 
 		logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
@@ -80,6 +81,12 @@ func main() {
 		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate properties")
 		}
+                 
+		logger.Get().Info().Msg("Migrating blogs------------>>>>>>>>>>>>>>>>>>>>")
+		if err = migration_jobs.MigrateBlogs(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate blogs")
+		}
+
 
 		logger.Get().Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")
 		if err := txn.Commit(); err != nil {
@@ -95,11 +102,13 @@ func main() {
 		logger.Get().Fatal().Err(err).Msg("Failed to load configuration")
 	}
 
-	client := database.NewClient("postgres://im_db_dev:password@localhost:5434/mydb?sslmode=disable")
+	// Log configuration values
+	cfg := config.GetConfig()
 
+	client := database.NewClient(cfg.Database.URL)
 	defer client.Close()
 
-	s3Client, err := s3client.NewS3Client(config.GetConfig().S3.Bucket)
+	s3Client, err := s3client.NewS3Client(cfg.S3.Bucket)
 	if err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to create S3 client")
 	}
@@ -111,8 +120,8 @@ func main() {
 	router.Init(app)
 
 	// Start server
-	logger.Get().Info().Msgf("Server starting on port %d", config.GetConfig().Port)
-	if err := http.ListenAndServe(":"+strconv.Itoa(config.GetConfig().Port), router.Router); err != nil {
+	logger.Get().Info().Msgf("Server starting on port %d", cfg.Port)
+	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), router.Router); err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to start server")
 	}
 }

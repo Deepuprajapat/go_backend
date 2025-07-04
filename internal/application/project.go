@@ -116,17 +116,37 @@ func (c *application) DeleteProject(id string) *imhttp.CustomError {
 	return nil
 }
 
-func (c *application) ListProjects(pagination *request.PaginationRequest) ([]*response.ProjectListResponse, int, *imhttp.CustomError) {
-	projects, totalItems, err := c.repo.GetAllProjects(pagination.GetOffset(), pagination.GetLimit())
+func (c *application) ListProjects(filters map[string]interface{}) ([]*response.ProjectListResponse, *imhttp.CustomError) {
+	projects, err := c.repo.GetAllProjects(filters)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list projects")
-		return nil, 0, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list projects", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list projects", err.Error())
 	}
 
 	var projectResponses []*response.ProjectListResponse
-	for _, project := range projects {
-		projectResponses = append(projectResponses, response.GetProjectListResponse(project))
+	// If name filter is present, return full project details
+	if _, hasNameFilter := filters["name"]; hasNameFilter {
+		for _, project := range projects {
+			fullProject := response.GetProjectFromEnt(project)
+			projectResponses = append(projectResponses, &response.ProjectListResponse{
+				ProjectID:     fullProject.ProjectID,
+				ProjectName:   fullProject.ProjectName,
+				ShortAddress:  fullProject.LocationInfo.ShortAddress,
+				IsPremium:     fullProject.IsPremium,
+				Images:        fullProject.WebCards.Images,
+				Configuration: fullProject.WebCards.Details.Configuration.Value,
+				MinPrice:      fullProject.MinPrice,
+				Sizes:         fullProject.WebCards.Details.Sizes.Value,
+				Canonical:     fullProject.MetaInfo.Canonical,
+				// Add full project details
+				FullDetails: fullProject,
+			})
+		}
+	} else {
+		for _, project := range projects {
+			projectResponses = append(projectResponses, response.GetProjectListResponse(project))
+		}
 	}
 
-	return projectResponses, totalItems, nil
+	return projectResponses, nil
 }
