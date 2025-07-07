@@ -13,13 +13,26 @@ services:
       - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U im_db_dev -d mydb"]
       timeout: 5s
       retries: 10
       interval: 10s
       start_period: 30s
+    networks:
+      - im_network
+
+  backend:
+    image: ghcr.io/vi-im/im-backend-go:18d8200c
+    container_name: im-backend
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "9999:9999"
     networks:
       - im_network
 
