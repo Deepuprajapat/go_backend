@@ -127,6 +127,9 @@ func (h *Handler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.Cus
 	if propertyType := r.URL.Query().Get("property_type"); propertyType != "" {
 		filters["property_type"] = propertyType
 	}
+	if city := r.URL.Query().Get("city"); city != "" {
+        filters["city"] = city
+    }
 
 	properties, totalItems, err := h.app.ListProperties(pagination, filters)
 	if err != nil {

@@ -276,6 +276,12 @@ func (r *repository) GetAllProperties(offset, limit int, filters map[string]inte
 			}
 		}
 
+		if city, ok := filters["city"].(string); ok && city != "" {
+			if p.Edges.Location.City != city {
+				matches = false
+			}
+		}
+
 		if matches {
 			filteredProperties = append(filteredProperties, p)
 		}

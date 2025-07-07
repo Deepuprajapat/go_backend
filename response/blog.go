@@ -11,6 +11,8 @@ type BlogResponse struct {
 	BlogContent schema.BlogContent `json:"blog_content"`
 	SEOMetaInfo schema.SEOMetaInfo `json:"seo_meta_info"`
 	IsPriority  bool               `json:"is_priority"`
+	CreatedAt   int64              `json:"created_at"`
+	UpdatedAt   int64              `json:"updated_at"`
 }
 
 type BlogListItem struct {
@@ -31,6 +33,8 @@ func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
 		BlogContent: blog.BlogContent,
 		SEOMetaInfo: blog.SeoMetaInfo,
 		IsPriority:  blog.IsPriority,
+		CreatedAt:   blog.CreatedAt,
+		UpdatedAt:   blog.UpdatedAt,
 	}
 }
 

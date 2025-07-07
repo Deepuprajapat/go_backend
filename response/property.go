@@ -22,7 +22,7 @@ type Property struct {
 	MetaInfo       schema.PropertyMetaInfo    `json:"meta_info"`
 	DeveloperID    string                     `json:"developer_id"`
 	LocationID     string                     `json:"location_id"`
-	ProjectID      string                     `json:"project_id,omitempty"`	
+	ProjectID      string                     `json:"project_id,omitempty"`
 	Developer      *SimpleDeveloper           `json:"developer,omitempty"`
 }
 

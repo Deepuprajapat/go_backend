@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
 	"github.com/rs/zerolog/log"
 )
 
@@ -72,4 +73,3 @@ func parsePropertyImagesFromPropertyImages(propertyImages *string) ([]string, er
 	}
 	return propertyImagesList, nil
 }
-

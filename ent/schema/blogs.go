@@ -44,7 +44,7 @@ type BlogContent struct {
 }
 
 type SEOMetaInfo struct {
-	BlogSchema  string `json:"blog_schema"`
+	BlogSchema  []string `json:"blog_schema"`
 	Canonical   string `json:"canonical"`
 	Title       string `json:"title"`
 	Keywords    string `json:"keywords"`

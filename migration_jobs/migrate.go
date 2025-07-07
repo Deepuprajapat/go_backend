@@ -908,9 +908,9 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 
 			// Create SEO meta info
 			seoMetaInfo := schema.SEOMetaInfo{
-				BlogSchema: safeStr(blog.BlogSchema),
+				BlogSchema: []string{safeStr(blog.BlogSchema)},
 				Canonical:  safeStr(blog.Canonical),
-				Title:      safeStr(blog.MetaTitle),
+				Title:      safeStr(blog.SubHeadings),
 				Keywords:   safeStr(blog.MetaKeywords),
 			}
 

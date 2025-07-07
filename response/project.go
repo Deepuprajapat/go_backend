@@ -11,8 +11,8 @@ type Project struct {
 	ProjectName  string                 `json:"project_name"`
 	Description  string                 `json:"description"`
 	Status       enums.ProjectStatus    `json:"status"`
-	MinPrice     int                    `json:"min_price"`
-	MaxPrice     int                    `json:"max_price"`
+	MinPrice     string                    `json:"min_price"`
+	MaxPrice     string                    `json:"max_price"`
 	PriceUnit    string                 `json:"price_unit"`
 	TimelineInfo schema.TimelineInfo    `json:"timeline_info"`
 	MetaInfo     schema.SEOMeta         `json:"meta_info"`
@@ -38,7 +38,7 @@ type ProjectListResponse struct {
 	Canonical     string   `json:"canonical"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
-	MinPrice      int      `json:"min_price"`
+	MinPrice      string      `json:"min_price"`
 	Sizes         string   `json:"sizes"`
 	IsPremium     bool     `json:"is_premium"`
 	VideoURL      []byte   `json:"video_url"`
@@ -52,6 +52,8 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 		ProjectName: project.Name,
 		Description: project.Description,
 		Status:      project.Status,
+		MinPrice:    project.MinPrice,
+		MaxPrice:    project.MaxPrice,
 		TimelineInfo: schema.TimelineInfo{
 			ProjectLaunchDate:     project.TimelineInfo.ProjectLaunchDate,
 			ProjectPossessionDate: project.TimelineInfo.ProjectPossessionDate,
@@ -81,6 +83,7 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		Configuration: project.WebCards.Details.Configuration.Value,
 		Sizes:         project.WebCards.Details.Sizes.Value,
 		VideoURL:      project.WebCards.VideoPresentation.URL,
+		MinPrice:      project.MinPrice,
 		Canonical:     project.MetaInfo.Canonical,
 	}
 }
