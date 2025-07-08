@@ -38,6 +38,7 @@ func (r *repository) AddProject(input domain.Project) (string, error) {
 		SetMetaInfo(schema.SEOMeta{
 			Canonical: input.ProjectURL,
 		}).
+		SetProjectType(project.ProjectType(input.ProjectType)).
 		SetDescription("").
 		SetDeveloperID(input.DeveloperID).
 		Exec(context.Background()); err != nil {
@@ -237,8 +238,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 			newWebCards.VideoPresentation.Description = input.WebCards.VideoPresentation.Description
 		}
 		if len(input.WebCards.VideoPresentation.URL) > 0 {
-			newWebCards.VideoPresentation.URL = make([]byte, len(input.WebCards.VideoPresentation.URL))
-			copy(newWebCards.VideoPresentation.URL, input.WebCards.VideoPresentation.URL)
+			newWebCards.VideoPresentation.URL = input.WebCards.VideoPresentation.URL
 		}
 		hasWebCardChanges = true
 	}

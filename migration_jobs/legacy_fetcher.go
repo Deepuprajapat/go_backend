@@ -173,6 +173,7 @@ func FetchhAllProject(ctx context.Context) ([]LProject, error) {
 		); err != nil {
 			return nil, err
 		}
+		// fmt.Println("Project Videos", project.ProjectVideos)
 		projects = append(projects, project)
 	}
 	return projects, nil

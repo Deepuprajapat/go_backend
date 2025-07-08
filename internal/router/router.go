@@ -69,7 +69,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.DeleteBlog)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
 
-	//
+	//lead routes
 }
 
 /////   curl calls	/////

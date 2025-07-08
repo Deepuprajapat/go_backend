@@ -115,7 +115,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 		return err
 	}
 	log.Info().Msg("Fetched all projects --------->>>> success")
-
 	processProjectBatch := func(ctx context.Context, batch []LProject) error {
 		for _, project := range batch {
 			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
@@ -408,7 +407,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					},
 					VideoPresentation: schema.VideoPresentation{
 						Description: safeStr(project.VideoPara),
-						URL:         []byte(project.ProjectVideos),
+						URL:         string(decodeJavaSerialized(project.ProjectVideos)),
 					},
 					PaymentPlans: schema.PaymentPlans{
 						Description: safeStr(project.PaymentPara),
@@ -718,13 +717,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 						Value: safeStr(property.Bathrooms),
 					},
 				},
-				WhyChooseUs: struct {
-					ImageUrls []string `json:"image_urls,omitempty"`
-					USP_List  []string `json:"usp_list,omitempty"`
-				}{
-					ImageUrls: parsedImages,
-					USP_List:  uspList,
-				},
 				PropertyFloorPlan: schema.PropertyFloorPlan{
 					Title: safeStr(property.FloorPara),
 					Plans: []map[string]string{
@@ -738,13 +730,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 					Description string `json:"description,omitempty"`
 				}{
 					Description: safeStr(property.About),
-				},
-				VideoPresentation: struct {
-					Title    string `json:"title,omitempty"`
-					VideoUrl string `json:"video_url,omitempty"`
-				}{
-					Title:    safeStr(property.VideoPara),
-					VideoUrl: safeStr(property.PropertyVideo),
 				},
 				LocationMap: struct {
 					Description   string `json:"description,omitempty"`
@@ -896,6 +881,11 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 					log.Error().Err(err).Msgf("Failed to parse images for blog ID %d", blog.ID)
 				}
 			}
+			// Clean up blog schema format
+			cleanedSchema := strings.TrimSpace(blog.BlogSchema)
+			if strings.HasPrefix(cleanedSchema, "[\"") && strings.HasSuffix(cleanedSchema, "\"]") {
+				blog.BlogSchema = cleanedSchema[2 : len(cleanedSchema)-2] // Remove [" and "]
+			}
 
 			blogContent := schema.BlogContent{
 				Title:       safeStr(blog.Headings),
@@ -908,7 +898,7 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 
 			// Create SEO meta info
 			seoMetaInfo := schema.SEOMetaInfo{
-				BlogSchema: []string{safeStr(blog.BlogSchema)},
+				BlogSchema: []string{safeStr(&blog.BlogSchema)},
 				Canonical:  safeStr(blog.Canonical),
 				Title:      safeStr(blog.SubHeadings),
 				Keywords:   safeStr(blog.MetaKeywords),

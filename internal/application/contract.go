@@ -67,6 +67,7 @@ type ApplicationInterface interface {
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
 	UpdateBlog(ctx context.Context, id string, req *request.UpdateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
+
 }
 
 func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {

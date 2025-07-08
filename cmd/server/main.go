@@ -15,6 +15,7 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/VI-IM/im_backend_go/migration_jobs"
+	"github.com/VI-IM/im_backend_go/playground"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 )
@@ -26,9 +27,14 @@ var (
 )
 
 func main() {
-	// Initialize logger
+	// Initialize loggerplayground.MigrateVideoURLs()
 	logger.Init()
 	ctx := context.Background()
+
+	if os.Args[1] == "video-migration" && len(os.Args) > 1 {
+		playground.MigrateVideoURLs()
+		return
+	}
 
 	logger.Get().Info().Msg("Starting application...")
 
@@ -45,7 +51,7 @@ func main() {
 		if err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to connect to new database")
 		}
-		defer newDB.Close()                
+		defer newDB.Close()
 
 		// // Start a transaction for the entire migration process
 		txn, err = newDB.BeginTx(ctx, nil)
@@ -81,12 +87,11 @@ func main() {
 		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate properties")
 		}
-                 
-		logger.Get().Info().Msg("Migrating blogs------------>>>>>>>>>>>>>>>>>>>>")
-		if err = migration_jobs.MigrateBlogs(ctx, txn); err != nil {
-			logger.Get().Fatal().Err(err).Msg("Failed to migrate blogs")
-		}
 
+		// logger.Get().Info().Msg("Migrating blogs------------>>>>>>>>>>>>>>>>>>>>")
+		// if err = migration_jobs.MigrateBlogs(ctx, txn); err != nil {
+		// 	logger.Get().Fatal().Err(err).Msg("Failed to migrate blogs")
+		// }
 
 		logger.Get().Info().Msg("Committing transaction------------>>>>>>>>>>>>>>>>>>>>")
 		if err := txn.Commit(); err != nil {

@@ -49,6 +49,7 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 	project.ProjectID = fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(time.Now().Unix(), 10))))[:16]
 	project.ProjectName = input.ProjectName
 	project.ProjectURL = input.ProjectURL
+	project.ProjectType = input.ProjectType
 	project.DeveloperID = input.DeveloperID
 
 	projectID, err := c.repo.AddProject(project)

@@ -41,7 +41,7 @@ type ProjectListResponse struct {
 	MinPrice      string      `json:"min_price"`
 	Sizes         string   `json:"sizes"`
 	IsPremium     bool     `json:"is_premium"`
-	VideoURL      []byte   `json:"video_url"`
+	VideoURL      string   `json:"video_url"`
 	FullDetails   *Project `json:"full_details,omitempty"`
 }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/rs/zerolog/log"
 )
@@ -72,4 +73,45 @@ func parsePropertyImagesFromPropertyImages(propertyImages *string) ([]string, er
 		propertyImagesList = append(propertyImagesList, image)
 	}
 	return propertyImagesList, nil
+}
+
+func decodeJavaSerialized(blob []byte) []byte {
+	if len(blob) == 0 {
+		return []byte{}
+	}
+
+	// Try to detect if it's actually human readable (not binary)
+	if utf8.Valid(blob) {
+		// Maybe it's a plain string (rare case)
+		return blob
+	}
+
+	// Extract string from Java serialized ArrayList
+	// Find the string content after the 't' marker
+	for i := 0; i < len(blob)-1; i++ {
+		if blob[i] == 0x74 { // 't' marker for string in Java serialization
+			strStart := i + 3 // Skip 't' and 2-byte length
+			if strStart < len(blob) {
+				var content []byte
+				// Read until we hit a null byte or end
+				for j := strStart; j < len(blob); j++ {
+					if blob[j] == 0 {
+						break
+					}
+					content = append(content, blob[j])
+				}
+				if len(content) > 0 {
+					// If it looks like a YouTube video ID, make it a full URL
+					str := string(content)
+					if len(str) == 11 { // YouTube IDs are 11 characters
+						return []byte("https://www.youtube.com/watch?v=" + str)
+					}
+					return content
+				}
+			}
+		}
+	}
+
+	log.Warn().Msg("Failed to extract video URL from Java serialized data")
+	return []byte("VIDEO_URL_DECODE_FAILED")
 }
