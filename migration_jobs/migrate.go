@@ -328,6 +328,22 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 
 			videoUrl := projectIDToVideoURLMAP[project.ID]
 
+			projectSchema := []string{}
+			if project.ProjectSchema != nil {
+				// Handle the case where ProjectSchema comes as "[""]"
+				schemaStr := *project.ProjectSchema
+				if schemaStr != "" {
+					// Remove the square brackets and quotes from the string
+					schemaStr = strings.Trim(schemaStr, "[]")
+					schemaStr = strings.Trim(schemaStr, "\"")
+					if schemaStr != "" {
+						projectSchema = append(projectSchema, schemaStr)
+					}
+				}
+			}
+
+			log.Info().Msgf("projectSchema: -------------   %v", projectSchema)
+
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
@@ -344,7 +360,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Description:   safeStr(project.MetaDescription),
 					Keywords:      safeStr(project.MetaKeywords),
 					Canonical:     safeStr(project.ProjectURL),
-					ProjectSchema: project.ProjectSchema,
+					ProjectSchema: projectSchema,
 				}).
 				SetWebCards(schema.ProjectWebCards{
 					Images: imageURLs,

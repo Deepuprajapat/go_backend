@@ -16,7 +16,7 @@ type Property struct {
 	ID             string                     `json:"id"`
 	Name           string                     `json:"name"`
 	PropertyImages []string                   `json:"property_images"`
-	WebCards       schema.WebCards            `json:"web_cards"`
+	WebCards       WebCards                   `json:"web_cards"`
 	PricingInfo    schema.PropertyPricingInfo `json:"pricing_info"`
 	PropertyRera   schema.PropertyReraInfo    `json:"property_rera_info"`
 	MetaInfo       schema.PropertyMetaInfo    `json:"meta_info"`
@@ -26,7 +26,19 @@ type Property struct {
 	Developer      *SimpleDeveloper           `json:"developer,omitempty"`
 }
 
-func GetPropertyFromEnt(property *ent.Property) *Property {
+type WebCards struct {
+	PropertyDetails   schema.PropertyDetails   `json:"property_details,omitempty"`
+	PropertyFloorPlan schema.PropertyFloorPlan `json:"property_floor_plan,omitempty"`
+	KnowAbout         schema.KnowAbout         `json:"know_about,omitempty"`
+	VideoPresentation schema.VideoPresentation `json:"video_presentation,omitempty"`
+	Amenities         schema.Amenities         `json:"amenities,omitempty"`
+	LocationMap       struct {
+		Description   string `json:"description,omitempty"`
+		GoogleMapLink string `json:"google_map_link,omitempty"`
+	} `json:"location_map,omitempty"`
+}
+
+func GetPropertyFromEnt(property *ent.Property, project *ent.Project) *Property {
 	var developer *SimpleDeveloper
 	if property.Edges.Developer != nil {
 		developer = &SimpleDeveloper{
@@ -36,11 +48,20 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 		}
 	}
 
+	webCard := WebCards{
+		PropertyDetails:   property.WebCards.PropertyDetails,
+		PropertyFloorPlan: property.WebCards.PropertyFloorPlan,
+		KnowAbout:         project.WebCards.KnowAbout,
+		VideoPresentation: project.WebCards.VideoPresentation,
+		Amenities:         project.WebCards.Amenities,
+		LocationMap:       property.WebCards.LocationMap,
+	}
+
 	return &Property{
 		ID:             property.ID,
 		Name:           property.Name,
 		PropertyImages: property.PropertyImages,
-		WebCards:       property.WebCards,
+		WebCards:       webCard,
 		PricingInfo:    property.PricingInfo,
 		PropertyRera:   property.PropertyReraInfo,
 		MetaInfo:       property.MetaInfo,

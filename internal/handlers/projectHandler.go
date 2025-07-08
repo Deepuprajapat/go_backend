@@ -124,7 +124,11 @@ func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.Custo
 		filters["city"] = city
 	}
 
-	projects, err := h.app.ListProjects(filters)
+	pagination := &request.GetAllAPIRequest{
+		Filters: filters,
+	}
+
+	projects, err := h.app.ListProjects(pagination)
 	if err != nil {
 		return nil, err
 	}

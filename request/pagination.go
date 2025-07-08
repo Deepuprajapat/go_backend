@@ -1,11 +1,12 @@
 package request
 
-type PaginationRequest struct {
-	Page     int `json:"page" query:"page"`           // Current page number (1-based)
-	PageSize int `json:"page_size" query:"page_size"` // Number of items per page
+type GetAllAPIRequest struct {
+	Page     int                    `json:"page" query:"page"`
+	PageSize int                    `json:"page_size" query:"page_size"`
+	Filters  map[string]interface{} `json:"filters,omitempty" query:"filters"`
 }
 
-func (p *PaginationRequest) Validate() {
+func (p *GetAllAPIRequest) Validate() {
 	if p.Page <= 0 {
 		p.Page = 1
 	}
@@ -17,10 +18,10 @@ func (p *PaginationRequest) Validate() {
 	}
 }
 
-func (p *PaginationRequest) GetOffset() int {
+func (p *GetAllAPIRequest) GetOffset() int {
 	return (p.Page - 1) * p.PageSize
 }
 
-func (p *PaginationRequest) GetLimit() int {
+func (p *GetAllAPIRequest) GetLimit() int {
 	return p.PageSize
 }

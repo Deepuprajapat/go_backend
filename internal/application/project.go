@@ -117,8 +117,8 @@ func (c *application) DeleteProject(id string) *imhttp.CustomError {
 	return nil
 }
 
-func (c *application) ListProjects(filters map[string]interface{}) ([]*response.ProjectListResponse, *imhttp.CustomError) {
-	projects, err := c.repo.GetAllProjects(filters)
+func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError) {
+	projects, err := c.repo.GetAllProjects(request.Filters)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list projects")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list projects", err.Error())
@@ -126,7 +126,7 @@ func (c *application) ListProjects(filters map[string]interface{}) ([]*response.
 
 	var projectResponses []*response.ProjectListResponse
 	// If name filter is present, return full project details
-	if _, hasNameFilter := filters["name"]; hasNameFilter {
+	if _, hasNameFilter := request.Filters["name"]; hasNameFilter {
 		for _, project := range projects {
 			fullProject := response.GetProjectFromEnt(project)
 			projectResponses = append(projectResponses, &response.ProjectListResponse{

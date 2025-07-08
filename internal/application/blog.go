@@ -10,7 +10,7 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (c *application) ListBlogs(pagination *request.PaginationRequest) (*response.BlogListResponse, *imhttp.CustomError) {
+func (c *application) ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError) {
 	// Get blogs from repository
 	blogs, err := c.repo.GetAllBlogs()
 	if err != nil {

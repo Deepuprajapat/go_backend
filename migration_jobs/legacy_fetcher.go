@@ -64,7 +64,6 @@ func FetchAllLocality(ctx context.Context) ([]LLocality, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	log.Info().Msgf("Fetched localities %+v", localities)
 	return localities, nil
 }
 
@@ -597,6 +596,7 @@ func FetchAllBlogs(ctx context.Context) ([]LBlog, error) {
 }
 
 func fetchAllProjectIDs(client *http.Client) (*JavaGetProjectByIDResponse, error) {
+
 	resp, err := client.Get(javaAPIBaseURL + getAllProjectsPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch projects: %v", err)

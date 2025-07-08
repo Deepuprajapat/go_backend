@@ -98,7 +98,7 @@ func (h *Handler) AddProperty(r *http.Request) (*imhttp.Response, *imhttp.Custom
 
 func (h *Handler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// Parse pagination parameters from query
-	pagination := &request.PaginationRequest{
+	pagination := &request.GetAllAPIRequest{
 		Page:     1,
 		PageSize: 10,
 	}
@@ -128,10 +128,12 @@ func (h *Handler) ListProperties(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		filters["property_type"] = propertyType
 	}
 	if city := r.URL.Query().Get("city"); city != "" {
-        filters["city"] = city
-    }
+		filters["city"] = city
+	}
 
-	properties, totalItems, err := h.app.ListProperties(pagination, filters)
+	pagination.Filters = filters
+
+	properties, totalItems, err := h.app.ListProperties(pagination)
 	if err != nil {
 		return nil, err
 	}

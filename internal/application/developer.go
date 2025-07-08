@@ -9,8 +9,8 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (c *application) ListDevelopers(pagination *request.PaginationRequest) ([]*response.Developer, int, *imhttp.CustomError) {
-	developers, totalItems, err := c.repo.GetAllDevelopers(pagination.GetOffset(), pagination.GetLimit())
+func (c *application) ListDevelopers(input *request.GetAllAPIRequest) ([]*response.Developer, int, *imhttp.CustomError) {
+	developers, totalItems, err := c.repo.GetAllDevelopers(input.GetOffset(), input.GetLimit())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list developers")
 		return nil, 0, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list developers", err.Error())

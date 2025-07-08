@@ -12,34 +12,34 @@ import (
 
 func (h *Handler) ListDevelopers(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// Parse pagination parameters from query
-	pagination := &request.PaginationRequest{
+	input := &request.GetAllAPIRequest{
 		Page:     1,
 		PageSize: 10,
 	}
 
 	if page := r.URL.Query().Get("page"); page != "" {
 		if pageNum, err := strconv.Atoi(page); err == nil {
-			pagination.Page = pageNum
+			input.Page = pageNum
 		}
 	}
 
 	if pageSize := r.URL.Query().Get("page_size"); pageSize != "" {
 		if pageSizeNum, err := strconv.Atoi(pageSize); err == nil {
-			pagination.PageSize = pageSizeNum
+			input.PageSize = pageSizeNum
 		}
 	}
 
-	pagination.Validate()
+	input.Validate()
 
-	developers, totalItems, err := h.app.ListDevelopers(pagination)
+	developers, totalItems, err := h.app.ListDevelopers(input)
 	if err != nil {
 		return nil, err
 	}
 
 	paginatedResponse := response.NewPaginatedResponse(
 		developers,
-		pagination.Page,
-		pagination.PageSize,
+		input.Page,
+		input.PageSize,
 		totalItems,
 	)
 
