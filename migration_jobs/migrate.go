@@ -407,7 +407,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					},
 					VideoPresentation: schema.VideoPresentation{
 						Description: safeStr(project.VideoPara),
-						URL:         string(decodeJavaSerialized(project.ProjectVideos)),
+						URLs:        strings.Split(string(decodeJavaSerialized(project.ProjectVideos)), ","),
 					},
 					PaymentPlans: schema.PaymentPlans{
 						Description: safeStr(project.PaymentPara),

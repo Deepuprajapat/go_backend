@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/location"
@@ -233,12 +234,12 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Update VideoPresentation if provided
-	if input.WebCards.VideoPresentation.Description != "" || len(input.WebCards.VideoPresentation.URL) > 0 {
+	if input.WebCards.VideoPresentation.Description != "" || len(input.WebCards.VideoPresentation.URLs) > 0 {
 		if input.WebCards.VideoPresentation.Description != "" {
 			newWebCards.VideoPresentation.Description = input.WebCards.VideoPresentation.Description
 		}
-		if len(input.WebCards.VideoPresentation.URL) > 0 {
-			newWebCards.VideoPresentation.URL = input.WebCards.VideoPresentation.URL
+		if len(input.WebCards.VideoPresentation.URLs) > 0 {
+			newWebCards.VideoPresentation.URLs = input.WebCards.VideoPresentation.URLs
 		}
 		hasWebCardChanges = true
 	}

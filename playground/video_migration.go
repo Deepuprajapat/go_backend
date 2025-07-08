@@ -22,6 +22,13 @@ type JavaProject struct {
 	ProjectID string `json:"projectId"`
 }
 
+type JavaGetProjectByIDResponse struct {
+	Content []struct {
+		ID     string   `json:"id"`
+		Videos []string `json:"videos"`
+	} `json:"content"`
+}
+
 const (
 	// Update these with actual Java API endpoints
 	javaAPIBaseURL     = "https://api.investmango.com"
@@ -46,23 +53,15 @@ func MigrateVideoURLs() {
 	// Create HTTP client
 	httpClient := &http.Client{}
 
-	projectIDs, err := fetchAllProjectIDs(httpClient)
-
+	projects, err := fetchAllProjectIDs(httpClient)
 	if err != nil {
 		log.Fatalf("Failed to fetch project IDs: %v", err)
 	}
 
-	projectIDToURL := make(map[string]string)
+	projectIDToURL := make(map[string][]string)
 
-	for _, projectID := range projectIDs {
-		project, err := fetchProjectDetails(httpClient, projectID)
-		if err != nil {
-			log.Printf("Warning: Failed to fetch details for project %s: %v", projectID, err)
-			continue
-		}
-		if project.VideoURL != "" {
-			projectIDToURL[project.ProjectID] = project.VideoURL
-		}
+	for _, project := range projects.Content {
+		projectIDToURL[project.ID] = project.Videos
 	}
 
 	ctx := context.Background()
@@ -76,7 +75,7 @@ func MigrateVideoURLs() {
 	}
 }
 
-func fetchAllProjectIDs(client *http.Client) ([]string, error) {
+func fetchAllProjectIDs(client *http.Client) (*JavaGetProjectByIDResponse, error) {
 	resp, err := client.Get(javaAPIBaseURL + getAllProjectsPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch projects: %v", err)
@@ -89,19 +88,15 @@ func fetchAllProjectIDs(client *http.Client) ([]string, error) {
 	}
 	logger.Get().Info().Msg(string(body))
 
-	var projects []JavaProject
+	var projects JavaGetProjectByIDResponse
 	if err := json.Unmarshal(body, &projects); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal projects: %v", err)
 	}
 
-	var projectIDs []string
-	for _, project := range projects {
-		projectIDs = append(projectIDs, project.ID)
-	}
-	return projectIDs, nil
+	return &projects, nil
 }
 
-func fetchProjectDetails(client *http.Client, projectID string) (*JavaProject, error) {
+func fetchProjectDetails(client *http.Client, projectID string) (*JavaGetProjectByIDResponse, error) {
 	resp, err := client.Get(fmt.Sprintf(javaAPIBaseURL+getProjectByIDPath, projectID))
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch project details: %v", err)
@@ -113,7 +108,7 @@ func fetchProjectDetails(client *http.Client, projectID string) (*JavaProject, e
 		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	var project JavaProject
+	var project JavaGetProjectByIDResponse
 	if err := json.Unmarshal(body, &project); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal project details: %v", err)
 	}
@@ -121,27 +116,16 @@ func fetchProjectDetails(client *http.Client, projectID string) (*JavaProject, e
 	return &project, nil
 }
 
-func updateProjectVideoURL(ctx context.Context, client *ent.Client, projectID, videoURL string) error {
-	project, err := client.Project.Get(ctx, projectID)
-	if err != nil {
-		return fmt.Errorf("failed to get project: %v", err)
-	}
+func updateProjectVideoURL(ctx context.Context, client *ent.Client, projectID string, videoURLs []string) error {
 
-	// Get existing web cards
-	webCards := project.WebCards
-
-	// Update video presentation URL
-	webCards.VideoPresentation = schema.VideoPresentation{
-		URL:         videoURL,
-		Description: webCards.VideoPresentation.Description, // Preserve existing description
-	}
-
-	// Update the project with new web cards
-	_, err = client.Project.UpdateOne(project).
-		SetWebCards(webCards).
-		Save(ctx)
-
-	if err != nil {
+	if err := client.Project.UpdateOneID(projectID).
+		SetWebCards(schema.ProjectWebCards{
+			VideoPresentation: schema.VideoPresentation{
+				URLs:        videoURLs,
+				Description: "",
+			},
+		}).
+		Exec(ctx); err != nil {
 		return fmt.Errorf("failed to update project: %v", err)
 	}
 

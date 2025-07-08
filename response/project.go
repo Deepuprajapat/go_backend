@@ -11,8 +11,8 @@ type Project struct {
 	ProjectName  string                 `json:"project_name"`
 	Description  string                 `json:"description"`
 	Status       enums.ProjectStatus    `json:"status"`
-	MinPrice     string                    `json:"min_price"`
-	MaxPrice     string                    `json:"max_price"`
+	MinPrice     string                 `json:"min_price"`
+	MaxPrice     string                 `json:"max_price"`
 	PriceUnit    string                 `json:"price_unit"`
 	TimelineInfo schema.TimelineInfo    `json:"timeline_info"`
 	MetaInfo     schema.SEOMeta         `json:"meta_info"`
@@ -38,10 +38,10 @@ type ProjectListResponse struct {
 	Canonical     string   `json:"canonical"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
-	MinPrice      string      `json:"min_price"`
+	MinPrice      string   `json:"min_price"`
 	Sizes         string   `json:"sizes"`
 	IsPremium     bool     `json:"is_premium"`
-	VideoURL      string   `json:"video_url"`
+	VideoURLs     []string `json:"video_urls"`
 	FullDetails   *Project `json:"full_details,omitempty"`
 }
 
@@ -73,7 +73,6 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 }
 
 func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
-
 	return &ProjectListResponse{
 		ProjectID:     project.ID,
 		ProjectName:   project.Name,
@@ -82,7 +81,7 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		Images:        project.WebCards.Images,
 		Configuration: project.WebCards.Details.Configuration.Value,
 		Sizes:         project.WebCards.Details.Sizes.Value,
-		VideoURL:      project.WebCards.VideoPresentation.URL,
+		VideoURLs:     project.WebCards.VideoPresentation.URLs,
 		MinPrice:      project.MinPrice,
 		Canonical:     project.MetaInfo.Canonical,
 	}

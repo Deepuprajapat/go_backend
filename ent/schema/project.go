@@ -171,8 +171,8 @@ type AmenityCategory struct {
 
 // video presentation
 type VideoPresentation struct {
-	Description string `json:"description,omitempty"`
-	URL         string `json:"url,omitempty"`
+	Description string   `json:"description,omitempty"`
+	URLs        []string `json:"urls,omitempty"`
 }
 
 // payment plans
