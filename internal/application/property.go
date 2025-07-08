@@ -17,13 +17,7 @@ func (c *application) GetPropertyByID(id string) (*response.Property, *imhttp.Cu
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property", err.Error())
 	}
 
-	project, err := c.repo.GetProjectByID(property.ProjectID)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get project")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project", err.Error())
-	}
-
-	return response.GetPropertyFromEnt(property, project), nil
+	return response.GetPropertyFromEnt(property), nil
 }
 
 func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError) {
@@ -68,13 +62,7 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update property", err.Error())
 	}
 
-	project, err := c.repo.GetProjectByID(input.ProjectID)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get project")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project", err.Error())
-	}
-
-	return response.GetPropertyFromEnt(updatedProperty, project), nil
+	return response.GetPropertyFromEnt(updatedProperty), nil
 }
 
 func (c *application) GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError) {
@@ -84,15 +72,9 @@ func (c *application) GetPropertiesOfProject(projectID string) ([]*response.Prop
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get properties of project", err.Error())
 	}
 
-	project, err := c.repo.GetProjectByID(projectID)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get project")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project", err.Error())
-	}
-
 	var propertyResponses []*response.Property
 	for _, property := range properties {
-		propertyResponses = append(propertyResponses, response.GetPropertyFromEnt(property, project))
+		propertyResponses = append(propertyResponses, response.GetPropertyFromEnt(property))
 	}
 
 	return propertyResponses, nil

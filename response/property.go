@@ -38,14 +38,25 @@ type WebCards struct {
 	} `json:"location_map,omitempty"`
 }
 
-func GetPropertyFromEnt(property *ent.Property, project *ent.Project) *Property {
+func GetPropertyFromEnt(property *ent.Property) *Property {
 	var developer *SimpleDeveloper
 	if property.Edges.Developer != nil {
+		var developerAddress string
+		if property.Edges.Developer.MediaContent.DeveloperAddress != "" {
+			developerAddress = property.Edges.Developer.MediaContent.DeveloperAddress
+		}
 		developer = &SimpleDeveloper{
 			Name:             property.Edges.Developer.Name,
 			DeveloperLogo:    property.Edges.Developer.MediaContent.DeveloperLogo,
-			DeveloperAddress: property.Edges.Project.WebCards.About.ContactDetails.ProjectAddress,
+			DeveloperAddress: developerAddress,
 		}
+	}
+
+	var project *ent.Project
+	if property.Edges.Project != nil {
+		project = property.Edges.Project
+	} else {
+		project = &ent.Project{}
 	}
 
 	webCard := WebCards{

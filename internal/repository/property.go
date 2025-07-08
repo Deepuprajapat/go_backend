@@ -17,11 +17,12 @@ func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
 		Where(property.ID(id)).
 		WithDeveloper().
 		WithProject().
-		First(context.Background())
+		Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("property not found")
 		}
+
 		logger.Get().Error().Err(err).Msg("Failed to get property")
 		return nil, err
 	}
