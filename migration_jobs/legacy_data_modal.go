@@ -1,58 +1,58 @@
 package migration_jobs
 
 type LProject struct {
-	ID                    int64   `json:"id"`
-	AltProjectLogo        *string `json:"alt_project_logo"`
-	AltSitePlanImg        *string `json:"alt_site_plan_img"`
-	AmenitiesPara         *string `json:"amenities_para"`
-	AvailableUnit         *string `json:"available_unit"`
-	CoverPhoto            *string `json:"cover_photo"`
-	CreatedDate           *int64  `json:"created_date"`
-	FloorPara             *string `json:"floor_para"`
-	IsDeleted             bool    `json:"is_deleted"`
-	IsFeatured            bool    `json:"is_featured"`
-	IsPremium             bool    `json:"is_premium"`
-	IsPriority            bool    `json:"is_priority"`
-	LocationMap           *string `json:"location_map"`
-	LocationPara          *string `json:"location_para"`
-	MetaDescription       *string `json:"meta_description"`
-	MetaTitle             *string `json:"meta_title"`
-	OverviewPara          *string `json:"overview_para"`
-	PaymentPara           *string `json:"payment_para"`
-	PriceListPara         *string `json:"price_list_para"`
-	ProjectAbout          *string `json:"project_about"`
-	ProjectAddress        *string `json:"project_address"`
-	ProjectArea           *string `json:"project_area"`
-	ProjectBrochure       *string `json:"project_brochure"`
-	ProjectConfigurations *string `json:"project_configurations"`
-	ProjectDescription    *string `json:"project_description"`
-	ProjectLaunchDate     *string `json:"project_launch_date"`
-	ProjectLocationURL    *string `json:"project_location_url"`
-	ProjectLogo           *string `json:"project_logo"`
-	ProjectName           *string `json:"project_name"`
-	ProjectPossessionDate *string `json:"project_possession_date"`
-	ProjectRERA           *string `json:"project_rera"`
-	ProjectSchema         *string `json:"project_schema"`
-	ProjectUnits          *string `json:"project_units"`
-	ProjectURL            *string `json:"project_url"`
-	ProjectVideoCount     *int64  `json:"project_video_count"`
-	ProjectVideos         []byte  `json:"project_videos"`
-	ReraLink              *string `json:"rera_link"`
-	ShortAddress          *string `json:"short_address"`
-	SitePlanImg           *string `json:"siteplan_img"`
-	SitePlanPara          *string `json:"siteplan_para"`
-	Status                *string `json:"status"`
-	TotalFloor            *string `json:"total_floor"`
-	TotalTowers           *string `json:"total_towers"`
-	UpdatedDate           *int64  `json:"updated_date"`
-	USP                   *string `json:"usp"`
-	VideoPara             *string `json:"video_para"`
-	WhyPara               *string `json:"why_para"`
-	PropertyConfigTypeID  *int64  `json:"property_configuration_type_id"`
-	DeveloperID           *int64  `json:"developer_id"`
-	LocalityID            *int64  `json:"locality_id"`
-	UserID                *int64  `json:"user_id"`
-	MetaKeywords          *string `json:"meta_keywords"`
+	ID                    int64    `json:"id"`
+	AltProjectLogo        *string  `json:"alt_project_logo"`
+	AltSitePlanImg        *string  `json:"alt_site_plan_img"`
+	AmenitiesPara         *string  `json:"amenities_para"`
+	AvailableUnit         *string  `json:"available_unit"`
+	CoverPhoto            *string  `json:"cover_photo"`
+	CreatedDate           *int64   `json:"created_date"`
+	FloorPara             *string  `json:"floor_para"`
+	IsDeleted             bool     `json:"is_deleted"`
+	IsFeatured            bool     `json:"is_featured"`
+	IsPremium             bool     `json:"is_premium"`
+	IsPriority            bool     `json:"is_priority"`
+	LocationMap           *string  `json:"location_map"`
+	LocationPara          *string  `json:"location_para"`
+	MetaDescription       *string  `json:"meta_description"`
+	MetaTitle             *string  `json:"meta_title"`
+	OverviewPara          *string  `json:"overview_para"`
+	PaymentPara           *string  `json:"payment_para"`
+	PriceListPara         *string  `json:"price_list_para"`
+	ProjectAbout          *string  `json:"project_about"`
+	ProjectAddress        *string  `json:"project_address"`
+	ProjectArea           *string  `json:"project_area"`
+	ProjectBrochure       *string  `json:"project_brochure"`
+	ProjectConfigurations *string  `json:"project_configurations"`
+	ProjectDescription    *string  `json:"project_description"`
+	ProjectLaunchDate     *string  `json:"project_launch_date"`
+	ProjectLocationURL    *string  `json:"project_location_url"`
+	ProjectLogo           *string  `json:"project_logo"`
+	ProjectName           *string  `json:"project_name"`
+	ProjectPossessionDate *string  `json:"project_possession_date"`
+	ProjectRERA           *string  `json:"project_rera"`
+	ProjectSchema         []string `json:"project_schema"`
+	ProjectUnits          *string  `json:"project_units"`
+	ProjectURL            *string  `json:"project_url"`
+	ProjectVideoCount     *int64   `json:"project_video_count"`
+	ProjectVideos         []byte   `json:"project_videos"`
+	ReraLink              *string  `json:"rera_link"`
+	ShortAddress          *string  `json:"short_address"`
+	SitePlanImg           *string  `json:"siteplan_img"`
+	SitePlanPara          *string  `json:"siteplan_para"`
+	Status                *string  `json:"status"`
+	TotalFloor            *string  `json:"total_floor"`
+	TotalTowers           *string  `json:"total_towers"`
+	UpdatedDate           *int64   `json:"updated_date"`
+	USP                   *string  `json:"usp"`
+	VideoPara             *string  `json:"video_para"`
+	WhyPara               *string  `json:"why_para"`
+	PropertyConfigTypeID  *int64   `json:"property_configuration_type_id"`
+	DeveloperID           *int64   `json:"developer_id"`
+	LocalityID            *int64   `json:"locality_id"`
+	UserID                *int64   `json:"user_id"`
+	MetaKeywords          *string  `json:"meta_keywords"`
 }
 
 type LProperty struct {
@@ -222,20 +222,40 @@ type LPropertyConfigurationType struct {
 }
 
 type LBlog struct {
-	ID           int64   `json:"id"`
-	Alt          *string `json:"alt"`
-	BlogSchema   string `json:"blog_schema"`
-	BlogURL      *string `json:"blog_url"`
-	Canonical    *string `json:"canonical"`
-	CreatedDate  *int64  `json:"created_date"`
-	Description  *string `json:"description"`
-	Headings     *string `json:"headings"`
-	Images       *string `json:"images"`
-	IsPriority   bool    `json:"is_priority"`
-	SubHeadings  *string `json:"sub_headings"`
-	UpdatedDate  *int64  `json:"updated_date"`
-	UserID       *int64  `json:"user_id"`
-	MetaKeywords *string `json:"meta_keywords"`
-	MetaTitle    *string `json:"meta_title"`
-	IsDeleted    bool    `json:"is_deleted"`
+	ID           int64    `json:"id"`
+	Alt          *string  `json:"alt"`
+	BlogSchema   []string `json:"blog_schema"`
+	BlogURL      *string  `json:"blog_url"`
+	Canonical    *string  `json:"canonical"`
+	CreatedDate  *int64   `json:"created_date"`
+	Description  *string  `json:"description"`
+	Headings     *string  `json:"headings"`
+	Images       *string  `json:"images"`
+	IsPriority   bool     `json:"is_priority"`
+	SubHeadings  *string  `json:"sub_headings"`
+	UpdatedDate  *int64   `json:"updated_date"`
+	UserID       *int64   `json:"user_id"`
+	MetaKeywords *string  `json:"meta_keywords"`
+	MetaTitle    *string  `json:"meta_title"`
+	IsDeleted    bool     `json:"is_deleted"`
 }
+
+type JavaProject struct {
+	ID        string `json:"id"`
+	VideoURL  string `json:"videoUrl"`
+	ProjectID string `json:"projectId"`
+}
+
+type JavaGetProjectByIDResponse struct {
+	Content []struct {
+		ID     int64    `json:"id"`
+		Videos []string `json:"videos"`
+	} `json:"content"`
+}
+
+const (
+	// Update these with actual Java API endpoints
+	javaAPIBaseURL     = "https://api.investmango.com"
+	getAllProjectsPath = "/project/get/all"
+	getProjectByIDPath = "/project/get/by/id/%s" // %s will be replaced with project ID
+)

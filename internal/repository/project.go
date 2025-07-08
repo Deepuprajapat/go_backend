@@ -110,7 +110,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Handle MetaInfo updates
-	if input.MetaInfo != (schema.SEOMeta{}) {
+	if input.MetaInfo.Title != "" || input.MetaInfo.Description != "" || input.MetaInfo.Keywords != "" || input.MetaInfo.Canonical != "" || len(input.MetaInfo.ProjectSchema) > 0 {
 		newMetaInfo := oldProject.MetaInfo
 		if input.MetaInfo.Title != "" {
 			newMetaInfo.Title = input.MetaInfo.Title
@@ -124,7 +124,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		if input.MetaInfo.Canonical != "" {
 			newMetaInfo.Canonical = input.MetaInfo.Canonical
 		}
-		if input.MetaInfo.ProjectSchema != "" {
+		if len(input.MetaInfo.ProjectSchema) > 0 {
 			newMetaInfo.ProjectSchema = input.MetaInfo.ProjectSchema
 		}
 		project.SetMetaInfo(newMetaInfo)

@@ -15,7 +15,6 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/VI-IM/im_backend_go/migration_jobs"
-	"github.com/VI-IM/im_backend_go/playground"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 )
@@ -30,11 +29,6 @@ func main() {
 	// Initialize loggerplayground.MigrateVideoURLs()
 	logger.Init()
 	ctx := context.Background()
-
-	if os.Args[1] == "video-migration" && len(os.Args) > 1 {
-		playground.MigrateVideoURLs()
-		return
-	}
 
 	logger.Get().Info().Msg("Starting application...")
 
