@@ -42,3 +42,5 @@ type PropertyTypes struct {
 	Commercial  []string `json:"commercial"`
 	Residential []string `json:"residential"`
 }
+
+

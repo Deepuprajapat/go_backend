@@ -151,3 +151,50 @@ func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*respon
 
 	return projectResponses, nil
 }
+ 
+func (c *application) CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError) {
+    if len(projectIDs) < 2 {
+        return nil, imhttp.NewCustomErr(http.StatusBadRequest, "At least 2 projects are required for comparison", "At least 2 projects are required for comparison")
+    }
+
+    var comparisonProjects []*response.ProjectComparison
+
+    for _, projectID := range projectIDs {
+        project, err := c.repo.GetProjectByID(projectID)
+        if err != nil {
+            logger.Get().Error().Err(err).Msg("Failed to get project")
+            return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project", err.Error())
+        }
+
+        if project.IsDeleted {
+            return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found or deleted", "Project not found or deleted")
+        }
+
+        var developerName string
+        if project.Edges.Developer != nil {
+            developerName = project.Edges.Developer.Name
+        }
+
+        comparisonProject := &response.ProjectComparison{
+            ProjectID:     project.ID,
+            ProjectName:   project.Name,
+            Description:   project.Description,
+            Status:       project.Status,
+            MinPrice:     project.MinPrice,
+            MaxPrice:     project.MaxPrice,
+            TimelineInfo: project.TimelineInfo,
+            LocationInfo: project.LocationInfo,
+            IsFeatured:   project.IsFeatured,
+            IsPremium:    project.IsPremium,
+            IsPriority:   project.IsPriority,
+            WebCards:     project.WebCards,
+            DeveloperName: developerName,
+        }
+
+        comparisonProjects = append(comparisonProjects, comparisonProject)
+    }
+
+    return &response.ProjectComparisonResponse{
+        Projects: comparisonProjects,
+    }, nil
+}

@@ -27,6 +27,7 @@ type ApplicationInterface interface {
 	UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError)
 	DeleteProject(id string) *imhttp.CustomError
 	ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError)
+	CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError)
 
 	// Developer
 	ListDevelopers(pagination *request.GetAllAPIRequest) ([]*response.Developer, int, *imhttp.CustomError)

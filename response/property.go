@@ -97,6 +97,7 @@ type PropertyListResponse struct {
 	Images           []string `json:"images"`
 	Location         string   `json:"location"`
 	DeveloperName    string   `json:"developer_name"`
+	Configuration    string   `json:"configuration"`
 }
 
 func GetPropertyListResponse(property *ent.Property, developerName string, location string) *PropertyListResponse {
@@ -108,6 +109,7 @@ func GetPropertyListResponse(property *ent.Property, developerName string, locat
 		Facing:           property.WebCards.PropertyDetails.Facing.Value,
 		FloorNumber:      property.WebCards.PropertyDetails.FloorNumber.Value,
 		Images:           property.PropertyImages,
+		Configuration:    property.WebCards.PropertyDetails.Configuration.Value,
 		Location:         location,
 		DeveloperName:    developerName,
 	}

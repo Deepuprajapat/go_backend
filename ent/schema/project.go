@@ -196,7 +196,7 @@ type TimelineInfo struct {
 type SEOMeta struct {
 	Title         string   `json:"title,omitempty"`
 	Description   string   `json:"description,omitempty"`
-	Keywords      string   `json:"keywords,omitempty"`
+	Keywords        string   `json:"keywords,omitempty"`
 	Canonical     string   `json:"canonical,omitempty"`
 	ProjectSchema []string `json:"project_schema,omitempty"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
 }
