@@ -11,16 +11,23 @@ import (
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
-	"github.com/google/uuid"
 )
 
-func (c *application) GetAccessToken(username string, password string) (*response.GenerateTokenResponse, *imhttp.CustomError) {
-
-	if username == "" || password == "" {
+func (c *application) GetAccessToken(email string, password string) (*response.GenerateTokenResponse, *imhttp.CustomError) {
+	ctx := context.Background()
+	if email == "" || password == "" {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "No credentials provided", "No credentials provided")
 	}
 
-	user, err := c.repo.GetUserDetailsByUsername(username)
+	exist, err := c.repo.CheckIfUserExistsByEmail(ctx, email)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check email", err.Error())
+	}
+	if !exist {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "User not found", "User not found")
+	}
+
+	user, err := c.repo.GetUserDetailsByEmail(ctx, email)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get user details", err.Error())
 	}
@@ -52,7 +59,7 @@ func (c *application) GetAccessToken(username string, password string) (*respons
 }
 
 func (c *application) RefreshToken(refreshToken string) (*response.GenerateTokenResponse, *imhttp.CustomError) {
-
+	ctx := context.Background()
 	if refreshToken == "" {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Refresh token is empty", "Refresh token is empty")
 	}
@@ -62,7 +69,7 @@ func (c *application) RefreshToken(refreshToken string) (*response.GenerateToken
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to verify refresh token", err.Error())
 	}
 
-	user, err := c.repo.GetUserDetailsByUsername(strconv.Itoa(userID))
+	user, err := c.repo.GetUserDetailsByEmail(ctx, strconv.Itoa(userID))
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get user details", err.Error())
 	}
@@ -108,7 +115,6 @@ func (c *application) Signup(ctx context.Context, req *request.SignupRequest) (*
 
 	// Create user
 	user := &ent.User{
-		ID:          uuid.New().String(),
 		Username:    req.Username,
 		Password:    hashedPassword,
 		Email:       req.Email,

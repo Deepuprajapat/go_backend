@@ -10,11 +10,11 @@ import (
 	"github.com/VI-IM/im_backend_go/ent/user"
 )
 
-func (r *repository) GetUserDetailsByUsername(username string) (*ent.User, error) {
-	if username == "" {
-		return nil, errors.New("username is required")
+func (r *repository) GetUserDetailsByEmail(ctx context.Context, email string) (*ent.User, error) {
+	if email == "" {
+		return nil, errors.New("email is required")
 	}
-	user, err := r.db.User.Query().Where(user.Username(username)).First(context.Background())
+	user, err := r.db.User.Query().Where(user.Email(email)).First(ctx)
 	if err != nil {
 		return nil, err
 	}

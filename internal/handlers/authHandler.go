@@ -14,7 +14,7 @@ func (h *Handler) GenerateToken(r *http.Request) (*imhttp.Response, *imhttp.Cust
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
 	}
-	resp, err := h.app.GetAccessToken(req.Username, req.Password)
+	resp, err := h.app.GetAccessToken(req.Email, req.Password)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
 	}

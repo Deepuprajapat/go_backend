@@ -14,7 +14,7 @@ type repository struct {
 
 type AppRepository interface {
 	// Auth
-	GetUserDetailsByUsername(username string) (*ent.User, error)
+	GetUserDetailsByEmail(ctx context.Context, email string) (*ent.User, error)
 	CreateUser(ctx context.Context, user *ent.User) (*ent.User, error)
 	CheckIfUserExistsByEmail(ctx context.Context, email string) (bool, error)
 
