@@ -92,12 +92,12 @@ func (c *application) RefreshToken(refreshToken string) (*response.GenerateToken
 
 func (c *application) Signup(ctx context.Context, req *request.SignupRequest) (*response.GenerateTokenResponse, *imhttp.CustomError) {
 	// Check if username already exists
-	existingUser, err := c.repo.GetUserDetailsByUsername(req.Username)
-	if err != nil && !ent.IsNotFound(err) {
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check username", err.Error())
+	exist, err := c.repo.CheckIfUserExistsByEmail(ctx, req.Email)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check email", err.Error())
 	}
-	if existingUser != nil {
-		return nil, imhttp.NewCustomErr(http.StatusConflict, "Username already exists", "Username already exists")
+	if exist {
+		return nil, imhttp.NewCustomErr(http.StatusConflict, "Email already exists", "Email already exists")
 	}
 
 	// Hash password
@@ -112,7 +112,7 @@ func (c *application) Signup(ctx context.Context, req *request.SignupRequest) (*
 		Username:    req.Username,
 		Password:    hashedPassword,
 		Email:       req.Email,
-		Name:        req.FirstName + " " + req.LastName,
+		Name:        req.Name,
 		PhoneNumber: req.PhoneNumber,
 		IsActive:    true,
 	}

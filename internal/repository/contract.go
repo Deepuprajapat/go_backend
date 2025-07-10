@@ -16,6 +16,7 @@ type AppRepository interface {
 	// Auth
 	GetUserDetailsByUsername(username string) (*ent.User, error)
 	CreateUser(ctx context.Context, user *ent.User) (*ent.User, error)
+	CheckIfUserExistsByEmail(ctx context.Context, email string) (bool, error)
 
 	// Project
 	GetProjectByID(id string) (*ent.Project, error)

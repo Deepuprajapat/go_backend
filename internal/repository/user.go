@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
+	"fmt"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/user"
@@ -24,26 +26,10 @@ func (r *repository) CreateUser(ctx context.Context, input *ent.User) (*ent.User
 		return nil, errors.New("user input is required")
 	}
 
-	// Check if username already exists
-	exists, err := r.db.User.Query().Where(user.Username(input.Username)).Exist(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if exists {
-		return nil, errors.New("username already exists")
-	}
-
-	// Check if email already exists
-	exists, err = r.db.User.Query().Where(user.Email(input.Email)).Exist(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if exists {
-		return nil, errors.New("email already exists")
-	}
-
+	id := fmt.Sprintf("%x", sha256.Sum256([]byte(input.Email)))[:16]
 	// Create the user
 	createdUser, err := r.db.User.Create().
+		SetID(id).
 		SetUsername(input.Username).
 		SetPassword(input.Password).
 		SetEmail(input.Email).
@@ -57,4 +43,12 @@ func (r *repository) CreateUser(ctx context.Context, input *ent.User) (*ent.User
 	}
 
 	return createdUser, nil
+}
+
+func (r *repository) CheckIfUserExistsByEmail(ctx context.Context, email string) (bool, error) {
+	exists, err := r.db.User.Query().Where(user.Email(email)).Exist(ctx)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
