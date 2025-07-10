@@ -1,13 +1,15 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
 type Property struct {
-	Base
+	ent.Schema
 }
 
 func (Property) Fields() []ent.Field {
@@ -26,6 +28,9 @@ func (Property) Fields() []ent.Field {
 		field.String("project_id").Optional(),
 		field.String("developer_id").Optional(),
 		field.String("location_id").Optional(),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

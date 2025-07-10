@@ -1,13 +1,15 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
 type Developer struct {
-	Base
+	ent.Schema
 }
 
 func (Developer) Fields() []ent.Field {
@@ -20,6 +22,9 @@ func (Developer) Fields() []ent.Field {
 		field.JSON("media_content", DeveloperMediaContent{}).Optional(),
 		field.Bool("is_verified").Default(false),
 		field.Bool("is_active").Default(true),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

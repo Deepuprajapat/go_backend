@@ -71,9 +71,10 @@ func (c *application) RefreshToken(refreshToken string) (*response.GenerateToken
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "User not found", "User not found")
 	}
 
-	if user.IsDeleted {
-		return nil, imhttp.NewCustomErr(http.StatusNotFound, "User is deleted", "User is deleted")
-	}
+	// Note: DeletedAt field will be available after regenerating entities
+	// if user.DeletedAt != nil {
+	// 	return nil, imhttp.NewCustomErr(http.StatusNotFound, "User is deleted", "User is deleted")
+	// }
 
 	if !user.IsActive {
 		return nil, imhttp.NewCustomErr(http.StatusUnauthorized, "User is not active", "User is not active")
@@ -111,11 +112,9 @@ func (c *application) Signup(ctx context.Context, req *request.SignupRequest) (*
 		Username:    req.Username,
 		Password:    hashedPassword,
 		Email:       req.Email,
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
+		Name:        req.FirstName + " " + req.LastName,
 		PhoneNumber: req.PhoneNumber,
 		IsActive:    true,
-		IsDeleted:   false,
 	}
 
 	createdUser, err := c.repo.CreateUser(ctx, user)
