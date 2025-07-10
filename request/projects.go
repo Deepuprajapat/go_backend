@@ -46,16 +46,9 @@ type UpdatePropertyRequest struct {
 }
 
 type AddPropertyRequest struct {
-	ProjectID      string `json:"project_id"`
-	Name           string `json:"name"`
-	PropertyType   string `json:"property_type"`
-	AgeOfProperty  string `json:"age_of_property"`
-	FloorNumber    string `json:"floor_number"`
-	Facing         string `json:"facing"`
-	Furnishing     string `json:"furnishing"`
-	BalconyCount   string `json:"balcony_count"`
-	BedroomsCount  string `json:"bedrooms_count"`
-	CoveredParking string `json:"covered_parking"`
+	ProjectID    string `json:"project_id"`
+	Name         string `json:"name"`
+	PropertyType string `json:"property_type"`
 }
 
 type ProjectFilterRequest struct {
@@ -101,8 +94,9 @@ func (r *ProjectFilterRequest) ToMap() map[string]interface{} {
 	}
 	return filters
 }
+
 // ... existing code ...
 
 type CompareProjectsRequest struct {
-    ProjectIDs []string `json:"project_ids" validate:"required,min=2"`
+	ProjectIDs []string `json:"project_ids" validate:"required,min=2"`
 }

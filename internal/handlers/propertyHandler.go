@@ -80,7 +80,7 @@ func (h *Handler) AddProperty(r *http.Request) (*imhttp.Response, *imhttp.Custom
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
-	if input.ProjectID == "" || input.PropertyType == "" || input.AgeOfProperty == "" || input.FloorNumber == "" || input.Facing == "" || input.Furnishing == "" || input.BalconyCount == "" {
+	if input.ProjectID == "" || input.PropertyType == "" || input.Name == "" {
 		logger.Get().Error().Msg("Invalid request body")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
 	}

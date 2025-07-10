@@ -223,12 +223,7 @@ func (r *repository) AddProperty(input domain.Property) (string, error) {
 		SetID(propertyID).
 		SetProjectID(input.ProjectID).
 		SetName(input.Name).
-		SetPropertyType(input.PropertyType).
-		SetWebCards(input.WebCards).
-		SetPricingInfo(input.PricingInfo).
-		SetPropertyReraInfo(input.PropertyReraInfo).
-		SetMetaInfo(input.MetaInfo)
-
+		SetPropertyType(input.PropertyType)
 	if project.Edges.Developer.ID != "" {
 		property.SetDeveloperID(project.Edges.Developer.ID)
 	}

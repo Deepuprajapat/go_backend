@@ -86,13 +86,6 @@ func (c *application) AddProperty(input request.AddPropertyRequest) (*response.A
 	property.ProjectID = input.ProjectID
 	property.Name = input.Name
 	property.PropertyType = input.PropertyType
-	property.WebCards.PropertyDetails.AgeOfProperty.Value = input.AgeOfProperty
-	property.WebCards.PropertyDetails.FloorNumber.Value = input.FloorNumber
-	property.WebCards.PropertyDetails.Facing.Value = input.Facing
-	property.WebCards.PropertyDetails.FurnishingType.Value = input.Furnishing
-	property.WebCards.PropertyDetails.Balconies.Value = input.BalconyCount
-	property.WebCards.PropertyDetails.Bedrooms.Value = input.BedroomsCount
-	property.WebCards.PropertyDetails.CoveredParking.Value = input.CoveredParking
 
 	propertyID, err := c.repo.AddProperty(property)
 	if err != nil {
