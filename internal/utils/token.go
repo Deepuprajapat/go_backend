@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(userID int, expiresAt time.Time) (string, error) {
+func GenerateToken(userID string, expiresAt time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": userID,
 		"exp": expiresAt.Unix(),
@@ -20,7 +20,7 @@ func GenerateToken(userID int, expiresAt time.Time) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-func GenerateRefreshToken(userID int, expiresAt time.Time) (string, error) {
+func GenerateRefreshToken(userID string, expiresAt time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":        userID,
 		"token_type": "refresh",

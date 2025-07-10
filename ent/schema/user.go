@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // User holds the schema definition for the User entity.
@@ -16,28 +17,24 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id"),
+		field.String("id"),
 		field.String("username").Unique(),
 		field.String("password"),
 		field.String("email").Unique(),
-		field.String("first_name"),
-		field.String("last_name"),
+		field.String("name"),
 		field.Time("date_of_birth").Optional(),
 		field.String("gender").Optional(),
 		field.String("phone_number").Optional(),
 		field.String("current_address").Optional(),
 		field.String("permanent_address").Optional(),
 		field.Bool("is_active").Default(true),
-		field.Bool("is_deleted").Default(false),
 		field.Bool("is_email_verified").Default(false),
 		field.Bool("is_verified").Default(false),
 		field.Time("last_login_time").Optional(),
 		field.Int("parent_id").Optional(),
-		field.String("photo_url").Optional(),
-		field.Time("created_at").Default(time.Now()),
-		field.Time("updated_at").Default(time.Now()).UpdateDefault(time.Now),
-		field.Int("created_by").Optional(),
-		field.Int("updated_by").Optional(),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
@@ -58,5 +55,18 @@ func (User) Edges() []ent.Edge {
 			Unique(),
 		// Users updated by this user
 		edge.To("updated_users", User.Type),
+	}
+}
+
+// Indexes of the User.
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("username"),
+		index.Fields("email"),
+		index.Fields("phone_number"),
+		index.Fields("parent_id"),
+		index.Fields("is_active"),
+		index.Fields("is_verified"),
+		index.Fields("last_login_time"),
 	}
 }

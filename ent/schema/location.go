@@ -1,13 +1,15 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
 type Location struct {
-	Base
+	ent.Schema
 }
 
 func (Location) Fields() []ent.Field {
@@ -20,6 +22,9 @@ func (Location) Fields() []ent.Field {
 		field.String("country").Default("India"),
 		field.String("pincode").Optional(),
 		field.Bool("is_active").Default(true),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 

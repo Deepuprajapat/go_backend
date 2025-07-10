@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	entproject "github.com/VI-IM/im_backend_go/ent/project"
@@ -938,8 +939,8 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				SetBlogContent(blogContent).
 				SetSeoMetaInfo(seoMetaInfo).
 				SetIsPriority(blog.IsPriority).
-				SetCreatedAt(*blog.CreatedDate).
-				SetUpdatedAt(int64(safeInt(blog.UpdatedDate))).
+				SetCreatedAt(time.Unix(*blog.CreatedDate, 0)).
+				SetUpdatedAt(time.Unix(*blog.UpdatedDate, 0)).
 				SetIsDeleted(blog.IsDeleted).
 				Exec(ctx); err != nil {
 				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)

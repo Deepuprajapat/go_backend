@@ -9,7 +9,7 @@ import (
 )
 
 type Blogs struct {
-	Base
+	ent.Schema
 }
 
 func (Blogs) Fields() []ent.Field {
@@ -20,8 +20,9 @@ func (Blogs) Fields() []ent.Field {
 		field.JSON("blog_content", BlogContent{}),
 		field.Bool("is_priority").Default(false),
 		field.Bool("is_deleted").Default(false),
-		field.Int64("created_at").Default(time.Now().Unix()),
-		field.Int64("updated_at").Default(time.Now().Unix()),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
@@ -45,8 +46,8 @@ type BlogContent struct {
 
 type SEOMetaInfo struct {
 	BlogSchema  []string `json:"blog_schema"`
-	Canonical   string `json:"canonical"`
-	Title       string `json:"title"`
-	Keywords    string `json:"keywords"`
-	Description string `json:"description"`
+	Canonical   string   `json:"canonical"`
+	Title       string   `json:"title"`
+	Keywords    string   `json:"keywords"`
+	Description string   `json:"description"`
 }

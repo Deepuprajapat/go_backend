@@ -11,9 +11,10 @@ type RefreshTokenRequest struct {
 }
 
 type SignupRequest struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required,min=6"`
-	Email    string `json:"email" validate:"required,email"`
-	FullName string `json:"full_name" validate:"required"`
-	Phone    string `json:"phone" validate:"required"`
+	Username    string `json:"username" validate:"required"`
+	Password    string `json:"password" validate:"required,min=6"`
+	Email       string `json:"email" validate:"required,email"`
+	FirstName   string `json:"first_name" validate:"required"`
+	LastName    string `json:"last_name" validate:"required"`
+	PhoneNumber string `json:"phone_number" validate:"required"`
 }

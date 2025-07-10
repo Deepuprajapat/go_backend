@@ -16,14 +16,14 @@ type BlogResponse struct {
 }
 
 type BlogListItem struct {
-	ID          string             `json:"id"`
-	Image       string             `json:"image"`
-	Title       string             `json:"title"`
-	BlogURL     string             `json:"blog_url"`
-	Description string             `json:"description"`
-	IsPriority  bool               `json:"is_priority"`
-	CreatedAt   int64              `json:"created_at"`
-	UpdatedAt   int64              `json:"updated_at"`
+	ID          string `json:"id"`
+	Image       string `json:"image"`
+	Title       string `json:"title"`
+	BlogURL     string `json:"blog_url"`
+	Description string `json:"description"`
+	IsPriority  bool   `json:"is_priority"`
+	CreatedAt   int64  `json:"created_at"`
+	UpdatedAt   int64  `json:"updated_at"`
 }
 
 func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
@@ -33,8 +33,8 @@ func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
 		BlogContent: blog.BlogContent,
 		SEOMetaInfo: blog.SeoMetaInfo,
 		IsPriority:  blog.IsPriority,
-		CreatedAt:   blog.CreatedAt,
-		UpdatedAt:   blog.UpdatedAt,
+		CreatedAt:   blog.CreatedAt.Unix(),
+		UpdatedAt:   blog.UpdatedAt.Unix(),
 	}
 }
 
@@ -46,8 +46,8 @@ func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
 		Title:       blog.BlogContent.Title,
 		Description: blog.BlogContent.Description,
 		IsPriority:  blog.IsPriority,
-		CreatedAt:   blog.CreatedAt,
-		UpdatedAt:   blog.UpdatedAt,
+		CreatedAt:   blog.CreatedAt.Unix(),
+		UpdatedAt:   blog.UpdatedAt.Unix(),
 	}
 }
 

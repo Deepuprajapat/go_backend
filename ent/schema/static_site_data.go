@@ -1,13 +1,15 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 )
 
 type StaticSiteData struct {
-	Base
+	ent.Schema
 }
 
 func (StaticSiteData) Fields() []ent.Field {
@@ -18,7 +20,6 @@ func (StaticSiteData) Fields() []ent.Field {
 		field.JSON("testimonials", []byte{}).Optional(),
 		field.JSON("mango_insights", []byte{}).Optional(),
 		field.JSON("our_associations", []byte{}).Optional(),
-		field.Time("updated_at").Optional(),
 		field.JSON("categories_with_amenities", struct {
 			Categories map[string][]struct {
 				Icon  string `json:"icon"`
@@ -27,6 +28,9 @@ func (StaticSiteData) Fields() []ent.Field {
 		}{}).Optional(),
 		field.JSON("property_types", PropertyTypes{}),
 		field.Bool("is_active").Default(true),
+		field.Time("deleted_at").Optional().Nillable(),
+		field.Time("created_at").Default(time.Now).Immutable(),
+		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}
 }
 
@@ -42,5 +46,3 @@ type PropertyTypes struct {
 	Commercial  []string `json:"commercial"`
 	Residential []string `json:"residential"`
 }
-
-
