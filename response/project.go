@@ -7,41 +7,53 @@ import (
 )
 
 type ProjectComparisonResponse struct {
-    Projects []*ProjectComparison `json:"projects"`
+	Projects []*ProjectComparison `json:"projects"`
 }
 
 type ProjectComparison struct {
-    ProjectID     string                 `json:"project_id"`
-    ProjectName   string                 `json:"project_name"`
-    Description   string                 `json:"description"`
-    Status        enums.ProjectStatus    `json:"status"`
-    MinPrice      string                 `json:"min_price"`
-    MaxPrice      string                 `json:"max_price"`
-    PriceUnit     string                 `json:"price_unit"`
-    TimelineInfo  schema.TimelineInfo    `json:"timeline_info"`
-    LocationInfo  schema.LocationInfo    `json:"location_info"`
-    IsFeatured    bool                   `json:"is_featured"`
-    IsPremium     bool                   `json:"is_premium"`
-    IsPriority    bool                   `json:"is_priority"`
-    WebCards      schema.ProjectWebCards `json:"web_cards"`
-    DeveloperName string                 `json:"developer_name,omitempty"`
+	ProjectID     string                 `json:"project_id"`
+	ProjectName   string                 `json:"project_name"`
+	Description   string                 `json:"description"`
+	Status        enums.ProjectStatus    `json:"status"`
+	MinPrice      string                 `json:"min_price"`
+	MaxPrice      string                 `json:"max_price"`
+	PriceUnit     string                 `json:"price_unit"`
+	TimelineInfo  schema.TimelineInfo    `json:"timeline_info"`
+	LocationInfo  schema.LocationInfo    `json:"location_info"`
+	IsFeatured    bool                   `json:"is_featured"`
+	IsPremium     bool                   `json:"is_premium"`
+	IsPriority    bool                   `json:"is_priority"`
+	WebCards      schema.ProjectWebCards `json:"web_cards"`
+	DeveloperName string                 `json:"developer_name,omitempty"`
 }
 
 type Project struct {
-	ProjectID    string                 `json:"project_id"`
-	ProjectName  string                 `json:"project_name"`
-	Description  string                 `json:"description"`
-	Status       enums.ProjectStatus    `json:"status"`
-	MinPrice     string                 `json:"min_price"`
-	MaxPrice     string                 `json:"max_price"`
-	PriceUnit    string                 `json:"price_unit"`
-	TimelineInfo schema.TimelineInfo    `json:"timeline_info"`
-	MetaInfo     schema.SEOMeta         `json:"meta_info"`
-	WebCards     schema.ProjectWebCards `json:"web_cards"`
-	LocationInfo schema.LocationInfo    `json:"location_info"`
-	IsFeatured   bool                   `json:"is_featured"`
-	IsPremium    bool                   `json:"is_premium"`
-	IsPriority   bool                   `json:"is_priority"`
+	ProjectID     string                 `json:"project_id"`
+	ProjectName   string                 `json:"project_name"`
+	Description   string                 `json:"description"`
+	Status        enums.ProjectStatus    `json:"status"`
+	MinPrice      string                 `json:"min_price"`
+	MaxPrice      string                 `json:"max_price"`
+	PriceUnit     string                 `json:"price_unit"`
+	TimelineInfo  schema.TimelineInfo    `json:"timeline_info"`
+	MetaInfo      schema.SEOMeta         `json:"meta_info"`
+	WebCards      schema.ProjectWebCards `json:"web_cards"`
+	LocationInfo  schema.LocationInfo    `json:"location_info"`
+	DeveloperInfo DeveloperInfo          `json:"developer_info"`
+	IsFeatured    bool                   `json:"is_featured"`
+	IsPremium     bool                   `json:"is_premium"`
+	IsPriority    bool                   `json:"is_priority"`
+}
+
+type DeveloperInfo struct {
+	DeveloperID     string `json:"developer_id"`
+	DeveloperName   string `json:"developer_name"`
+	Phone           string `json:"phone"`
+	Logo            string `json:"logo"`
+	AltLogo         string `json:"alt_logo"`
+	Address         string `json:"address"`
+	EstablishedYear int    `json:"established_year"`
+	TotalProjects   int    `json:"total_projects"`
 }
 
 type AddProjectResponse struct {
@@ -85,7 +97,16 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 			ShortAddress:  project.LocationInfo.ShortAddress,
 			Longitude:     project.LocationInfo.Longitude,
 			Latitude:      project.LocationInfo.Latitude,
-			GoogleMapLink: project.LocationInfo.GoogleMapLink,
+			GoogleMapLink: project.LocationInfo.GoogleMapLink, // project.Edges.Location.PhoneNumber
+		},
+		DeveloperInfo: DeveloperInfo{
+			DeveloperID:     project.Edges.Developer.ID,
+			DeveloperName:   project.Edges.Developer.Name,
+			Phone:           project.Edges.Developer.MediaContent.Phone,
+			Logo:            project.Edges.Developer.MediaContent.DeveloperLogo,
+			AltLogo:         project.Edges.Developer.MediaContent.AltDeveloperLogo,
+			Address:         project.Edges.Developer.MediaContent.DeveloperAddress,
+			EstablishedYear: project.Edges.Developer.EstablishedYear,
 		},
 		IsFeatured: project.IsFeatured,
 		IsPremium:  project.IsPremium,

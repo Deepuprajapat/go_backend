@@ -129,7 +129,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("Fetched all projects --------->>>> success")
 	processProjectBatch := func(ctx context.Context, batch []LProject) error {
 		for _, project := range batch {
-			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
+			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID+1000, 10))))[:16]
 
 			projectRera, err := FetchReraByProjectID(ctx, project.ID)
 			if err != nil {
