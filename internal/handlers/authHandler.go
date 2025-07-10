@@ -46,3 +46,28 @@ func (h *Handler) RefreshToken(r *http.Request) (*imhttp.Response, *imhttp.Custo
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *Handler) Signup(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	var req request.SignupRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Error().Err(err).Msg("Error decoding request")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
+	}
+
+	// Validate request
+	if err := h.validate.Struct(req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
+	}
+
+	// Call application layer to create user
+	resp, err := h.app.Signup(r.Context(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       resp,
+		StatusCode: http.StatusCreated,
+		Message:    "User created successfully",
+	}, nil
+}

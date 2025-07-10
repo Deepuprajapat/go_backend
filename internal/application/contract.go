@@ -21,6 +21,7 @@ type ApplicationInterface interface {
 	// Auth
 	GetAccessToken(username, password string) (*response.GenerateTokenResponse, *imhttp.CustomError)
 	RefreshToken(refreshToken string) (*response.GenerateTokenResponse, *imhttp.CustomError)
+	Signup(ctx context.Context, req *request.SignupRequest) (*response.GenerateTokenResponse, *imhttp.CustomError)
 
 	// Project
 	GetProjectByID(id string) (*response.Project, *imhttp.CustomError)

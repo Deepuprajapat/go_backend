@@ -25,6 +25,7 @@ func Init(app application.ApplicationInterface) {
 	// auth routes
 	Router.Handle("/v1/api/auth/generate-token", imhttp.AppHandler(handler.GenerateToken)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/auth/refresh-token", imhttp.AppHandler(handler.RefreshToken)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/auth/signup", imhttp.AppHandler(handler.Signup)).Methods(http.MethodPost)
 
 	// project routes
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.GetProject)).Methods(http.MethodGet)
@@ -71,7 +72,6 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
 
 	//lead routes
-
 
 	//content routes
 	Router.Handle("/v1/api/content/test", imhttp.AppHandler(handler.GetContentTest)).Methods(http.MethodGet)

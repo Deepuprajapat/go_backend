@@ -15,6 +15,7 @@ type repository struct {
 type AppRepository interface {
 	// Auth
 	GetUserDetailsByUsername(username string) (*ent.User, error)
+	CreateUser(ctx context.Context, user *ent.User) (*ent.User, error)
 
 	// Project
 	GetProjectByID(id string) (*ent.Project, error)
