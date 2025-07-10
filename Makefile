@@ -50,3 +50,6 @@ run-migration:
 dev-setup: docker-up migrate
 	@echo "Development environment ready!" 
 
+video-migration:
+	go run cmd/server/main.go video-migration
+

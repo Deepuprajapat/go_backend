@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"strings"
+
+	"entgo.io/ent/dialect/sql"
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/location"
@@ -38,6 +40,7 @@ func (r *repository) AddProject(input domain.Project) (string, error) {
 		SetMetaInfo(schema.SEOMeta{
 			Canonical: input.ProjectURL,
 		}).
+		SetProjectType(project.ProjectType(input.ProjectType)).
 		SetDescription("").
 		SetDeveloperID(input.DeveloperID).
 		Exec(context.Background()); err != nil {
@@ -108,7 +111,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Handle MetaInfo updates
-	if input.MetaInfo != (schema.SEOMeta{}) {
+	if input.MetaInfo.Title != "" || input.MetaInfo.Description != "" || input.MetaInfo.Keywords != "" || input.MetaInfo.Canonical != "" || len(input.MetaInfo.ProjectSchema) > 0 {
 		newMetaInfo := oldProject.MetaInfo
 		if input.MetaInfo.Title != "" {
 			newMetaInfo.Title = input.MetaInfo.Title
@@ -122,7 +125,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		if input.MetaInfo.Canonical != "" {
 			newMetaInfo.Canonical = input.MetaInfo.Canonical
 		}
-		if input.MetaInfo.ProjectSchema != "" {
+		if len(input.MetaInfo.ProjectSchema) > 0 {
 			newMetaInfo.ProjectSchema = input.MetaInfo.ProjectSchema
 		}
 		project.SetMetaInfo(newMetaInfo)
@@ -232,13 +235,12 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Update VideoPresentation if provided
-	if input.WebCards.VideoPresentation.Description != "" || len(input.WebCards.VideoPresentation.URL) > 0 {
+	if input.WebCards.VideoPresentation.Description != "" || len(input.WebCards.VideoPresentation.URLs) > 0 {
 		if input.WebCards.VideoPresentation.Description != "" {
 			newWebCards.VideoPresentation.Description = input.WebCards.VideoPresentation.Description
 		}
-		if len(input.WebCards.VideoPresentation.URL) > 0 {
-			newWebCards.VideoPresentation.URL = make([]byte, len(input.WebCards.VideoPresentation.URL))
-			copy(newWebCards.VideoPresentation.URL, input.WebCards.VideoPresentation.URL)
+		if len(input.WebCards.VideoPresentation.URLs) > 0 {
+			newWebCards.VideoPresentation.URLs = input.WebCards.VideoPresentation.URLs
 		}
 		hasWebCardChanges = true
 	}
@@ -453,4 +455,26 @@ func (r *repository) GetAllProjects(filters map[string]interface{}) ([]*ent.Proj
 	}
 
 	return projects, nil
+}
+
+func (r *repository) GetProjectByURL(url string) (*ent.Project, error) {
+
+	project, err := r.db.Project.Query().
+    Where(
+        project.IsDeletedEQ(false),
+        func(s *sql.Selector) {
+            s.Where(sql.ExprP("meta_info->>'canonical' = ?", url))
+        },
+    ).
+    First(context.Background())
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		logger.Get().Error().Err(err).Msg("Failed to get project by URL")
+		return nil, err
+	}
+
+	return project, nil
 }

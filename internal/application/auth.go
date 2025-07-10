@@ -25,7 +25,7 @@ func (c *application) GetAccessToken(username string, password string) (*respons
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "User not found", "User not found")
 	}
 
-	if err := utils.ComparePassword(user.Password, password); err != nil {
+	if !utils.ComparePassword(user.Password, password) {
 		return nil, imhttp.NewCustomErr(http.StatusUnauthorized, "Invalid password", "Invalid password")
 	}
 

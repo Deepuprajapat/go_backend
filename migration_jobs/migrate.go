@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ var (
 	legacyToNewProjectIDMAP   = make(map[int64]string)
 	legacyToNewDeveloperIDMAP = make(map[int64]string)
 	legacyToNewLocalityIDMAP  = make(map[int64]string)
+	projectIDToVideoURLMAP    = make(map[int64][]string)
 	staticSiteWebCardsID      string
 )
 
@@ -114,8 +116,17 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 	if err != nil {
 		return err
 	}
-	log.Info().Msg("Fetched all projects --------->>>> success")
 
+	projectFetchFromAPI, err := fetchAllProjectIDs(&http.Client{})
+	if err != nil {
+		return err
+	}
+
+	for _, project := range projectFetchFromAPI.Content {
+		projectIDToVideoURLMAP[project.ID] = project.Videos
+	}
+
+	log.Info().Msg("Fetched all projects --------->>>> success")
 	processProjectBatch := func(ctx context.Context, batch []LProject) error {
 		for _, project := range batch {
 			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
@@ -315,6 +326,24 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				continue
 			}
 
+			videoUrl := projectIDToVideoURLMAP[project.ID]
+
+			projectSchema := []string{}
+			if project.ProjectSchema != nil {
+				// Handle the case where ProjectSchema comes as "[""]"
+				schemaStr := *project.ProjectSchema
+				if schemaStr != "" {
+					// Remove the square brackets and quotes from the string
+					schemaStr = strings.Trim(schemaStr, "[]")
+					schemaStr = strings.Trim(schemaStr, "\"")
+					if schemaStr != "" {
+						projectSchema = append(projectSchema, schemaStr)
+					}
+				}
+			}
+
+			log.Info().Msgf("projectSchema: -------------   %v", projectSchema)
+
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
@@ -331,7 +360,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Description:   safeStr(project.MetaDescription),
 					Keywords:      safeStr(project.MetaKeywords),
 					Canonical:     safeStr(project.ProjectURL),
-					ProjectSchema: safeStr(project.ProjectSchema),
+					ProjectSchema: projectSchema,
 				}).
 				SetWebCards(schema.ProjectWebCards{
 					Images: imageURLs,
@@ -408,7 +437,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					},
 					VideoPresentation: schema.VideoPresentation{
 						Description: safeStr(project.VideoPara),
-						URL:         []byte(project.ProjectVideos),
+						URLs:        videoUrl,
 					},
 					PaymentPlans: schema.PaymentPlans{
 						Description: safeStr(project.PaymentPara),
@@ -718,13 +747,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 						Value: safeStr(property.Bathrooms),
 					},
 				},
-				WhyChooseUs: struct {
-					ImageUrls []string `json:"image_urls,omitempty"`
-					USP_List  []string `json:"usp_list,omitempty"`
-				}{
-					ImageUrls: parsedImages,
-					USP_List:  uspList,
-				},
 				PropertyFloorPlan: schema.PropertyFloorPlan{
 					Title: safeStr(property.FloorPara),
 					Plans: []map[string]string{
@@ -738,13 +760,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 					Description string `json:"description,omitempty"`
 				}{
 					Description: safeStr(property.About),
-				},
-				VideoPresentation: struct {
-					Title    string `json:"title,omitempty"`
-					VideoUrl string `json:"video_url,omitempty"`
-				}{
-					Title:    safeStr(property.VideoPara),
-					VideoUrl: safeStr(property.PropertyVideo),
 				},
 				LocationMap: struct {
 					Description   string `json:"description,omitempty"`
@@ -896,6 +911,8 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 					log.Error().Err(err).Msgf("Failed to parse images for blog ID %d", blog.ID)
 				}
 			}
+			// Clean up blog schema format
+			//"[\"1\",\"2\",\"3\"]"
 
 			blogContent := schema.BlogContent{
 				Title:       safeStr(blog.Headings),
@@ -908,7 +925,7 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 
 			// Create SEO meta info
 			seoMetaInfo := schema.SEOMetaInfo{
-				BlogSchema: []string{safeStr(blog.BlogSchema)},
+				BlogSchema: blog.BlogSchema,
 				Canonical:  safeStr(blog.Canonical),
 				Title:      safeStr(blog.SubHeadings),
 				Keywords:   safeStr(blog.MetaKeywords),

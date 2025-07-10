@@ -102,8 +102,8 @@ func (c *application) AddProperty(input request.AddPropertyRequest) (*response.A
 	return &response.AddPropertyResponse{PropertyID: propertyID}, nil
 }
 
-func (c *application) ListProperties(pagination *request.PaginationRequest, filters map[string]interface{}) ([]*response.PropertyListResponse, int, *imhttp.CustomError) {
-	properties, totalItems, err := c.repo.GetAllProperties(pagination.GetOffset(), pagination.GetLimit(), filters)
+func (c *application) ListProperties(pagination *request.GetAllAPIRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError) {
+	properties, totalItems, err := c.repo.GetAllProperties(pagination.GetOffset(), pagination.GetLimit(), pagination.Filters)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list properties")
 		return nil, 0, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list properties", err.Error())

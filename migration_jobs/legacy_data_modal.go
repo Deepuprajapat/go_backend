@@ -222,20 +222,39 @@ type LPropertyConfigurationType struct {
 }
 
 type LBlog struct {
-	ID           int64   `json:"id"`
-	Alt          *string `json:"alt"`
-	BlogSchema   *string `json:"blog_schema"`
-	BlogURL      *string `json:"blog_url"`
-	Canonical    *string `json:"canonical"`
-	CreatedDate  *int64  `json:"created_date"`
-	Description  *string `json:"description"`
-	Headings     *string `json:"headings"`
-	Images       *string `json:"images"`
-	IsPriority   bool    `json:"is_priority"`
-	SubHeadings  *string `json:"sub_headings"`
-	UpdatedDate  *int64  `json:"updated_date"`
-	UserID       *int64  `json:"user_id"`
-	MetaKeywords *string `json:"meta_keywords"`
-	MetaTitle    *string `json:"meta_title"`
-	IsDeleted    bool    `json:"is_deleted"`
+	ID           int64    `json:"id"`
+	Alt          *string  `json:"alt"`
+	BlogSchema   []string `json:"blog_schema"`
+	BlogURL      *string  `json:"blog_url"`
+	Canonical    *string  `json:"canonical"`
+	CreatedDate  *int64   `json:"created_date"`
+	Description  *string  `json:"description"`
+	Headings     *string  `json:"headings"`
+	Images       *string  `json:"images"`
+	IsPriority   bool     `json:"is_priority"`
+	SubHeadings  *string  `json:"sub_headings"`
+	UpdatedDate  *int64   `json:"updated_date"`
+	UserID       *int64   `json:"user_id"`
+	MetaKeywords *string  `json:"meta_keywords"`
+	MetaTitle    *string  `json:"meta_title"`
+	IsDeleted    bool     `json:"is_deleted"`
 }
+
+type JavaProject struct {
+	ID        string `json:"id"`
+	VideoURL  string `json:"videoUrl"`
+	ProjectID string `json:"projectId"`
+}
+
+type JavaGetProjectByIDResponse struct {
+	Content []struct {
+		ID     int64    `json:"id"`
+		Videos []string `json:"videos"`
+	} `json:"content"`
+}
+
+const (
+	// Update these with actual Java API endpoints
+	javaAPIBaseURL     = "https://api.investmango.com"
+	getAllProjectsPath = "/project/get/all?size=400&isDeleted=false"
+)

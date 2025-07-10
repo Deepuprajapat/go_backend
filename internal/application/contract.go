@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/client"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/request"
@@ -26,10 +27,12 @@ type ApplicationInterface interface {
 	AddProject(input request.AddProjectRequest) (*response.AddProjectResponse, *imhttp.CustomError)
 	UpdateProject(input request.UpdateProjectRequest) (*response.Project, *imhttp.CustomError)
 	DeleteProject(id string) *imhttp.CustomError
-	ListProjects(filters map[string]interface{}) ([]*response.ProjectListResponse, *imhttp.CustomError)
+	ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError)
+	CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError)
+	GetProjectByURL(url string) (*ent.Project, *imhttp.CustomError)
 
 	// Developer
-	ListDevelopers(pagination *request.PaginationRequest) ([]*response.Developer, int, *imhttp.CustomError)
+	ListDevelopers(pagination *request.GetAllAPIRequest) ([]*response.Developer, *imhttp.CustomError)
 	GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError)
 	DeleteDeveloper(id string) *imhttp.CustomError
 
@@ -43,7 +46,7 @@ type ApplicationInterface interface {
 	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
 	GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError)
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
-	ListProperties(pagination *request.PaginationRequest, filters map[string]interface{}) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
+	ListProperties(pagination *request.GetAllAPIRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
 	DeleteProperty(id string) *imhttp.CustomError
 
 	// Amenity
@@ -62,7 +65,7 @@ type ApplicationInterface interface {
 	UploadFile(file io.Reader, request request.UploadFileRequest) (string, *imhttp.CustomError)
 
 	// Blogs
-	ListBlogs(pagination *request.PaginationRequest) (*response.BlogListResponse, *imhttp.CustomError)
+	ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError)
 	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError

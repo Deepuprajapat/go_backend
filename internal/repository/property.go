@@ -17,11 +17,12 @@ func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
 		Where(property.ID(id)).
 		WithDeveloper().
 		WithProject().
-		First(context.Background())
+		Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("property not found")
 		}
+
 		logger.Get().Error().Err(err).Msg("Failed to get property")
 		return nil, err
 	}
@@ -109,32 +110,32 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 	}
 
 	// why choose us
-	if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 || len(input.WebCards.WhyChooseUs.USP_List) > 0 {
-		if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 {
-			newWebCards.WhyChooseUs.ImageUrls = input.WebCards.WhyChooseUs.ImageUrls
-		}
-		if len(input.WebCards.WhyChooseUs.USP_List) > 0 {
-			newWebCards.WhyChooseUs.USP_List = input.WebCards.WhyChooseUs.USP_List
-		}
-		hasWebCardChanges = true
-	}
+	// if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 || len(input.WebCards.WhyChooseUs.USP_List) > 0 {
+	// 	if len(input.WebCards.WhyChooseUs.ImageUrls) > 0 {
+	// 		newWebCards.WhyChooseUs.ImageUrls = input.WebCards.WhyChooseUs.ImageUrls
+	// 	}
+	// 	if len(input.WebCards.WhyChooseUs.USP_List) > 0 {
+	// 		newWebCards.WhyChooseUs.USP_List = input.WebCards.WhyChooseUs.USP_List
+	// 	}
+	// 	hasWebCardChanges = true
+	// }
 
-	// know about
-	if input.WebCards.KnowAbout.Description != "" {
-		newWebCards.KnowAbout.Description = input.WebCards.KnowAbout.Description
-		hasWebCardChanges = true
-	}
+	// // know about
+	// if input.WebCards.KnowAbout.Description != "" {
+	// 	newWebCards.KnowAbout.Description = input.WebCards.KnowAbout.Description
+	// 	hasWebCardChanges = true
+	// }
 
-	// video presentation
-	if input.WebCards.VideoPresentation.Title != "" || input.WebCards.VideoPresentation.VideoUrl != "" {
-		if input.WebCards.VideoPresentation.Title != "" {
-			newWebCards.VideoPresentation.Title = input.WebCards.VideoPresentation.Title
-		}
-		if input.WebCards.VideoPresentation.VideoUrl != "" {
-			newWebCards.VideoPresentation.VideoUrl = input.WebCards.VideoPresentation.VideoUrl
-		}
-		hasWebCardChanges = true
-	}
+	// // video presentation
+	// if input.WebCards.VideoPresentation.Title != "" || input.WebCards.VideoPresentation.VideoUrl != "" {
+	// 	if input.WebCards.VideoPresentation.Title != "" {
+	// 		newWebCards.VideoPresentation.Title = input.WebCards.VideoPresentation.Title
+	// 	}
+	// 	if input.WebCards.VideoPresentation.VideoUrl != "" {
+	// 		newWebCards.VideoPresentation.VideoUrl = input.WebCards.VideoPresentation.VideoUrl
+	// 	}
+	// 	hasWebCardChanges = true
+	// }
 
 	// location map
 	if input.WebCards.LocationMap.Description != "" || input.WebCards.LocationMap.GoogleMapLink != "" {

@@ -101,3 +101,8 @@ func (r *ProjectFilterRequest) ToMap() map[string]interface{} {
 	}
 	return filters
 }
+// ... existing code ...
+
+type CompareProjectsRequest struct {
+    ProjectIDs []string `json:"project_ids" validate:"required,min=2"`
+}

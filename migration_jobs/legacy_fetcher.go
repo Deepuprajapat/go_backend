@@ -3,8 +3,12 @@ package migration_jobs
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 
+	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/rs/zerolog/log"
 )
 
@@ -60,7 +64,6 @@ func FetchAllLocality(ctx context.Context) ([]LLocality, error) {
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	log.Info().Msgf("Fetched localities %+v", localities)
 	return localities, nil
 }
 
@@ -173,6 +176,7 @@ func FetchhAllProject(ctx context.Context) ([]LProject, error) {
 		); err != nil {
 			return nil, err
 		}
+		// fmt.Println("Project Videos", project.ProjectVideos)
 		projects = append(projects, project)
 	}
 	return projects, nil
@@ -570,7 +574,7 @@ func FetchAllBlogs(ctx context.Context) ([]LBlog, error) {
 		if err := rows.Scan(
 			&blog.ID,
 			&blog.Alt,
-			&blog.BlogSchema, 
+			&blog.BlogSchema,
 			&blog.BlogURL,
 			&blog.Canonical,
 			&blog.CreatedDate,
@@ -589,4 +593,26 @@ func FetchAllBlogs(ctx context.Context) ([]LBlog, error) {
 		blogs = append(blogs, blog)
 	}
 	return blogs, nil
+}
+
+func fetchAllProjectIDs(client *http.Client) (*JavaGetProjectByIDResponse, error) {
+
+	resp, err := client.Get(javaAPIBaseURL + getAllProjectsPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch projects: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+	logger.Get().Info().Msg(string(body))
+
+	var projects JavaGetProjectByIDResponse
+	if err := json.Unmarshal(body, &projects); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal projects: %v", err)
+	}
+
+	return &projects, nil
 }

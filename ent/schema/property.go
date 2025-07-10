@@ -50,18 +50,17 @@ type PropertyReraInfo struct {
 }
 
 type WebCards struct {
-	PropertyDetails PropertyDetails `json:"property_details,omitempty"`
-	WhyChooseUs     struct {
-		ImageUrls []string `json:"image_urls,omitempty"`
-		USP_List  []string `json:"usp_list,omitempty"`
-	} `json:"why_choose_us,omitempty"`
+	PropertyDetails   PropertyDetails   `json:"property_details,omitempty"`
 	PropertyFloorPlan PropertyFloorPlan `json:"property_floor_plan,omitempty"`
 	KnowAbout         struct {
 		Description string `json:"description,omitempty"`
 	} `json:"know_about,omitempty"`
+	WhyToChoose struct {
+		UspList   []string `json:"usp_list,omitempty"`
+		ImageUrls []string `json:"image_urls,omitempty"`
+	} `json:"why_to_choose,omitempty"`
 	VideoPresentation struct {
-		Title    string `json:"title,omitempty"`
-		VideoUrl string `json:"video_url,omitempty"`
+		Urls []string `json:"urls,omitempty"`
 	} `json:"video_presentation,omitempty"`
 	LocationMap struct {
 		Description   string `json:"description,omitempty"`
