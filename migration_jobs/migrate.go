@@ -129,7 +129,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("Fetched all projects --------->>>> success")
 	processProjectBatch := func(ctx context.Context, batch []LProject) error {
 		for _, project := range batch {
-			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID, 10))))[:16]
+			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID+1000, 10))))[:16]
 
 			projectRera, err := FetchReraByProjectID(ctx, project.ID)
 			if err != nil {
@@ -654,8 +654,8 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 			}
 
 			var propertyType *LPropertyConfigurationType
-			if property.ConfigurationID != nil {
-				propertyType, err = FetchPropertyConfigurationTypeByID(ctx, *property.ConfigurationID)
+			if propertyConfiguration != nil {
+				propertyType, err = FetchPropertyConfigurationTypeByID(ctx, propertyConfiguration.ID)
 				if err != nil {
 					log.Error().Err(err).Msgf("Failed to fetch property type for property ID %d", property.ID)
 					continue

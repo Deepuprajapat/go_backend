@@ -18,7 +18,11 @@ import (
 )
 
 func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
-	project, err := r.db.Project.Get(context.Background(), id)
+	project, err := r.db.Project.Query().
+		Where(project.ID(id)).
+		WithDeveloper().
+		WithLocation().
+		Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("project not found")
@@ -460,13 +464,13 @@ func (r *repository) GetAllProjects(filters map[string]interface{}) ([]*ent.Proj
 func (r *repository) GetProjectByURL(url string) (*ent.Project, error) {
 
 	project, err := r.db.Project.Query().
-    Where(
-        project.IsDeletedEQ(false),
-        func(s *sql.Selector) {
-            s.Where(sql.ExprP("meta_info->>'canonical' = ?", url))
-        },
-    ).
-    First(context.Background())
+		Where(
+			project.IsDeletedEQ(false),
+			func(s *sql.Selector) {
+				s.Where(sql.ExprP("meta_info->>'canonical' = ?", url))
+			},
+		).
+		First(context.Background())
 
 	if err != nil {
 		if ent.IsNotFound(err) {
