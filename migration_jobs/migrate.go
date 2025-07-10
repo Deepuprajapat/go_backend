@@ -654,8 +654,8 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 			}
 
 			var propertyType *LPropertyConfigurationType
-			if property.ConfigurationID != nil {
-				propertyType, err = FetchPropertyConfigurationTypeByID(ctx, *property.ConfigurationID)
+			if propertyConfiguration != nil {
+				propertyType, err = FetchPropertyConfigurationTypeByID(ctx, propertyConfiguration.ID)
 				if err != nil {
 					log.Error().Err(err).Msgf("Failed to fetch property type for property ID %d", property.ID)
 					continue

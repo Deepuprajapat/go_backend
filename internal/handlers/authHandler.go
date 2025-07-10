@@ -12,12 +12,10 @@ import (
 func (h *Handler) GenerateToken(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	var req request.GenerateTokenRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Error().Err(err).Msg("Error decoding request")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
 	}
 	resp, err := h.app.GetAccessToken(req.Username, req.Password)
 	if err != nil {
-		log.Error().Err(err).Msg("Error generating token")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
 	}
 
