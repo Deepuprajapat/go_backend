@@ -124,11 +124,9 @@ func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.Custo
 		filters["city"] = city
 	}
 
-	pagination := &request.GetAllAPIRequest{
+	projects, err := h.app.ListProjects(&request.GetAllAPIRequest{
 		Filters: filters,
-	}
-
-	projects, err := h.app.ListProjects(pagination)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -139,27 +137,26 @@ func (h *Handler) ListProjects(r *http.Request) (*imhttp.Response, *imhttp.Custo
 	}, nil
 }
 
-
 func (h *Handler) CompareProjects(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-    var input request.CompareProjectsRequest
+	var input request.CompareProjectsRequest
 
-    if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-        logger.Get().Error().Msg("Invalid request body")
-        return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
-    }
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		logger.Get().Error().Msg("Invalid request body")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
 
-    if err := h.validate.Struct(input); err != nil {
-        logger.Get().Error().Msg("Invalid request body")
-        return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "At least 2 project IDs are required")
-    }
+	if err := h.validate.Struct(input); err != nil {
+		logger.Get().Error().Msg("Invalid request body")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "At least 2 project IDs are required")
+	}
 
-    response, err := h.app.CompareProjects(input.ProjectIDs)
-    if err != nil {
-        return nil, err
-    }
+	response, err := h.app.CompareProjects(input.ProjectIDs)
+	if err != nil {
+		return nil, err
+	}
 
-    return &imhttp.Response{
-        Data:       response,
-        StatusCode: http.StatusOK,
-    }, nil
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
 }

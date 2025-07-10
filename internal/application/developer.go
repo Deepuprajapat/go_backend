@@ -9,11 +9,11 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (c *application) ListDevelopers(input *request.GetAllAPIRequest) ([]*response.Developer, int, *imhttp.CustomError) {
-	developers, totalItems, err := c.repo.GetAllDevelopers(input.GetOffset(), input.GetLimit())
+func (c *application) ListDevelopers(input *request.GetAllAPIRequest) ([]*response.Developer, *imhttp.CustomError) {
+	developers, err := c.repo.GetAllDevelopers()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list developers")
-		return nil, 0, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list developers", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list developers", err.Error())
 	}
 
 	var developerResponses []*response.Developer
@@ -21,7 +21,7 @@ func (c *application) ListDevelopers(input *request.GetAllAPIRequest) ([]*respon
 		developerResponses = append(developerResponses, response.GetDeveloperFromEnt(developer))
 	}
 
-	return developerResponses, totalItems, nil
+	return developerResponses, nil
 }
 
 func (c *application) GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError) {

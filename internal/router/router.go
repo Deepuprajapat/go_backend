@@ -71,6 +71,10 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
 
 	//lead routes
+
+
+	//content routes
+	Router.Handle("/v1/api/content/test", imhttp.AppHandler(handler.GetContentTest)).Methods(http.MethodGet)
 }
 
 /////   curl calls	/////

@@ -9,28 +9,19 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (r *repository) GetAllDevelopers(offset, limit int) ([]*ent.Developer, int, error) {
+func (r *repository) GetAllDevelopers() ([]*ent.Developer, error) {
 	ctx := context.Background()
 
-	// Get total count
-	total, err := r.db.Developer.Query().Count(ctx)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to count developers")
-		return nil, 0, err
-	}
-
-	// Get paginated results
+	// Get all developers
 	developers, err := r.db.Developer.Query().
 		Order(ent.Desc(developer.FieldID)).
-		Offset(offset).
-		Limit(limit).
 		All(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get developers")
-		return nil, 0, err
+		return nil, err
 	}
 
-	return developers, total, nil
+	return developers, nil
 }
 
 func (r *repository) GetDeveloperByID(id string) (*ent.Developer, error) {

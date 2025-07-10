@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/developer"
 	"github.com/VI-IM/im_backend_go/ent/location"
@@ -454,4 +455,26 @@ func (r *repository) GetAllProjects(filters map[string]interface{}) ([]*ent.Proj
 	}
 
 	return projects, nil
+}
+
+func (r *repository) GetProjectByURL(url string) (*ent.Project, error) {
+
+	project, err := r.db.Project.Query().
+    Where(
+        project.IsDeletedEQ(false),
+        func(s *sql.Selector) {
+            s.Where(sql.ExprP("meta_info->>'canonical' = ?", url))
+        },
+    ).
+    First(context.Background())
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		logger.Get().Error().Err(err).Msg("Failed to get project by URL")
+		return nil, err
+	}
+
+	return project, nil
 }

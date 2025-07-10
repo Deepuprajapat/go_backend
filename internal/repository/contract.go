@@ -23,10 +23,11 @@ type AppRepository interface {
 	DeleteProject(id string, hardDelete bool) error
 	IsProjectDeleted(id string) (bool, error)
 	GetAllProjects(filters map[string]interface{}) ([]*ent.Project, error)
+	GetProjectByURL(url string) (*ent.Project, error)
 
 	// Developer
 	ExistDeveloperByID(id string) (bool, error)
-	GetAllDevelopers(offset, limit int) ([]*ent.Developer, int, error)
+	GetAllDevelopers() ([]*ent.Developer, error)
 	GetDeveloperByID(id string) (*ent.Developer, error)
 	SoftDeleteDeveloper(id string) error
 
@@ -55,7 +56,6 @@ type AppRepository interface {
 	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
-
 }
 
 func NewRepository(db *ent.Client) AppRepository {

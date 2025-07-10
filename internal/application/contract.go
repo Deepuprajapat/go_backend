@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/client"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/request"
@@ -28,9 +29,10 @@ type ApplicationInterface interface {
 	DeleteProject(id string) *imhttp.CustomError
 	ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError)
 	CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError)
+	GetProjectByURL(url string) (*ent.Project, *imhttp.CustomError)
 
 	// Developer
-	ListDevelopers(pagination *request.GetAllAPIRequest) ([]*response.Developer, int, *imhttp.CustomError)
+	ListDevelopers(pagination *request.GetAllAPIRequest) ([]*response.Developer, *imhttp.CustomError)
 	GetDeveloperByID(id string) (*response.Developer, *imhttp.CustomError)
 	DeleteDeveloper(id string) *imhttp.CustomError
 

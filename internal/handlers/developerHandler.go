@@ -2,49 +2,20 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/VI-IM/im_backend_go/request"
-	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
 func (h *Handler) ListDevelopers(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	// Parse pagination parameters from query
-	input := &request.GetAllAPIRequest{
-		Page:     1,
-		PageSize: 10,
-	}
-
-	if page := r.URL.Query().Get("page"); page != "" {
-		if pageNum, err := strconv.Atoi(page); err == nil {
-			input.Page = pageNum
-		}
-	}
-
-	if pageSize := r.URL.Query().Get("page_size"); pageSize != "" {
-		if pageSizeNum, err := strconv.Atoi(pageSize); err == nil {
-			input.PageSize = pageSizeNum
-		}
-	}
-
-	input.Validate()
-
-	developers, totalItems, err := h.app.ListDevelopers(input)
+	developers, err := h.app.ListDevelopers(&request.GetAllAPIRequest{})
 	if err != nil {
 		return nil, err
 	}
 
-	paginatedResponse := response.NewPaginatedResponse(
-		developers,
-		input.Page,
-		input.PageSize,
-		totalItems,
-	)
-
 	return &imhttp.Response{
-		Data:       paginatedResponse,
+		Data:       developers,
 		StatusCode: http.StatusOK,
 	}, nil
 }
