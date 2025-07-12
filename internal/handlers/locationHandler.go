@@ -8,7 +8,13 @@ import (
 )
 
 func (h *Handler) ListLocations(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	response, err := h.app.GetAllLocations()
+
+	filters := make(map[string]interface{})
+	if city := r.URL.Query().Get("city"); city != "" {
+		filters["city"] = city
+	}
+
+	response, err := h.app.GetAllLocations(filters)
 	if err != nil {
 		return nil, err
 	}

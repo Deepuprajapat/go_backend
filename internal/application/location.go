@@ -8,8 +8,8 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (c *application) GetAllLocations() ([]*response.Location, *imhttp.CustomError) {
-	locations, err := c.repo.ListLocations()
+func (c *application) GetAllLocations(filters map[string]interface{}) ([]*response.Location, *imhttp.CustomError) {
+	locations, err := c.repo.ListLocations(filters)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list locations")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list locations", err.Error())

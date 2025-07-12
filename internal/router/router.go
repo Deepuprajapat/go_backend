@@ -74,7 +74,9 @@ func Init(app application.ApplicationInterface) {
 	//lead routes
 
 	//content routes
-	Router.Handle("/v1/api/content/test", imhttp.AppHandler(handler.GetContentTest)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/content/test/{url}", imhttp.AppHandler(handler.GetProjectSEOContent)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/content/text", imhttp.AppHandler(handler.GetPropertySEOContent)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/content/text/html", imhttp.AppHandler(handler.GetHTMLContent)).Methods(http.MethodGet)
 }
 
 /////   curl calls	/////

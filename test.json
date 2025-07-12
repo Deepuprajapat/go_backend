@@ -1,0 +1,20 @@
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "Ivory County",
+    "image": "https://image.investmango.com/images/img/ivory-county-sector-115-noida/2.webp",
+    "description": "Ivory County Sector 115 Noida is an Under Construction Residential Project. Click for Project Price List, Floor Plan, Photos, Video, Location Map and Download Brochure.",
+    "brand": {
+        "@type": "Brand",
+        "name": "County Group"
+    },
+    "offers": {
+        "@type": "AggregateOffer",
+        "url": "https://www.investmango.com/ivory-county-sector-115-noida",
+        "priceCurrency": "INR",
+        "lowPrice": "32500000",
+        "highPrice": "124900000"
+    }
+}
+</script>

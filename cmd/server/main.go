@@ -26,7 +26,7 @@ var (
 )
 
 func main() {
-	// Initialize loggerplayground.MigrateVideoURLs()
+
 	logger.Init()
 	ctx := context.Background()
 
@@ -58,8 +58,6 @@ func main() {
 		if err := migration_jobs.MigrateStaticSiteData(ctx, txn); err != nil {
 			logger.Get().Fatal().Err(err).Msg("Failed to migrate static site data")
 		}
-
-		// Execute migrations in sequence
 
 		logger.Get().Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
 		if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {

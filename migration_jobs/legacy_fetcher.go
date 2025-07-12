@@ -249,6 +249,7 @@ func fetchAllProperty(ctx context.Context) ([]LProperty, error) {
 		); err != nil {
 			return nil, err
 		}
+		log.Info().Msgf("Product Schema: %+v", property.ProductSchema)
 		properties = append(properties, property)
 	}
 	return properties, nil

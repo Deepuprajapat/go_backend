@@ -17,6 +17,7 @@ func (Property) Fields() []ent.Field {
 		field.String("id").Unique(),
 		field.String("name"),
 		field.String("property_type").Optional(),
+		field.String("product_schema").Optional(),
 		field.JSON("property_images", []string{}).Optional(), // 0 index logo image
 		field.JSON("web_cards", WebCards{}),
 		field.JSON("pricing_info", PropertyPricingInfo{}),
@@ -79,11 +80,6 @@ type PropertyFloorPlan struct {
 }
 
 // area details
-type PropertyAreaDetails struct {
-	CarpetArea       string `json:"carpet_area,omitempty"`         // in sq ft
-	BuiltUpArea      string `json:"built_up_area,omitempty"`       // in sq ft
-	SuperBuiltUpArea string `json:"super_built_up_area,omitempty"` // in sq ft
-}
 
 // pricing information
 type PropertyPricingInfo struct {

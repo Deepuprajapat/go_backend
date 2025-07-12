@@ -29,6 +29,7 @@ type Property struct {
 type WebCards struct {
 	PropertyDetails   schema.PropertyDetails   `json:"property_details,omitempty"`
 	PropertyFloorPlan schema.PropertyFloorPlan `json:"property_floor_plan,omitempty"`
+	WhyToChoose       schema.WhyToChoose       `json:"why_to_choose,omitempty"`
 	KnowAbout         schema.KnowAbout         `json:"know_about,omitempty"`
 	VideoPresentation schema.VideoPresentation `json:"video_presentation,omitempty"`
 	Amenities         schema.Amenities         `json:"amenities,omitempty"`
@@ -62,6 +63,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	webCard := WebCards{
 		PropertyDetails:   property.WebCards.PropertyDetails,
 		PropertyFloorPlan: property.WebCards.PropertyFloorPlan,
+		WhyToChoose:       project.WebCards.WhyToChoose,
 		KnowAbout:         project.WebCards.KnowAbout,
 		VideoPresentation: project.WebCards.VideoPresentation,
 		Amenities:         project.WebCards.Amenities,

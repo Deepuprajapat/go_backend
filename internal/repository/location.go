@@ -5,13 +5,19 @@ import (
 	"errors"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/location"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (r *repository) ListLocations() ([]*ent.Location, error) {
-	locations, err := r.db.Location.Query().
-		Where().
-		All(context.Background())
+func (r *repository) ListLocations(filters map[string]interface{}) ([]*ent.Location, error) {
+	ctx := context.Background()
+	query := r.db.Location.Query()
+
+	if city, ok := filters["city"].(string); ok && city != "" {
+		query = query.Where(location.CityEQ(city))
+	}
+
+	locations, err := query.All(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list locations")
 		return nil, err

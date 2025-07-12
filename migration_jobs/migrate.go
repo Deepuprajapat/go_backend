@@ -300,13 +300,18 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				imageURLs[i] = img.ImageURL
 			}
 
+			// for i, j := 0, len(faqs)-1; i < j; i, j = i+1, j-1 {
+			// 	faqs[i], faqs[j] = faqs[j], faqs[i]
+			// }
+
 			faqsNew := []schema.FAQ{}
 			for _, faq := range faqs {
 				faqsNew = append(faqsNew, schema.FAQ{
-					Question: safeStr(faq.Question),
-					Answer:   safeStr(faq.Answer),
+					Question: safeStr(faq.Answer),
+					Answer:   safeStr(faq.Question),
 				})
 			}
+			
 
 			setProjectIDMapping(project.ID, id)
 
@@ -803,6 +808,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				SetID(id).
 				SetName(*property.PropertyName).
 				SetPropertyImages(parsedImages).
+				SetProductSchema(safeStr(property.ProductSchema)).
 				SetPropertyType(safeStr(propertyType.PropertyType)).
 				SetWebCards(webCard).
 				SetPricingInfo(schema.PropertyPricingInfo{
@@ -843,14 +849,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 	return nil
 }
 
-func safeStrToInt(s *string) int {
-	if s != nil {
-		if n, err := strconv.Atoi(*s); err == nil {
-			return n
-		}
-	}
-	return 0
-}
 
 func strPtr(s string) *string {
 	return &s

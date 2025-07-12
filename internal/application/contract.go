@@ -38,7 +38,7 @@ type ApplicationInterface interface {
 	DeleteDeveloper(id string) *imhttp.CustomError
 
 	// Location
-	GetAllLocations() ([]*response.Location, *imhttp.CustomError)
+	GetAllLocations(filters map[string]interface{}) ([]*response.Location, *imhttp.CustomError)
 	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
 	DeleteLocation(id string) *imhttp.CustomError
 
@@ -71,6 +71,10 @@ type ApplicationInterface interface {
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
 	UpdateBlog(ctx context.Context, id string, req *request.UpdateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
+
+	// Content
+	GetProjectByCanonicalURL(ctx context.Context, url string) (*ent.Project, *imhttp.CustomError)
+	GetPropertyByName(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {

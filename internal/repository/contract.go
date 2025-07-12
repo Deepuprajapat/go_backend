@@ -34,7 +34,7 @@ type AppRepository interface {
 	SoftDeleteDeveloper(id string) error
 
 	// Location
-	ListLocations() ([]*ent.Location, error)
+	ListLocations(filters map[string]interface{}) ([]*ent.Location, error)
 	GetLocationByID(id string) (*ent.Location, error)
 	SoftDeleteLocation(id string) error
 
@@ -58,6 +58,12 @@ type AppRepository interface {
 	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
+
+
+	//content 
+
+	GetProjectByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Project, error)
+	GetPropertyByName(ctx context.Context, name string) (*ent.Property, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {
