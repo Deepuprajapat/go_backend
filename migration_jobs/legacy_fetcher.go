@@ -617,3 +617,22 @@ func fetchAllProjectIDs(client *http.Client) (*JavaGetProjectByIDResponse, error
 
 	return &projects, nil
 }
+
+func FetchAllGenericSearchData(ctx context.Context) ([]LGenericSearchData, error) {
+	query := `SELECT * FROM generic_search_data`
+	rows, err := legacyDB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var allGenericSearchData []LGenericSearchData
+	for rows.Next() {
+		var data LGenericSearchData
+		if err := rows.Scan(&data.ID, &data.Path, &data.SearchTerms, &data.URL); err != nil {
+			return nil, err
+		}
+		allGenericSearchData = append(allGenericSearchData, data)
+	}
+	return allGenericSearchData, nil
+}

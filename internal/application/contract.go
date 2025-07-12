@@ -75,6 +75,12 @@ type ApplicationInterface interface {
 	GetProjectByCanonicalURL(ctx context.Context, url string) (*ent.Project, *imhttp.CustomError)
 	GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
 	GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, *imhttp.CustomError)
+
+	// Generic Search
+	GetGenericSearchData(ctx context.Context) ([]response.GenericSearchData, *imhttp.CustomError)
+	AddGenericSearchData(ctx context.Context, data request.GenericSearchData) ([]*response.GenericSearchData, *imhttp.CustomError)
+	UpdateGenericSearchData(ctx context.Context, data request.GenericSearchData) (*response.GenericSearchData, *imhttp.CustomError)
+	DeleteGenericSearchData(ctx context.Context, index int) *imhttp.CustomError
 }
 
 func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {

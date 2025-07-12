@@ -64,6 +64,12 @@ type AppRepository interface {
 	GetProjectByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Project, error)
 	GetPropertyByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Property, error)
 	GetBlogByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Blogs, error)
+
+	// Generic Search
+	GetGenericSearchData(ctx context.Context) ([]schema.GenericSearchData, error)
+	AddGenericSearchData(ctx context.Context, data *schema.GenericSearchData) ([]schema.GenericSearchData, error)
+	UpdateGenericSearchData(ctx context.Context, data *schema.GenericSearchData, index int) (*schema.GenericSearchData, error)
+	DeleteGenericSearchData(ctx context.Context, index int) error
 }
 
 func NewRepository(db *ent.Client) AppRepository {

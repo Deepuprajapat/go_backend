@@ -6,4 +6,4 @@ CREATE INDEX IF NOT EXISTS idx_project_canonical ON projects ((meta_info->>'cano
 
 CREATE INDEX IF NOT EXISTS idx_blog_canonical ON blogs ((seo_meta_info->>'canonical')) WHERE seo_meta_info->>'canonical' IS NOT NULL;
 
-Create Index idx_blog_meta_can
+CREATE INDEX IF NOT EXISTS idx_blog_meta_canonical ON blogs ((seo_meta_info->>'canonical')) WHERE seo_meta_info->>'canonical' IS NOT NULL;

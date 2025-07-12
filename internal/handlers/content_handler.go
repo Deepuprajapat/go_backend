@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -118,13 +119,9 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		url = strings.TrimPrefix(url, "https://investmango.com/")
 	}
 
-	//TODO: get generic path and get the projects
-
 	var htmlResponse string
 
-	if strings.Contains(url, "blogs/") {
-
-	}
+	//TODO: get generic path and get the projects
 
 	switch url {
 	case "", "/":
@@ -381,7 +378,42 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		}, nil
 
 	default:
-		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Page not found", "")
+		genericPath, err := h.app.GetGenericSearchData(ctx)
+		if err != nil {
+			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Generic path not found", "Generic path not found")
+		}
+		genericPathMap := []string{}
+		for _, path := range genericPath {
+			genericPathMap = append(genericPathMap, path.CanonicalURL)
+		}
+
+		if slices.Contains(genericPathMap, url) {
+			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Page not found", "")
+		}
+
+		projectByCanonicalURL, err := h.app.GetProjectByCanonicalURL(ctx, url)
+		if err != nil {
+			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found", "Project not found")
+		}
+
+		htmlResponse = "<!DOCTYPE html><html><head>" +
+			"<meta name=\"google-site-verification\" content=\"ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA\">" +
+			"<title>" + projectByCanonicalURL.MetaInfo.Title + "</title>" +
+			"<meta name=\"description\" content=\"" + projectByCanonicalURL.MetaInfo.Description + "\">" +
+			"<meta name=\"keywords\" content=\"" + projectByCanonicalURL.MetaInfo.Keywords + "\">" +
+
+			"<meta property=\"og:title\" content=\"" + projectByCanonicalURL.MetaInfo.Title + "\">" +
+			"<meta property=\"og:description\" content=\"" + projectByCanonicalURL.MetaInfo.Description + "\">" +
+			"<meta property=\"og:image\" content=\"" + projectByCanonicalURL.WebCards.Images[0] + "\">" +
+			"<meta property=\"og:url\" content=\"" + url + "\">" +
+			"<meta property=\"og:type\" content=\"website\">" +
+			"<meta name=\"robots\" content=\"index, follow\">" +
+			"<link rel=\"canonical\" href=\"" + url + "\">" +
+			projectByCanonicalURL.MetaInfo.ProjectSchema[0] +
+			"</head><body><h1>" + projectByCanonicalURL.MetaInfo.Title + "</h1>" +
+			"<p>" + strings.ReplaceAll(projectByCanonicalURL.MetaInfo.Description, "\n", "<br>") + "</p>" +
+			"</body></html>"
+
 	}
 
 	return &imhttp.Response{

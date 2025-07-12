@@ -965,3 +965,37 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("Blogs migrated successfully --------->>>> success")
 	return nil
 }
+
+func MigrateGenericSearchData(ctx context.Context, txn *ent.Tx) error {
+	log.Info().Msg("fetching generic search data --------->>>> success")
+	genericSearchData, err := FetchAllGenericSearchData(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, data := range genericSearchData {
+		if data.URL == nil {
+			continue
+		}
+
+		parsedURL := strings.Split(*data.URL, "?")
+		if len(parsedURL) != 2 {
+			continue
+		}
+
+		filters := make(map[string]string)
+		queryParams := strings.Split(parsedURL[1], "&")
+
+		for _, param := range queryParams {
+			keyValue := strings.Split(param, "=")
+			if len(keyValue) == 2 {
+				filters[keyValue[0]] = keyValue[1]
+			}
+		}
+		//TODO: use the filter to get the mapped IDs and search filters of legacy data to new data
+
+	}
+	log.Info().Msg("Fetched generic search data --------->>>> success")
+
+	return nil
+}

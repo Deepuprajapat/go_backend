@@ -36,8 +36,6 @@ func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
 
-	
-
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
 
@@ -97,7 +95,16 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/content/text", imhttp.AppHandler(handler.GetPropertySEOContent)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/content/text/html", imhttp.AppHandler(handler.GetHTMLContent)).Methods(http.MethodGet)
 
-	
+	// generic search routes
+	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.GetGenericSearchData)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.AddGenericSearchData)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.UpdateGenericSearchData)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.DeleteGenericSearchData)).Methods(http.MethodDelete)
+
+	//TODO: leads generation routes
+	// 1.get otp
+	// 2.verify otp
+
 	Router.PathPrefix("/").HandlerFunc(serveReactApp)
 
 }
