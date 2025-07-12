@@ -109,6 +109,7 @@ func (h *Handler) GetPropertySEOContent(r *http.Request) (*imhttp.Response, *imh
 
 func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	url := r.URL.Query().Get("url")
+	logger.Get().Info().Msg("url from gethtmlcontent: " + url)
 	// ctx := r.Context()
 
 	if strings.HasPrefix(url, "https://www.investmango.com/") {
@@ -124,63 +125,61 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 
 	var htmlResponse string
 
-	// 	if strings.Contains(cleanUrl, "propertyforsale/") {
-	// 		parts := strings.Split(cleanUrl, "/")
-	// 		if len(parts) >= 2 {
-	// 			propertyURL := parts[1]
-	// 			logger.Get().Info().Msg("propertyURL from gethtmlcontent: " + propertyURL)
-	// 			property, err := h.app.GetPropertyByName(ctx , propertyURL)
-	// 			logger.Get().Info().Msg("property from gethtmlcontent: " + property.MetaInfo.Title)
+	if strings.Contains(cleanUrl, "blogs/") {
+		parts := strings.Split(cleanUrl, "/")
+		if len(parts) >= 2 {
+			dynamicValue := parts[1]
+			blog, err := h.app.GetBlogByID(dynamicValue)
+			if err != nil || blog == nil {
+				return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found with this url: "+url, "Blog not found")
+			}
 
-	// 			if err != nil {
-	// 				return nil, err
-	// 			}
-	// 			if property == nil {
-	// 				return nil, imhttp.NewCustomErr(http.StatusNotFound, "Property not found with this url: "+url, "")
-	// 			}
+			ogImage := ""
+			if blog.Images != nil && len(blog.Images) > 0 {
+				ogImage = blog.Images[0]
+			}
 
-	// 			// Get OG image from product schema if available
-	// 			ogImage := utils.GetOgImageFromSchema(property.ProductSchema)
-	// 			htmlResponse = fmt.Sprintf(`<!DOCTYPE html>
-	// <html>
-	//     <head>
-	//         <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
-	//         <title>%s</title>
-	//         <meta name="description" content="%s">
-	//         <meta name="keywords" content="%s">
-	//         <meta property="og:title" content="%s">
-	//         <meta property="og:description" content="%s">
-	//         <meta property="og:image" content="%s">
-	//         <meta property="og:url" content="%s">
-	//         <meta property="og:type" content="website">
-	//         <meta name="robots" content="index, follow">
-	//         <link rel="canonical" href="%s">
-	//         %s
-	//     </head>
-	//     <body>
-	//         <h1>%s</h1>
-	//         <p>%s</p>
-	//     </body>
-	// </html>`,
-	// 				property.MetaInfo.Title,
-	// 				property.MetaInfo.Description,
-	// 				property.MetaInfo.Keywords,
-	// 				property.MetaInfo.Title,
-	// 				property.MetaInfo.Description,
-	// 				ogImage,
-	// 				url,
-	// 				url,
-	// 				property.ProductSchema,
-	// 				property.MetaInfo.Title,
-	// 				strings.ReplaceAll(property.MetaInfo.Description, "\n", "<br>"))
+			blogSchema := ""
+			if blog.BlogSchema != "" {
+				blogSchema = blog.BlogSchema
+			}
 
-	// 			return &imhttp.Response{
-	// 				Data:       htmlResponse,
-	// 				StatusCode: http.StatusOK,
-	// 			}, nil
-	// 		}
-	// 	}
+			htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
+<meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+<title>%s</title>
+<meta name="description" content="%s">
+<meta name="keywords" content="%s">
+<link rel="canonical" href="%s">
+<meta property="og:title" content="%s">
+<meta property="og:description" content="%s">
+<meta property="og:image" content="%s">
+<meta property="og:url" content="%s">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+%s
+</head><body><h1>%s</h1>
+<p>%s</p>
+</body></html>`,
+				blog.MetaTitle,
+				blog.SubHeadings,
+				blog.MetaKeywords,
+				url,
+				blog.MetaTitle,
+				blog.SubHeadings,
+				ogImage,
+				url,
+				blogSchema,
+				blog.MetaTitle,
+				strings.ReplaceAll(blog.SubHeadings, "\n", "<br>"),
+			)
+			return &imhttp.Response{
+				Data:       htmlResponse,
+				StatusCode: http.StatusOK,
+			}, nil
+		}
+	}
 
+	
 	switch cleanUrl {
 	case "", "/":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>

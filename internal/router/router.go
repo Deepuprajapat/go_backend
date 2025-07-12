@@ -36,7 +36,7 @@ func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
 
-	Router.PathPrefix("/").HandlerFunc(serveReactApp)
+	
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -96,6 +96,10 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/content/test/{url}", imhttp.AppHandler(handler.GetProjectSEOContent)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/content/text", imhttp.AppHandler(handler.GetPropertySEOContent)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/content/text/html", imhttp.AppHandler(handler.GetHTMLContent)).Methods(http.MethodGet)
+
+	
+	Router.PathPrefix("/").HandlerFunc(serveReactApp)
+
 }
 
 /////   curl calls	/////
