@@ -20,11 +20,11 @@ func (c *application) GetProjectByCanonicalURL(ctx context.Context, url string) 
 	return project, nil
 }
 
-func (c *application) GetPropertyByName(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError) {
+func (c *application) GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError) {
 
 	cleanUrl := strings.Replace(url, "https://investmango.com/", "", -1)
 	cleanUrl = strings.Replace(cleanUrl, "https://www.investmango.com/", "", -1)
-	
+
 	logger.Get().Debug().Msg("cleanUrl: " + cleanUrl)
 	// Extract property name
 	if strings.Contains(cleanUrl, "propertyforsale/") {
@@ -42,4 +42,13 @@ func (c *application) GetPropertyByName(ctx context.Context, url string) (*ent.P
 		}
 	}
 	return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid URL format", "Invalid URL format")
+}
+
+func (c *application) GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, *imhttp.CustomError) {
+	blog, err := c.repo.GetBlogByCanonicalURL(ctx, url)
+	if err != nil {
+		fmt.Println("Error getting blog by canonical URL: ", err)
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get blog by canonical URL", err.Error())
+	}
+	return blog, nil
 }

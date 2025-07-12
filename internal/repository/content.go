@@ -16,7 +16,7 @@ func (r *repository) GetProjectByCanonicalURL(ctx context.Context, url string) (
 				s.Where(sql.ExprP("meta_info->>'canonical' = $1", url)).Limit(1)
 			},
 		).
-		First(ctx)
+		Only(ctx)
 }
 
 func (r *repository) GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, error) {
@@ -25,5 +25,15 @@ func (r *repository) GetPropertyByCanonicalURL(ctx context.Context, url string) 
 			// Correctly grouped SQL expression
 			s.Where(sql.ExprP("(meta_info->>'canonical') = $1", url))
 		}).
+		Only(ctx)
+}
+
+func (r *repository) GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, error) {
+	return r.db.Blogs.Query().
+		Where(
+			func(s *sql.Selector) {
+				s.Where(sql.ExprP("(seo_meta_info->>'canonical') = $1", url))
+			},
+		).
 		Only(ctx)
 }

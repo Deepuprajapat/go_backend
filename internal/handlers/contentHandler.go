@@ -67,7 +67,7 @@ func (h *Handler) GetPropertySEOContent(r *http.Request) (*imhttp.Response, *imh
 	ctx := r.Context()
 	url := r.URL.Query().Get("url")
 
-	property, err := h.app.GetPropertyByName(ctx, url)
+	property, err := h.app.GetPropertyByCanonicalURL(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (h *Handler) GetPropertySEOContent(r *http.Request) (*imhttp.Response, *imh
 func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	url := r.URL.Query().Get("url")
 	logger.Get().Info().Msg("url from gethtmlcontent: " + url)
-	// ctx := r.Context()
+	ctx := r.Context()
 
 	if strings.HasPrefix(url, "https://www.investmango.com/") {
 		url = strings.TrimPrefix(url, "https://www.investmango.com/")
@@ -118,69 +118,15 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		url = strings.TrimPrefix(url, "https://investmango.com/")
 	}
 
-	cleanUrl := strings.TrimPrefix(url, "www.")
-	cleanUrl = strings.TrimSuffix(cleanUrl, "/")
-	cleanUrl = strings.TrimPrefix(cleanUrl, "/")
-	logger.Get().Info().Msg("cleanUrl from gethtmlcontent: " + cleanUrl)
+	//TODO: get generic path and get the projects
 
 	var htmlResponse string
 
-	if strings.Contains(cleanUrl, "blogs/") {
-		parts := strings.Split(cleanUrl, "/")
-		if len(parts) >= 2 {
-			dynamicValue := parts[1]
-			blog, err := h.app.GetBlogByID(dynamicValue)
-			if err != nil || blog == nil {
-				return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found with this url: "+url, "Blog not found")
-			}
+	if strings.Contains(url, "blogs/") {
 
-			ogImage := ""
-			if blog.Images != nil && len(blog.Images) > 0 {
-				ogImage = blog.Images[0]
-			}
-
-			blogSchema := ""
-			if blog.BlogSchema != "" {
-				blogSchema = blog.BlogSchema
-			}
-
-			htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
-<meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
-<title>%s</title>
-<meta name="description" content="%s">
-<meta name="keywords" content="%s">
-<link rel="canonical" href="%s">
-<meta property="og:title" content="%s">
-<meta property="og:description" content="%s">
-<meta property="og:image" content="%s">
-<meta property="og:url" content="%s">
-<meta property="og:type" content="website">
-<meta name="robots" content="index, follow">
-%s
-</head><body><h1>%s</h1>
-<p>%s</p>
-</body></html>`,
-				blog.MetaTitle,
-				blog.SubHeadings,
-				blog.MetaKeywords,
-				url,
-				blog.MetaTitle,
-				blog.SubHeadings,
-				ogImage,
-				url,
-				blogSchema,
-				blog.MetaTitle,
-				strings.ReplaceAll(blog.SubHeadings, "\n", "<br>"),
-			)
-			return &imhttp.Response{
-				Data:       htmlResponse,
-				StatusCode: http.StatusOK,
-			}, nil
-		}
 	}
 
-	
-	switch cleanUrl {
+	switch url {
 	case "", "/":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
             <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
@@ -191,7 +137,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
             <meta name="robots" content="index, follow">
             <meta property="og:url" content="%s">
             <link rel="canonical" href="https://www.investmango.com/">
-            </head><body><h1>Welcome to Invest Mango</h1></body></html>`, url)
+            </head><body><h1>Welcome to Invest Mango</h1></body></html>`, "https://www.investmango.com/")
 
 	case "contact":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
@@ -346,6 +292,93 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			"<h2 style='margin-top: 30px;'>Contact Us</h2>" +
 			"<p>Email: <a href='mailto:info@investmango.com'>info@investmango.com</a>, <a href='mailto:hr@investmango.com'>hr@investmango.com</a></p>" +
 			"</div></body></html>"
+
+	case "propertyforsale":
+		canonical := strings.TrimPrefix(url, "propertyforsale/")
+		property, err := h.app.GetPropertyByCanonicalURL(ctx, canonical)
+		if err != nil {
+			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Property not found with this url: "+url, "Property not found")
+		}
+
+		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
+                                    <meta name=\"google-site-verification\" content=\"ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA\">
+                                    <title>%s</title>
+                                    <meta name=\"description\" content=\"%s\">
+                                    <meta name=\"keywords\" content=\"%s\">
+                                    <meta property=\"og:title\" content=\"%s\">
+                                    <meta property=\"og:description\" content=\"%s\">
+                                    <meta property=\"og:image\" content=\"%s\">
+                                    <meta property=\"og:url\" content=\"%s\">
+                                    <meta property=\"og:type\" content=\"website\">
+                                    <meta name=\"robots\" content=\"index, follow\">
+                                    <link rel=\"canonical\" href=\"%s\">
+                                    %s
+                                    </head><body><h1>%s</h1>
+                                    <p>%s</p>
+                                    </body></html>`,
+			property.MetaInfo.Title,
+			property.MetaInfo.Description,
+			property.MetaInfo.Keywords,
+			property.MetaInfo.Title,
+			property.MetaInfo.Description,
+			property.PropertyImages[0],
+			url,
+			url,
+			property.ProductSchema,
+			property.MetaInfo.Title,
+			strings.ReplaceAll(property.MetaInfo.Description, "\n", "<br>"),
+		)
+		return &imhttp.Response{
+			Data:       htmlResponse,
+			StatusCode: http.StatusOK,
+		}, nil
+
+	case "blogs", "blogs/":
+		canonical := strings.TrimPrefix(url, "blogs/")
+		if canonical == "" {
+			logger.Get().Info().Msg("canonical is empty for blogs")
+			return &imhttp.Response{
+				Data:       "<!DOCTYPE html><html><head><title>Blogs | Invest Mango</title><meta name=\"description\" content=\"Read our latest blogs and stay updated with the latest real estate trends and insights.\"><meta name=\"keywords\" content=\"real estate blogs, real estate news, real estate tips, real estate investment, real estate market trends\"><link rel=\"canonical\" href=\"https://www.investmango.com/blogs\"></head><body><h1>Blogs</h1></body></html>",
+				StatusCode: 200,
+			}, nil
+		}
+		blog, err := h.app.GetBlogByCanonicalURL(ctx, canonical)
+		if err != nil {
+			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found with this url: "+url, "Blog not found")
+		}
+
+		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
+		<meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+		<title>%s</title>
+		<meta name="description" content="%s">
+		<meta name="keywords" content="%s">
+		<link rel="canonical" href="%s">
+		<meta property="og:title" content="%s">
+		<meta property="og:description" content="%s">
+		<meta property="og:image" content="%s">
+		<meta property="og:url" content="%s">
+		<meta property="og:type" content="website">
+		<meta name="robots" content="index, follow">
+		%s
+		</head><body><h1>%s</h1>
+		<p>%s</p>
+		</body></html>`,
+			blog.BlogContent.Title,
+			blog.BlogContent.Description,
+			blog.BlogContent.Image,
+			url,
+			blog.BlogContent.Title,
+			blog.BlogContent.Description,
+			blog.BlogContent.Image,
+			url,
+			blog.BlogContent.Title,
+			blog.BlogContent.Description,
+			strings.ReplaceAll(blog.BlogContent.Description, "\n", "<br>"),
+		)
+		return &imhttp.Response{
+			Data:       htmlResponse,
+			StatusCode: http.StatusOK,
+		}, nil
 
 	default:
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Page not found", "")

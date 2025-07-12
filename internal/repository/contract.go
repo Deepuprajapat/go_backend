@@ -63,6 +63,7 @@ type AppRepository interface {
 
 	GetProjectByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Project, error)
 	GetPropertyByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Property, error)
+	GetBlogByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Blogs, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

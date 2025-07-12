@@ -73,7 +73,8 @@ type ApplicationInterface interface {
 
 	// Content
 	GetProjectByCanonicalURL(ctx context.Context, url string) (*ent.Project, *imhttp.CustomError)
-	GetPropertyByName(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
+	GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
+	GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, *imhttp.CustomError)
 }
 
 func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {
