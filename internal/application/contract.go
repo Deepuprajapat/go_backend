@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"io"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/internal/client"
@@ -63,7 +62,7 @@ type ApplicationInterface interface {
 	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
 
 	// Upload File
-	UploadFile(file io.Reader, request request.UploadFileRequest) (string, *imhttp.CustomError)
+	UploadFile(request request.UploadFileRequest) (string, string, *imhttp.CustomError)
 
 	// Blogs
 	ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError)

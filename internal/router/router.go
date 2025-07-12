@@ -2,6 +2,8 @@ package router
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
@@ -14,10 +16,27 @@ var (
 	Router = mux.NewRouter()
 )
 
+// serveReactApp serves the React application static files
+func serveReactApp(w http.ResponseWriter, r *http.Request) {
+	// Path to React build directory
+	buildDir := "./build"
+
+	// Check if file exists in build directory
+	filePath := filepath.Join(buildDir, r.URL.Path)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// If file doesn't exist, serve index.html for client-side routing
+		filePath = filepath.Join(buildDir, "index.html")
+	}
+
+	http.ServeFile(w, r, filePath)
+}
+
 // Init initializes the router with all routes and middleware
 func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
+
+	Router.PathPrefix("/").HandlerFunc(serveReactApp)
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
