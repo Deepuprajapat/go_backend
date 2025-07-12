@@ -59,11 +59,10 @@ type AppRepository interface {
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
 
-
-	//content 
+	//content
 
 	GetProjectByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Project, error)
-	GetPropertyByName(ctx context.Context, name string) (*ent.Property, error)
+	GetPropertyByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Property, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

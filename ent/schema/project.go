@@ -4,8 +4,10 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 )
 
@@ -42,6 +44,19 @@ func (Project) Edges() []ent.Edge {
 		edge.To("properties", Property.Type),
 		edge.From("location", Location.Type).Ref("projects").Unique(),
 		edge.From("developer", Developer.Type).Ref("projects").Unique(),
+	}
+}
+
+func (Project) Indexes() []ent.Index {
+	return []ent.Index{
+		// Index on id field
+		index.Fields("id"),
+		// Index on canonical field from meta_info JSON for efficient canonical lookups
+		index.Fields("meta_info").
+			StorageKey("idx_project_canonical").
+			Annotations(
+				entsql.IndexWhere("meta_info->>'canonical' IS NOT NULL"),
+			),
 	}
 }
 
