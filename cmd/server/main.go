@@ -54,31 +54,31 @@ func main() {
 		}
 		defer txn.Rollback()
 
-		// logger.Get().Info().Msg("Migrating static site data------------>>>>>>>>>>>>>>>>>>>>")
-		// if err := migration_jobs.MigrateStaticSiteData(ctx, txn); err != nil {
-		// 	logger.Get().Fatal().Err(err).Msg("Failed to migrate static site data")
-		// }
+		logger.Get().Info().Msg("Migrating static site data------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateStaticSiteData(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate static site data")
+		}
 
-		// logger.Get().Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
-		// if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {
-		// 	logger.Get().Fatal().Err(err).Msg("Failed to migrate localities")
-		// }
+		logger.Get().Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate localities")
+		}
 
-		// logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
-		// if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
-		// 	logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
+		logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
 
-		// }
+		}
 
-		// logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
-		// if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
-		// 	logger.Get().Fatal().Err(err).Msg("Failed to migrate projects")
-		// }
+		logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate projects")
+		}
 
-		// logger.Get().Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
-		// if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
-		// 	logger.Get().Fatal().Err(err).Msg("Failed to migrate properties")
-		// }
+		logger.Get().Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
+		if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to migrate properties")
+		}
 
 		logger.Get().Info().Msg("Migrating blogs------------>>>>>>>>>>>>>>>>>>>>")
 		if err = migration_jobs.MigrateBlogs(ctx, txn); err != nil {
