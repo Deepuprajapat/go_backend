@@ -7,6 +7,7 @@ import (
 
 	"github.com/VI-IM/im_backend_go/internal/utils"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
+	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -109,12 +110,19 @@ func (h *Handler) GetPropertySEOContent(r *http.Request) (*imhttp.Response, *imh
 
 func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	url := r.URL.Query().Get("url")
-	cleanUrl := strings.Replace(url, "https://investmango.com/", "", -1)
-	cleanUrl = strings.Replace(cleanUrl, "https://www.investmango.com/", "", -1)
-	cleanUrl = strings.Replace(cleanUrl, "www.", "", -1)
-	cleanUrl = strings.TrimSuffix(cleanUrl, "/")
+	ctx := r.Context()
+	// ctx := r.Context()
 
-	fmt.Println("cleanUrl: ", cleanUrl)
+	if strings.HasPrefix(url, "https://www.investmango.com/") {
+		url = strings.TrimPrefix(url, "https://www.investmango.com/")
+	} else if strings.HasPrefix(url, "https://investmango.com/") {
+		url = strings.TrimPrefix(url, "https://investmango.com/")
+	}
+
+	cleanUrl := strings.TrimPrefix(url, "www.")
+	cleanUrl = strings.TrimSuffix(cleanUrl, "/")
+	cleanUrl = strings.TrimPrefix(cleanUrl, "/")
+	logger.Get().Info().Msg("cleanUrl from gethtmlcontent: " + cleanUrl)
 
 	var htmlResponse string
 
@@ -122,7 +130,9 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		parts := strings.Split(cleanUrl, "/")
 		if len(parts) >= 2 {
 			propertyURL := parts[1]
-			property, err := h.app.GetPropertyByName(r.Context(), propertyURL)
+			logger.Get().Info().Msg("propertyURL from gethtmlcontent: " + propertyURL)
+			property, err := h.app.GetPropertyByName(ctx, propertyURL)
+			logger.Get().Info().Msg("property from gethtmlcontent: " + property.MetaInfo.Title)
 
 			if err != nil {
 				return nil, err
@@ -134,26 +144,26 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			// Get OG image from product schema if available
 			ogImage := utils.GetOgImageFromSchema(property.ProductSchema)
 			htmlResponse = fmt.Sprintf(`<!DOCTYPE html>
-<html>
-    <head>
-        <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
-        <title>%s</title>
-        <meta name="description" content="%s">
-        <meta name="keywords" content="%s">
-        <meta property="og:title" content="%s">
-        <meta property="og:description" content="%s">
-        <meta property="og:image" content="%s">
-        <meta property="og:url" content="%s">
-        <meta property="og:type" content="website">
-        <meta name="robots" content="index, follow">
-        <link rel="canonical" href="%s">
-        %s
-    </head>
-    <body>
-        <h1>%s</h1>
-        <p>%s</p>
-    </body>
-</html>`,
+	<html>
+	    <head>
+	        <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+	        <title>%s</title>
+	        <meta name="description" content="%s">
+	        <meta name="keywords" content="%s">
+	        <meta property="og:title" content="%s">
+	        <meta property="og:description" content="%s">
+	        <meta property="og:image" content="%s">
+	        <meta property="og:url" content="%s">
+	        <meta property="og:type" content="website">
+	        <meta name="robots" content="index, follow">
+	        <link rel="canonical" href="%s">
+	        %s
+	    </head>
+	    <body>
+	        <h1>%s</h1>
+	        <p>%s</p>
+	    </body>
+	</html>`,
 				property.MetaInfo.Title,
 				property.MetaInfo.Description,
 				property.MetaInfo.Keywords,
@@ -172,9 +182,6 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			}, nil
 		}
 	}
-
-
-    
 
 	switch cleanUrl {
 	case "", "/":

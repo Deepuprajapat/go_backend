@@ -224,7 +224,7 @@ type LPropertyConfigurationType struct {
 type LBlog struct {
 	ID           int64    `json:"id"`
 	Alt          *string  `json:"alt"`
-	BlogSchema   []string `json:"blog_schema"`
+	BlogSchema   *string `json:"blog_schema"`
 	BlogURL      *string  `json:"blog_url"`
 	Canonical    *string  `json:"canonical"`
 	CreatedDate  *int64   `json:"created_date"`

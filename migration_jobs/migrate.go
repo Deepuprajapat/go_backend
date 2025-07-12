@@ -311,7 +311,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Answer:   safeStr(faq.Question),
 				})
 			}
-			
 
 			setProjectIDMapping(project.ID, id)
 
@@ -849,7 +848,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 	return nil
 }
 
-
 func strPtr(s string) *string {
 	return &s
 }
@@ -922,9 +920,21 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				blogContent.ImageAlt = safeStr(blog.Alt)
 			}
 
+			blogSchema := []string{}
+			if blog.BlogSchema != nil {
+				blogSchemaText := strings.Trim(*blog.BlogSchema, "[]")
+				blogSchemaItems := strings.Split(blogSchemaText, "\",")
+				for _, item := range blogSchemaItems {
+					item = strings.Trim(item, "\" ")
+					if item != "" {
+						blogSchema = append(blogSchema, item)
+					}
+				}
+			}
+
 			// Create SEO meta info
 			seoMetaInfo := schema.SEOMetaInfo{
-				BlogSchema: blog.BlogSchema,
+				BlogSchema: blogSchema,
 				Canonical:  safeStr(blog.Canonical),
 				Title:      safeStr(blog.SubHeadings),
 				Keywords:   safeStr(blog.MetaKeywords),
@@ -938,7 +948,7 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				SetSeoMetaInfo(seoMetaInfo).
 				SetIsPriority(blog.IsPriority).
 				SetCreatedAt(time.Unix(*blog.CreatedDate, 0)).
-				SetUpdatedAt(time.Unix(*blog.UpdatedDate, 0)).
+				SetUpdatedAt(time.Now()).
 				SetIsDeleted(blog.IsDeleted).
 				Exec(ctx); err != nil {
 				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)

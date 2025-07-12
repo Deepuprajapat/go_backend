@@ -560,7 +560,7 @@ func FetchProjectConfigurationByID(ctx context.Context, id int64) (*LPropertyCon
 }
 
 func FetchAllBlogs(ctx context.Context) ([]LBlog, error) {
-	query := `SELECT id, alt, blog_schema, blog_url, canonical, created_date, description, headings, images, 
+	query := `SELECT id, alt, coalesce(blog_schema, '[]'), blog_url, canonical, created_date, description, headings, images, 
 					 is_priority, sub_headings, updated_date, user_id, meta_keywords, meta_title 
 			  FROM blogs`
 	rows, err := legacyDB.QueryContext(ctx, query)

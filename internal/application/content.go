@@ -24,6 +24,7 @@ func (c *application) GetPropertyByName(ctx context.Context, url string) (*ent.P
 
 	cleanUrl := strings.Replace(url, "https://investmango.com/", "", -1)
 	cleanUrl = strings.Replace(cleanUrl, "https://www.investmango.com/", "", -1)
+	
 	logger.Get().Debug().Msg("cleanUrl: " + cleanUrl)
 	// Extract property name
 	if strings.Contains(cleanUrl, "propertyforsale/") {
