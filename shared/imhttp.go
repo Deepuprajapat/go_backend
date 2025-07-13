@@ -10,6 +10,7 @@ type Response struct {
 	Data       interface{} `json:"data"`
 	StatusCode int         `json:"status_code"`
 	Message    string      `json:"message"`
+	Cookies    []*http.Cookie `json:"-"`
 }
 
 type AppHandler func(*http.Request) (*Response, *CustomError)
@@ -22,6 +23,13 @@ func (h AppHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("error writing error response: %v", err)
 		}
 		return
+	}
+
+	// Set cookies if any are provided
+	if resp.Cookies != nil {
+		for _, cookie := range resp.Cookies {
+			http.SetCookie(w, cookie)
+		}
 	}
 
 	httpResponse := make(map[string]interface{})

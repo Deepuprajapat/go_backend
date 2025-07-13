@@ -781,6 +781,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				projectID, ok = getProjectIDMapping(*property.ProjectID)
 				if !ok {
 					log.Error().Msgf("Project ID mapping not found for property ID %d", property.ID)
+					continue
 					return fmt.Errorf("project ID mapping not found for property ID %d", property.ID)
 				}
 			}
@@ -790,6 +791,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				developerID, ok = getDeveloperIDMapping(*property.DeveloperID)
 				if !ok {
 					log.Error().Msgf("Developer ID mapping not found for property ID %d", property.ID)
+					continue
 					return fmt.Errorf("developer ID mapping not found for property ID %d", property.ID)
 				}
 			}
@@ -799,6 +801,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				localityID, ok = getLocalityIDMapping(*property.LocalityID)
 				if !ok {
 					log.Error().Msgf("Locality ID mapping not found for property ID %d", property.ID)
+					continue
 					return fmt.Errorf("locality ID mapping not found for property ID %d", property.ID)
 				}
 			}

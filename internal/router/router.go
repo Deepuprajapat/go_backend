@@ -1,13 +1,17 @@
 package router
 
 import (
-	"github.com/VI-IM/im_backend_go/internal/application"
-	"github.com/VI-IM/im_backend_go/internal/handlers"
-	imhttp "github.com/VI-IM/im_backend_go/shared"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
+	"path/filepath"
+
+	"github.com/VI-IM/im_backend_go/internal/application"
+	"github.com/VI-IM/im_backend_go/internal/handlers"
+	"github.com/VI-IM/im_backend_go/internal/middleware"
+	imhttp "github.com/VI-IM/im_backend_go/shared"
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -34,11 +38,26 @@ func corsMiddleware(_ *mux.Router) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			next.ServeHTTP(w, r)
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		})
 	}
+}
+
+// serveStaticFiles serves the React application static files from build directory
+func serveStaticFiles(w http.ResponseWriter, r *http.Request) {
+	// Path to React build directory
+	buildDir := "./build"
+
+	// Check if file exists in build directory
+	filePath := filepath.Join(buildDir, r.URL.Path)
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// If file doesn't exist, serve index.html for client-side routing
+		filePath = filepath.Join(buildDir, "index.html")
+	}
+
+	http.ServeFile(w, r, filePath)
 }
 
 func serveReactApp(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +74,9 @@ func serveReactApp(w http.ResponseWriter, r *http.Request) {
 func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
+	
+	// Add middleware
+	Router.Use(middleware.LoggingMiddleware)
 	Router.Use(corsMiddleware(Router))
 
 	// Public routes
@@ -131,7 +153,8 @@ func Init(app application.ApplicationInterface) {
 	// 2.verify otp
 
 	// Catch-all route for React app - must be last to handle all non-API routes
-	Router.PathPrefix("/").HandlerFunc(serveReactApp)
+	Router.PathPrefix("/").HandlerFunc(serveReactApp) // Proxy to local dev server
+	//Router.PathPrefix("/").HandlerFunc(serveStaticFiles) // Serve static build files
 }
 
 /////   curl calls	/////
