@@ -113,7 +113,12 @@ func processBatch[T any](ctx context.Context, items []T, batchSize int, processo
 // Use ent schema modal to migrate data from legacy database to new database
 
 func MigrateProject(ctx context.Context, txn *ent.Tx) error {
-	projects, err := FetchhAllProject(ctx)
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	projects, err := loader.GetAllProjects()
 	if err != nil {
 		return err
 	}
@@ -132,7 +137,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 		for _, project := range batch {
 			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID+1000, 10))))[:16]
 
-			projectRera, err := FetchReraByProjectID(ctx, project.ID)
+			projectRera, err := loader.GetRerasByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch project RERA for project ID %d", project.ID)
 				continue
@@ -165,7 +170,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				uspListNew = append(uspListNew, safeStr(&usp))
 			}
 
-			floorPlans, err := FetchFloorPlanByProjectID(ctx, project.ID)
+			floorPlans, err := loader.GetFloorPlansByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch floor plans for project ID %d", project.ID)
 				continue
@@ -228,7 +233,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 
 			// Convert float prices to integers (calculated but not used in current migration)
 
-			amenities, err := FetchProjectAmenitiesByProjectID(ctx, project.ID)
+			amenities, err := loader.GetProjectAmenitiesByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch amenities for project ID %d", project.ID)
 				continue
@@ -242,7 +247,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				})
 			}
 
-			paymentPlans, err := FetchPaymentPlansByProjectID(ctx, project.ID)
+			paymentPlans, err := loader.GetPaymentPlansByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch payment plans for project ID %d", project.ID)
 				continue
@@ -261,19 +266,19 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				continue
 			}
 
-			developer, err := FetchDeveloperByID(ctx, *project.DeveloperID)
+			developer, err := loader.GetDeveloperByID(*project.DeveloperID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch developer for project ID %d", project.ID)
 				continue
 			}
 
-			faqs, err := FetchFaqsByProjectID(ctx, project.ID)
+			faqs, err := loader.GetFaqsByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch faqs for project ID %d", project.ID)
 				continue
 			}
 
-			projectImages, err := FetchProjectImagesByProjectID(ctx, project.ID)
+			projectImages, err := loader.GetProjectImagesByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch project images for project ID %d", project.ID)
 				continue
@@ -325,7 +330,13 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				log.Error().Msgf("Locality ID mapping not found for project ID %d", project.ID)
 				continue
 			}
-			projectConfigurationType, err := FetchProjectConfigurationByID(ctx, *project.PropertyConfigTypeID)
+			projectConfiguration, err := loader.GetPropertyConfigurationByID(*project.PropertyConfigTypeID)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to fetch project configuration for project ID %d", project.ID)
+				continue
+			}
+
+			projectConfigurationType, err := loader.GetPropertyConfigurationTypeByID(projectConfiguration.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch project configuration type for project ID %d", project.ID)
 				continue
@@ -516,7 +527,13 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching developers")
-	developers, err := FetchAllDevelopers(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	developers, err := loader.GetAllDevelopers()
 	if err != nil {
 		return err
 	}
@@ -560,7 +577,13 @@ func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching localities")
-	localities, err := FetchAllLocality(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	localities, err := loader.GetAllLocalities()
 	if err != nil {
 		return err
 	}
@@ -568,7 +591,7 @@ func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 
 	processLocalityBatch := func(ctx context.Context, batch []LLocality) error {
 		for _, locality := range batch {
-			city, err := FetchCityByID(ctx, *locality.CityID)
+			city, err := loader.GetCityByID(*locality.CityID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch city for locality ID %d", locality.ID)
 				continue
@@ -610,7 +633,13 @@ func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching properties --------->>>> success")
-	properties, err := fetchAllProperty(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	properties, err := loader.GetAllProperties()
 	if err != nil {
 		return err
 	}
@@ -627,7 +656,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 
 			var propertyConfiguration *LPropertyConfiguration
 			if property.ConfigurationID != nil {
-				propertyConfiguration, err = FetchPropertyConfigurationByID(ctx, *property.ConfigurationID)
+				propertyConfiguration, err = loader.GetPropertyConfigurationByID(*property.ConfigurationID)
 				if err != nil {
 					log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
 					continue
@@ -660,7 +689,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 
 			var propertyType *LPropertyConfigurationType
 			if propertyConfiguration != nil {
-				propertyType, err = FetchPropertyConfigurationTypeByID(ctx, propertyConfiguration.ID)
+				propertyType, err = loader.GetPropertyConfigurationTypeByID(propertyConfiguration.ID)
 				if err != nil {
 					log.Error().Err(err).Msgf("Failed to fetch property type for property ID %d", property.ID)
 					continue
@@ -894,7 +923,13 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 	}
 
 	log.Info().Msg("Fetching blogs")
-	blogs, err := FetchAllBlogs(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	blogs, err := loader.GetAllBlogs()
 	if err != nil {
 		return err
 	}
@@ -971,7 +1006,13 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateGenericSearchData(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching generic search data --------->>>> success")
-	genericSearchData, err := FetchAllGenericSearchData(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	genericSearchData, err := loader.GetAllGenericSearchData()
 	if err != nil {
 		return err
 	}

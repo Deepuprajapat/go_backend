@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
@@ -44,6 +45,15 @@ func main() {
 		case "seed-admin":
 			seedAdmin(ctx)
 			return
+		case "export-database":
+			exportDatabase(ctx)
+			return
+		case "export-specific-tables":
+			exportSpecificTables(ctx)
+			return
+		case "initialize-json-loader":
+			initializeJSONLoader(ctx)
+			return
 		}
 	}
 
@@ -77,8 +87,22 @@ func main() {
 }
 
 func runMigration(ctx context.Context) {
+	// Check if data directory is provided
+	if len(os.Args) < 3 {
+		logger.Get().Fatal().Msg("Please provide the data directory path. Usage: go run cmd/server/main.go run-migration /path/to/exported/data")
+	}
+
+	dataDir := os.Args[2]
+
+	// Initialize the JSON data loader first
+	logger.Get().Info().Msg("Initializing JSON data loader for migration...")
+	if err := migration_jobs.InitializeJSONDataLoader(dataDir); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to initialize JSON data loader")
+	}
+	logger.Get().Info().Msg("JSON data loader initialized successfully")
+
 	var err error
-	legacyDB, err = migration_jobs.NewLegacyDBConnection()
+	legacyDB, err = migration_jobs.LegacyDBConnection()
 	if err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to connect to legacy database")
 	}
@@ -97,25 +121,25 @@ func runMigration(ctx context.Context) {
 	}
 	defer txn.Rollback()
 
-	//logger.Get().Info().Msg("Migrating static site data------------>>>>>>>>>>>>>>>>>>>>")
-	//if err := migration_jobs.MigrateStaticSiteData(ctx, txn); err != nil {
-	//	logger.Get().Fatal().Err(err).Msg("Failed to migrate static site data")
-	//}
-	//
-	//logger.Get().Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
-	//if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {
-	//	logger.Get().Fatal().Err(err).Msg("Failed to migrate localities")
-	//}
-	//
-	//logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
-	//if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
-	//	logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
-	//}
+	logger.Get().Info().Msg("Migrating static site data------------>>>>>>>>>>>>>>>>>>>>")
+	if err := migration_jobs.MigrateStaticSiteData(ctx, txn); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to migrate static site data")
+	}
 
-	//logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
-	//if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
-	//	logger.Get().Fatal().Err(err).Msg("Failed to migrate projects")
-	//}
+	logger.Get().Info().Msg("Migrating localities------------>>>>>>>>>>>>>>>>>>>>")
+	if err := migration_jobs.MigrateLocality(ctx, txn); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to migrate localities")
+	}
+
+	logger.Get().Info().Msg("Migrating developers------------>>>>>>>>>>>>>>>>>>>>")
+	if err := migration_jobs.MigrateDeveloper(ctx, txn); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to migrate developers")
+	}
+
+	logger.Get().Info().Msg("Migrating projects------------>>>>>>>>>>>>>>>>>>>>")
+	if err := migration_jobs.MigrateProject(ctx, txn); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to migrate projects")
+	}
 
 	logger.Get().Info().Msg("Migrating properties------------>>>>>>>>>>>>>>>>>>>>")
 	if err := migration_jobs.MigrateProperty(ctx, txn); err != nil {
@@ -187,4 +211,71 @@ func seedAdmin(ctx context.Context) {
 		fmt.Printf("Email: %s\n", adminEmail)
 		fmt.Printf("========================\n\n")
 	}
+}
+
+func exportDatabase(ctx context.Context) {
+	logger.Get().Info().Msg("Starting database export...")
+
+	// Use custom export directory if provided as argument
+	exportDir := ""
+	if len(os.Args) > 2 {
+		exportDir = os.Args[2]
+	}
+
+	// Export all tables
+	if err := migration_jobs.ExportAllTablesToJSON(ctx, exportDir); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to export database")
+	}
+
+	logger.Get().Info().Msg("Database export completed successfully")
+}
+
+func exportSpecificTables(ctx context.Context) {
+	logger.Get().Info().Msg("Starting specific tables export...")
+
+	// Check if table names are provided
+	if len(os.Args) < 3 {
+		logger.Get().Fatal().Msg("Please provide table names to export. Usage: go run cmd/server/main.go export-specific-tables table1,table2,table3 [export_dir]")
+	}
+
+	// Parse table names from command line argument
+	tableNamesStr := os.Args[2]
+	tableNames := strings.Split(tableNamesStr, ",")
+
+	// Trim whitespace from table names
+	for i, name := range tableNames {
+		tableNames[i] = strings.TrimSpace(name)
+	}
+
+	// Use custom export directory if provided as argument
+	exportDir := ""
+	if len(os.Args) > 3 {
+		exportDir = os.Args[3]
+	}
+
+	// Export specific tables
+	if err := migration_jobs.ExportSpecificTablesToJSON(ctx, tableNames, exportDir); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to export specific tables")
+	}
+
+	logger.Get().Info().Msg("Specific tables export completed successfully")
+}
+
+func initializeJSONLoader(ctx context.Context) {
+	logger.Get().Info().Msg("Initializing JSON data loader...")
+
+	// Check if data directory is provided
+	if len(os.Args) < 3 {
+		logger.Get().Fatal().Msg("Please provide the data directory path. Usage: go run cmd/server/main.go initialize-json-loader /path/to/exported/data")
+	}
+
+	dataDir := os.Args[2]
+
+	// Initialize the JSON data loader
+	if err := migration_jobs.InitializeJSONDataLoader(dataDir); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to initialize JSON data loader")
+	}
+
+	logger.Get().Info().Msg("JSON data loader initialized successfully")
+	logger.Get().Info().Msg("You can now use the legacy fetcher functions which will read from JSON files instead of database")
 }

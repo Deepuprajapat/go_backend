@@ -44,7 +44,7 @@ run:
 	go run cmd/server/main.go
 
 run-migration:
-	go run cmd/server/main.go run-migration
+	go run cmd/server/main.go run-migration ./migration_jobs/database_export
 
 # Setup fresh development environment
 dev-setup: docker-up migrate
@@ -60,3 +60,14 @@ seed-data:
 	go run cmd/server/main.go seed-admin
 
 migrate: migrate-schema
+
+export-database:
+	go run cmd/server/main.go export-database
+
+export-specific-tables:
+	go run cmd/server/main.go export-specific-tables
+
+initialize-json-loader:
+	go run cmd/server/main.go initialize-json-loader ./migration_jobs/database_export
+
+

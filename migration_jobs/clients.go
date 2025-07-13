@@ -47,7 +47,7 @@ type LegacyDBConfig struct {
 }
 
 // NewLegacyDBConnection creates a new connection to the legacy MySQL database
-func NewLegacyDBConnection() (*sql.DB, error) {
+func LegacyDBConnection() (*sql.DB, error) {
 	config := LegacyDBConfig{
 		Host:     "invest.c74oiwy6c0gc.ap-south-1.rds.amazonaws.com",
 		Port:     "3306",
