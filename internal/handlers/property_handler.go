@@ -5,12 +5,43 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/VI-IM/im_backend_go/internal/auth"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/gorilla/mux"
 )
+
+// checkPropertyOwnership validates if a user can modify a property based on their role and ownership
+func (h *Handler) checkPropertyOwnership(r *http.Request, propertyID string) *imhttp.CustomError {
+	claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+	if !ok {
+		return imhttp.NewCustomErr(http.StatusUnauthorized, "Invalid user context", "Invalid user context")
+	}
+
+	// Superadmin can modify any property
+	if claims.Role == "superadmin" {
+		return nil
+	}
+
+	// Business partner can only modify properties they created
+	if claims.Role == "business_partner" {
+		property, err := h.app.GetPropertyByID(propertyID)
+		if err != nil {
+			logger.Get().Error().Err(err).Msg("Failed to get property for ownership check")
+			return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to verify property ownership", err.Error())
+		}
+
+		// Check if the property was created by this user
+		if property.CreatedByUserID == "" || property.CreatedByUserID != claims.UserID {
+			return imhttp.NewCustomErr(http.StatusForbidden, "Access denied: you can only modify properties you created", "Access denied")
+		}
+		return nil
+	}
+
+	return imhttp.NewCustomErr(http.StatusForbidden, "Access denied: insufficient role permissions", "Access denied")
+}
 
 func (h *Handler) GetProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
@@ -34,6 +65,11 @@ func (h *Handler) UpdateProperty(r *http.Request) (*imhttp.Response, *imhttp.Cus
 	if propertyID == "" {
 		logger.Get().Error().Msg("Property ID is required")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Property ID is required", "Property ID is required")
+	}
+
+	// Check ownership permissions
+	if err := h.checkPropertyOwnership(r, propertyID); err != nil {
+		return nil, err
 	}
 
 	var input request.UpdatePropertyRequest
@@ -83,6 +119,13 @@ func (h *Handler) AddProperty(r *http.Request) (*imhttp.Response, *imhttp.Custom
 	if input.ProjectID == "" || input.PropertyType == "" || input.Name == "" {
 		logger.Get().Error().Msg("Invalid request body")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
+	}
+
+	// Set the creator user ID from the authenticated user
+	claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+	if ok {
+		userID := claims.UserID
+		input.CreatedByUserID = &userID
 	}
 
 	propertyID, err := h.app.AddProperty(input)
@@ -159,6 +202,11 @@ func (h *Handler) DeleteProperty(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Property ID is required", "Property ID is required")
 	}
 
+	// Check ownership permissions
+	if err := h.checkPropertyOwnership(r, propertyID); err != nil {
+		return nil, err
+	}
+
 	if err := h.app.DeleteProperty(propertyID); err != nil {
 		return nil, err
 	}
@@ -167,5 +215,73 @@ func (h *Handler) DeleteProperty(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		Data:       nil,
 		StatusCode: http.StatusOK,
 		Message:    "Property deleted successfully",
+	}, nil
+}
+
+func (h *Handler) AdminListProperties(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	// Get user claims from context
+	claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+	if !ok {
+		return nil, imhttp.NewCustomErr(http.StatusUnauthorized, "Invalid user context", "Invalid user context")
+	}
+
+	// Parse pagination parameters from query with max page size of 10
+	pagination := &request.GetAllAPIRequest{
+		Page:     1,
+		PageSize: 10,
+	}
+
+	if page := r.URL.Query().Get("page"); page != "" {
+		if pageNum, err := strconv.Atoi(page); err == nil {
+			pagination.Page = pageNum
+		}
+	}
+
+	if pageSize := r.URL.Query().Get("page_size"); pageSize != "" {
+		if pageSizeNum, err := strconv.Atoi(pageSize); err == nil && pageSizeNum <= 10 {
+			pagination.PageSize = pageSizeNum
+		}
+	}
+
+	pagination.Validate()
+
+	// Create filter map
+	filters := make(map[string]interface{})
+
+	// Parse standard query parameters
+	if configuration := r.URL.Query().Get("configuration"); configuration != "" {
+		filters["configuration"] = configuration
+	}
+	if propertyType := r.URL.Query().Get("property_type"); propertyType != "" {
+		filters["property_type"] = propertyType
+	}
+	if city := r.URL.Query().Get("city"); city != "" {
+		filters["city"] = city
+	}
+
+	// Add role-based filtering
+	if claims.Role == "business_partner" {
+		// Business partners can only see properties they created
+		filters["created_by_user_id"] = claims.UserID
+	}
+	// Superadmin can see all properties (no additional filter needed)
+
+	pagination.Filters = filters
+
+	properties, totalItems, err := h.app.ListProperties(pagination)
+	if err != nil {
+		return nil, err
+	}
+
+	paginatedResponse := response.NewPaginatedResponse(
+		properties,
+		pagination.Page,
+		pagination.PageSize,
+		totalItems,
+	)
+
+	return &imhttp.Response{
+		Data:       paginatedResponse,
+		StatusCode: http.StatusOK,
 	}, nil
 }

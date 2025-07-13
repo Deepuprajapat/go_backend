@@ -278,6 +278,12 @@ func (r *repository) GetAllProperties(offset, limit int, filters map[string]inte
 			}
 		}
 
+		if createdByUserID, ok := filters["created_by_user_id"].(string); ok && createdByUserID != "" {
+			if p.CreatedByUserID != createdByUserID {
+				matches = false
+			}
+		}
+
 		if matches {
 			filteredProperties = append(filteredProperties, p)
 		}

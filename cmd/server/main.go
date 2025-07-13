@@ -11,10 +11,13 @@ import (
 	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/project"
+	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/application"
 	s3client "github.com/VI-IM/im_backend_go/internal/client"
 	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/database"
+	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
 	"github.com/VI-IM/im_backend_go/internal/utils"
@@ -53,6 +56,8 @@ func main() {
 			return
 		case "initialize-json-loader":
 			initializeJSONLoader(ctx)
+		case "seed-projects":
+			seedProjects(ctx)
 			return
 		}
 	}
@@ -278,4 +283,178 @@ func initializeJSONLoader(ctx context.Context) {
 
 	logger.Get().Info().Msg("JSON data loader initialized successfully")
 	logger.Get().Info().Msg("You can now use the legacy fetcher functions which will read from JSON files instead of database")
+}
+
+func seedProjects(ctx context.Context) {
+	logger.Get().Info().Msg("Starting project seeding...")
+
+	// Load configuration
+	if err := config.LoadConfig(); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to load configuration")
+	}
+
+	cfg := config.GetConfig()
+	client := database.NewClient(cfg.Database.URL)
+	defer client.Close()
+
+	// Sample projects data
+	projects := []struct {
+		name          string
+		description   string
+		status        enums.ProjectStatus
+		minPrice      string
+		maxPrice      string
+		projectType   project.ProjectType
+		locationInfo  schema.LocationInfo
+		timelineInfo  schema.TimelineInfo
+		seoMeta       schema.SEOMeta
+		searchContext []string
+		isFeatured    bool
+		isPremium     bool
+		isPriority    bool
+	}{
+		{
+			name:        "Prestige Lakeside Residences",
+			description: "A premium residential project offering luxurious 2 & 3 BHK apartments with stunning lake views and world-class amenities.",
+			status:      enums.ProjectStatusUNDERCONSTRUCTION,
+			minPrice:    "8500000",
+			maxPrice:    "15000000",
+			projectType: project.ProjectTypeRESIDENTIAL,
+			locationInfo: schema.LocationInfo{
+				ShortAddress:  "Whitefield, Bangalore",
+				Longitude:     "77.7500",
+				Latitude:      "12.9700",
+				GoogleMapLink: "https://maps.google.com/example1",
+			},
+			timelineInfo: schema.TimelineInfo{
+				ProjectLaunchDate:     "2024-01-15",
+				ProjectPossessionDate: "2026-12-31",
+			},
+			seoMeta: schema.SEOMeta{
+				Title:       "Prestige Lakeside Residences - Premium Apartments in Whitefield",
+				Description: "Discover luxury living at Prestige Lakeside Residences with 2 & 3 BHK apartments, lake views, and premium amenities in Whitefield, Bangalore.",
+				Keywords:    "prestige, lakeside, whitefield, bangalore, apartments, residential",
+			},
+			searchContext: []string{"prestige", "lakeside", "whitefield", "bangalore", "premium", "residential"},
+			isFeatured:    true,
+			isPremium:     true,
+			isPriority:    true,
+		},
+		{
+			name:        "Brigade Golden Triangle",
+			description: "A modern commercial complex featuring office spaces, retail outlets, and business hubs in the heart of the city.",
+			status:      enums.ProjectStatusREADYTOMOVE,
+			minPrice:    "25000000",
+			maxPrice:    "75000000",
+			projectType: project.ProjectTypeCOMMERCIAL,
+			locationInfo: schema.LocationInfo{
+				ShortAddress:  "MG Road, Bangalore",
+				Longitude:     "77.6200",
+				Latitude:      "12.9750",
+				GoogleMapLink: "https://maps.google.com/example2",
+			},
+			timelineInfo: schema.TimelineInfo{
+				ProjectLaunchDate:     "2022-06-01",
+				ProjectPossessionDate: "2024-03-31",
+			},
+			seoMeta: schema.SEOMeta{
+				Title:       "Brigade Golden Triangle - Commercial Spaces in MG Road",
+				Description: "Premium commercial spaces available at Brigade Golden Triangle, located in the prime MG Road area of Bangalore.",
+				Keywords:    "brigade, golden triangle, mg road, bangalore, commercial, office spaces",
+			},
+			searchContext: []string{"brigade", "golden", "triangle", "mg road", "bangalore", "commercial", "office"},
+			isFeatured:    true,
+			isPremium:     false,
+			isPriority:    false,
+		},
+		{
+			name:        "Sobha Dream Acres",
+			description: "Spacious 3 & 4 BHK villas with private gardens, clubhouse facilities, and excellent connectivity to major IT hubs.",
+			status:      enums.ProjectStatusNEWLAUNCH,
+			minPrice:    "18000000",
+			maxPrice:    "35000000",
+			projectType: project.ProjectTypeRESIDENTIAL,
+			locationInfo: schema.LocationInfo{
+				ShortAddress:  "Sarjapur Road, Bangalore",
+				Longitude:     "77.7000",
+				Latitude:      "12.9000",
+				GoogleMapLink: "https://maps.google.com/example3",
+			},
+			timelineInfo: schema.TimelineInfo{
+				ProjectLaunchDate:     "2024-07-01",
+				ProjectPossessionDate: "2027-06-30",
+			},
+			seoMeta: schema.SEOMeta{
+				Title:       "Sobha Dream Acres - Luxury Villas in Sarjapur Road",
+				Description: "Experience luxury villa living at Sobha Dream Acres with 3 & 4 BHK villas, private gardens, and premium amenities on Sarjapur Road.",
+				Keywords:    "sobha, dream acres, sarjapur road, bangalore, villas, residential",
+			},
+			searchContext: []string{"sobha", "dream", "acres", "sarjapur", "bangalore", "villas", "residential"},
+			isFeatured:    false,
+			isPremium:     true,
+			isPriority:    false,
+		},
+		{
+			name:        "Godrej City Center",
+			description: "An upcoming mixed-use development with residential towers and commercial spaces, perfectly designed for modern urban living.",
+			status:      enums.ProjectStatusPRELAUNCH,
+			minPrice:    "5500000",
+			maxPrice:    "12000000",
+			projectType: project.ProjectTypeRESIDENTIAL,
+			locationInfo: schema.LocationInfo{
+				ShortAddress:  "Electronic City, Bangalore",
+				Longitude:     "77.6650",
+				Latitude:      "12.8450",
+				GoogleMapLink: "https://maps.google.com/example4",
+			},
+			timelineInfo: schema.TimelineInfo{
+				ProjectLaunchDate:     "2024-10-01",
+				ProjectPossessionDate: "2028-03-31",
+			},
+			seoMeta: schema.SEOMeta{
+				Title:       "Godrej City Center - Modern Apartments in Electronic City",
+				Description: "Pre-launch residential project by Godrej offering modern apartments in Electronic City with excellent connectivity and amenities.",
+				Keywords:    "godrej, city center, electronic city, bangalore, apartments, pre launch",
+			},
+			searchContext: []string{"godrej", "city center", "electronic city", "bangalore", "apartments", "mixed use"},
+			isFeatured:    false,
+			isPremium:     false,
+			isPriority:    true,
+		},
+	}
+
+	// Create projects
+	for i, proj := range projects {
+		projectID := uuid.New().String()
+
+		project, err := client.Project.Create().
+			SetID(projectID).
+			SetName(proj.name).
+			SetDescription(proj.description).
+			SetStatus(proj.status).
+			SetMinPrice(proj.minPrice).
+			SetMaxPrice(proj.maxPrice).
+			SetProjectType(proj.projectType).
+			SetLocationInfo(proj.locationInfo).
+			SetTimelineInfo(proj.timelineInfo).
+			SetMetaInfo(proj.seoMeta).
+			SetSearchContext(proj.searchContext).
+			SetIsFeatured(proj.isFeatured).
+			SetIsPremium(proj.isPremium).
+			SetIsPriority(proj.isPriority).
+			SetCreatedAt(time.Now()).
+			SetUpdatedAt(time.Now()).
+			Save(ctx)
+
+		if err != nil {
+			logger.Get().Error().Err(err).Msgf("Failed to create project: %s", proj.name)
+		} else {
+			logger.Get().Info().Msgf("Project created successfully: %s (ID: %s)", proj.name, project.ID)
+			fmt.Printf("✓ Created project %d: %s\n", i+1, proj.name)
+		}
+	}
+
+	fmt.Printf("\n=== PROJECT SEEDING COMPLETED ===\n")
+	fmt.Printf("Total projects seeded: %d\n", len(projects))
+	fmt.Printf("================================\n\n")
 }

@@ -59,6 +59,7 @@ migrate-schema: run-migration
 seed-data:
 	go run cmd/server/main.go seed-admin
 
+<<<<<<< HEAD
 migrate: migrate-schema
 
 export-database:
@@ -71,3 +72,9 @@ initialize-json-loader:
 	go run cmd/server/main.go initialize-json-loader ./migration_jobs/database_export
 
 
+=======
+seed-projects:
+	go run cmd/server/main.go seed-projects
+
+migrate: migrate-schema
+>>>>>>> 8c598c6 (manage your own properties only)

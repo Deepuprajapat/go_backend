@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/internal/auth"
 	"github.com/VI-IM/im_backend_go/internal/utils"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
@@ -40,8 +41,8 @@ func (c *application) GetAccessToken(email string, password string) (*response.G
 		return nil, imhttp.NewCustomErr(http.StatusUnauthorized, "Invalid password", "Invalid password")
 	}
 
-	// Generate access token
-	accessToken, err := utils.GenerateToken(user.ID, time.Now().Add(time.Hour*24))
+	// Generate access token with role
+	accessToken, err := auth.GenerateToken(user.ID, false, user.Role.String(), user.PhoneNumber)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to generate access token", err.Error())
 	}
@@ -87,7 +88,8 @@ func (c *application) RefreshToken(refreshToken string) (*response.GenerateToken
 		return nil, imhttp.NewCustomErr(http.StatusUnauthorized, "User is not active", "User is not active")
 	}
 
-	accessToken, err := utils.GenerateToken(strconv.Itoa(userID), time.Now().Add(time.Hour*24))
+	// Generate access token with role
+	accessToken, err := auth.GenerateToken(strconv.Itoa(userID), false, user.Role.String(), user.PhoneNumber)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to generate access token", err.Error())
 	}
@@ -121,6 +123,7 @@ func (c *application) Signup(ctx context.Context, req *request.SignupRequest) (*
 		Name:        req.Name,
 		PhoneNumber: req.PhoneNumber,
 		IsActive:    true,
+		Role:        "business_partner", // Default role for new users
 	}
 
 	createdUser, err := c.repo.CreateUser(ctx, user)
@@ -128,8 +131,8 @@ func (c *application) Signup(ctx context.Context, req *request.SignupRequest) (*
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create user", err.Error())
 	}
 
-	// Generate tokens
-	accessToken, err := utils.GenerateToken(createdUser.ID, time.Now().Add(time.Hour*24))
+	// Generate tokens with role
+	accessToken, err := auth.GenerateToken(createdUser.ID, false, createdUser.Role.String(), createdUser.PhoneNumber)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to generate access token", err.Error())
 	}

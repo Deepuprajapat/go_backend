@@ -13,17 +13,18 @@ type SimpleDeveloper struct {
 }
 
 type Property struct {
-	ID             string                     `json:"id"`
-	Name           string                     `json:"name"`
-	PropertyImages []string                   `json:"property_images"`
-	WebCards       WebCards                   `json:"web_cards"`
-	PricingInfo    schema.PropertyPricingInfo `json:"pricing_info"`
-	PropertyRera   schema.PropertyReraInfo    `json:"property_rera_info"`
-	MetaInfo       schema.PropertyMetaInfo    `json:"meta_info"`
-	DeveloperID    string                     `json:"developer_id"`
-	LocationID     string                     `json:"location_id"`
-	ProjectID      string                     `json:"project_id,omitempty"`
-	Developer      *SimpleDeveloper           `json:"developer,omitempty"`
+	ID              string                     `json:"id"`
+	Name            string                     `json:"name"`
+	PropertyImages  []string                   `json:"property_images"`
+	WebCards        WebCards                   `json:"web_cards"`
+	PricingInfo     schema.PropertyPricingInfo `json:"pricing_info"`
+	PropertyRera    schema.PropertyReraInfo    `json:"property_rera_info"`
+	MetaInfo        schema.PropertyMetaInfo    `json:"meta_info"`
+	DeveloperID     string                     `json:"developer_id"`
+	LocationID      string                     `json:"location_id"`
+	ProjectID       string                     `json:"project_id,omitempty"`
+	CreatedByUserID string                     `json:"created_by_user_id,omitempty"`
+	Developer       *SimpleDeveloper           `json:"developer,omitempty"`
 }
 
 type WebCards struct {
@@ -71,17 +72,18 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	}
 
 	return &Property{
-		ID:             property.ID,
-		Name:           property.Name,
-		PropertyImages: property.PropertyImages,
-		WebCards:       webCard,
-		PricingInfo:    property.PricingInfo,
-		PropertyRera:   property.PropertyReraInfo,
-		MetaInfo:       property.MetaInfo,
-		DeveloperID:    property.DeveloperID,
-		LocationID:     property.LocationID,
-		ProjectID:      property.ProjectID,
-		Developer:      developer,
+		ID:              property.ID,
+		Name:            property.Name,
+		PropertyImages:  property.PropertyImages,
+		WebCards:        webCard,
+		PricingInfo:     property.PricingInfo,
+		PropertyRera:    property.PropertyReraInfo,
+		MetaInfo:        property.MetaInfo,
+		DeveloperID:     property.DeveloperID,
+		LocationID:      property.LocationID,
+		ProjectID:       property.ProjectID,
+		CreatedByUserID: property.CreatedByUserID,
+		Developer:       developer,
 	}
 }
 

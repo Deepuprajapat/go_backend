@@ -74,7 +74,7 @@ func serveReactApp(w http.ResponseWriter, r *http.Request) {
 func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
-	
+
 	// Add middleware
 	Router.Use(middleware.LoggingMiddleware)
 	Router.Use(corsMiddleware(Router))
@@ -101,10 +101,15 @@ func Init(app application.ApplicationInterface) {
 	// property routes
 	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(handler.GetPropertiesOfProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.UpdateProperty)).Methods(http.MethodPatch)
-	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.AddProperty)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.DeleteProperty)).Methods(http.MethodDelete)
+
+	// Protected property routes (require business_partner or superadmin role)
+	Router.Handle("/v1/api/properties", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.AddProperty))).Methods(http.MethodPost)
+	Router.Handle("/v1/api/properties/{property_id}", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.UpdateProperty))).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/properties/{property_id}", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.DeleteProperty))).Methods(http.MethodDelete)
+
+	// Admin property route - business partners see only their properties, superadmins see all properties
+	Router.Handle("/v1/api/admin/dashboard/properties", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.AdminListProperties))).Methods(http.MethodGet)
 
 	// developer routes
 	Router.Handle("/v1/api/developers", imhttp.AppHandler(handler.ListDevelopers)).Methods(http.MethodGet)

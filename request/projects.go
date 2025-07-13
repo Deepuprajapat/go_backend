@@ -46,9 +46,10 @@ type UpdatePropertyRequest struct {
 }
 
 type AddPropertyRequest struct {
-	ProjectID    string `json:"project_id"`
-	Name         string `json:"name"`
-	PropertyType string `json:"property_type"`
+	ProjectID        string  `json:"project_id"`
+	Name             string  `json:"name"`
+	PropertyType     string  `json:"property_type"`
+	CreatedByUserID  *string `json:"created_by_user_id,omitempty"`
 }
 
 type ProjectFilterRequest struct {
