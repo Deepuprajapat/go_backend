@@ -89,6 +89,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 
 type AddPropertyResponse struct {
 	PropertyID string `json:"property_id"`
+	Slug       string `json:"slug"`
 }
 
 type PropertyListResponse struct {

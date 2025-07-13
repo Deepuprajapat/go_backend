@@ -86,13 +86,17 @@ func (c *application) AddProperty(input request.AddPropertyRequest) (*response.A
 	property.ProjectID = input.ProjectID
 	property.Name = input.Name
 	property.PropertyType = input.PropertyType
+	property.CreatedByUserID = input.CreatedByUserID
 
-	propertyID, err := c.repo.AddProperty(property)
+	result, err := c.repo.AddProperty(property)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to add property")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add property", err.Error())
 	}
-	return &response.AddPropertyResponse{PropertyID: propertyID}, nil
+	return &response.AddPropertyResponse{
+		PropertyID: result.PropertyID,
+		Slug:       result.Slug,
+	}, nil
 }
 
 func (c *application) ListProperties(pagination *request.GetAllAPIRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError) {

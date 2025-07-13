@@ -857,7 +857,8 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				SetIsFeatured(property.IsFeatured).
 				SetIsDeleted(property.IsDeleted).
 				SetDeveloperID(*developerID).
-				SetLocationID(*localityID)
+				SetLocationID(*localityID).
+				SetSlug(*property.PropertyURL)
 
 			if projectID != nil {
 				entProperty = entProperty.SetProjectID(*projectID)

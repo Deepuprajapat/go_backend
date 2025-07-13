@@ -1,4 +1,4 @@
-.PHONY: build run test clean docker-up docker-down deps generate migrate migrate-status migrate-validate migrate-diff migrate-reset dev-setup
+.PHONY: build run test clean docker-up docker-down deps generate migrate migrate-status migrate-validate migrate-diff migrate-reset dev-setup db-reset
 
 # Build the application
 build:
@@ -25,6 +25,22 @@ docker-up:
 # Stop Docker services
 docker-down:
 	docker-compose down
+
+# Reset database by dropping all tables
+db-reset: docker-up
+	@echo "Dropping all tables from database..."
+	@sleep 3
+	@docker exec -i im_postgres_db psql -U im_db_dev -d mydb -c "\
+		DO \$$\$$ \
+		DECLARE \
+			r RECORD; \
+		BEGIN \
+			FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP \
+				EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE'; \
+			END LOOP; \
+		END \$$\$$;"
+	@echo "All tables dropped successfully!"
+	@echo "You can now run 'make run' to apply fresh migrations."
 
 enums:
 	./go-enum --marshal --sql --flag \
@@ -59,7 +75,6 @@ migrate-schema: run-migration
 seed-data:
 	go run cmd/server/main.go seed-admin
 
-<<<<<<< HEAD
 migrate: migrate-schema
 
 export-database:
@@ -71,10 +86,5 @@ export-specific-tables:
 initialize-json-loader:
 	go run cmd/server/main.go initialize-json-loader ./migration_jobs/database_export
 
-
-=======
 seed-projects:
 	go run cmd/server/main.go seed-projects
-
-migrate: migrate-schema
->>>>>>> 8c598c6 (manage your own properties only)

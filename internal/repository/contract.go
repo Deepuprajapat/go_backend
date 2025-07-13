@@ -17,6 +17,7 @@ type AppRepository interface {
 	GetUserDetailsByEmail(ctx context.Context, email string) (*ent.User, error)
 	CreateUser(ctx context.Context, user *ent.User) (*ent.User, error)
 	CheckIfUserExistsByEmail(ctx context.Context, email string) (bool, error)
+	CheckIfUserExistsByID(ctx context.Context, userID string) (bool, error)
 
 	// Project
 	GetProjectByID(id string) (*ent.Project, error)
@@ -42,7 +43,7 @@ type AppRepository interface {
 	GetPropertyByID(id string) (*ent.Property, error)
 	UpdateProperty(input domain.Property) (*ent.Property, error)
 	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
-	AddProperty(input domain.Property) (string, error)
+	AddProperty(input domain.Property) (*PropertyResult, error)
 	GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error)
 	DeleteProperty(id string, hardDelete bool) error
 	IsPropertyDeleted(id string) (bool, error)

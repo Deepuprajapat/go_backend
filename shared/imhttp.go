@@ -7,9 +7,9 @@ import (
 )
 
 type Response struct {
-	Data       interface{} `json:"data"`
-	StatusCode int         `json:"status_code"`
-	Message    string      `json:"message"`
+	Data       interface{}    `json:"data"`
+	StatusCode int            `json:"status_code"`
+	Message    string         `json:"message"`
 	Cookies    []*http.Cookie `json:"-"`
 }
 
@@ -87,7 +87,6 @@ func NewCustomErr(statusCode int, errMsg, msg string) *CustomError {
 func (ce *CustomError) Error() string {
 	return ce.ErrorMessage
 }
-
 
 func BadRequest(msg string) *CustomError {
 	return NewCustomErr(http.StatusBadRequest, "bad_request", msg)

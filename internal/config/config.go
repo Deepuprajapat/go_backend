@@ -25,9 +25,9 @@ type (
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
-		DB_Port    int    `envconfig:"DB_PORT"`
-		DB_HOST    string `envconfig:"DB_HOST"`
-		URL        string `envconfig:"DATABASE_URL"`
+		DB_Port int    `envconfig:"DB_PORT"`
+		DB_HOST string `envconfig:"DB_HOST"`
+		URL     string `envconfig:"DATABASE_URL"`
 	}
 	JWTConfig struct {
 		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET"`

@@ -1,12 +1,12 @@
 package application
 
 import (
-	"net/http"
-	"strings"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
+	"net/http"
+	"strings"
 )
 
 func (c *application) GetAllCategoriesWithAmenities() (*response.AmenityResponse, *imhttp.CustomError) {

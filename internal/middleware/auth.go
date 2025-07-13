@@ -9,21 +9,38 @@ import (
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var tokenString string
+
+		// First try to get token from Authorization header
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Missing or invalid Authorization header", http.StatusUnauthorized)
-			return
+		if authHeader != "" {
+			tokenString = authHeader
+			if strings.Contains(authHeader, "Bearer") {
+				tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+			}
+		} else {
+			// Fallback to cookies if no Authorization header
+			// Try common cookie names for auth tokens
+			if cookie, err := r.Cookie("authToken"); err == nil {
+				tokenString = cookie.Value
+			} else if cookie, err := r.Cookie("auth-token"); err == nil {
+				tokenString = cookie.Value
+			} else if cookie, err := r.Cookie("token"); err == nil {
+				tokenString = cookie.Value
+			}
 		}
 
-		tokenString := authHeader
-		if strings.Contains(authHeader, "Bearer") {
-			tokenString = strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenString == "" {
+			http.Error(w, "Missing or invalid Authorization header/cookie", http.StatusUnauthorized)
+			return
 		}
 		claims, err := auth.ValidateToken(tokenString)
 		if err != nil {
 			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
 			return
 		}
+
+		// TODO: validate if user exists, if not, return 401
 
 		// Add claims to request context for use in handlers
 		ctx := context.WithValue(r.Context(), "user_claims", claims)

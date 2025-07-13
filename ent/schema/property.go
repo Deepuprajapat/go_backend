@@ -16,6 +16,7 @@ func (Property) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
 		field.String("name"),
+		field.String("slug").Unique(),
 		field.String("property_type").Optional(),
 		field.String("product_schema").Optional(),
 		field.JSON("property_images", []string{}).Optional(), // 0 index logo image

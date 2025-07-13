@@ -16,4 +16,5 @@ type Property struct {
 	DeveloperID      string
 	LocationID       string
 	ProjectID        string
+	CreatedByUserID  *string
 }
