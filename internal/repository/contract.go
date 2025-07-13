@@ -66,10 +66,11 @@ type AppRepository interface {
 	GetBlogByCanonicalURL(ctx context.Context, canonicalURL string) (*ent.Blogs, error)
 
 	// Generic Search
-	GetGenericSearchData(ctx context.Context) ([]schema.GenericSearchData, error)
-	AddGenericSearchData(ctx context.Context, data *schema.GenericSearchData) ([]schema.GenericSearchData, error)
-	UpdateGenericSearchData(ctx context.Context, data *schema.GenericSearchData, index int) (*schema.GenericSearchData, error)
-	DeleteGenericSearchData(ctx context.Context, index int) error
+	GetCustomSearchPageFromSlug(ctx context.Context, slug string) (*ent.CustomSearchPage, error)
+	GetAllCustomSearchPages(ctx context.Context) ([]*ent.CustomSearchPage, error)
+	AddCustomSearchPage(ctx context.Context, customSearchPage *ent.CustomSearchPage) (*ent.CustomSearchPage, error)
+	UpdateCustomSearchPage(ctx context.Context, customSearchPage *ent.CustomSearchPage) (*ent.CustomSearchPage, error)
+	DeleteCustomSearchPage(ctx context.Context, id string) error
 }
 
 func NewRepository(db *ent.Client) AppRepository {

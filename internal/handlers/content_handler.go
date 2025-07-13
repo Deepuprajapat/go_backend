@@ -3,7 +3,6 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"slices"
 	"strings"
 
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -378,19 +377,6 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		}, nil
 
 	default:
-		genericPath, err := h.app.GetGenericSearchData(ctx)
-		if err != nil {
-			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Generic path not found", "Generic path not found")
-		}
-		genericPathMap := []string{}
-		for _, path := range genericPath {
-			genericPathMap = append(genericPathMap, path.CanonicalURL)
-		}
-
-		if slices.Contains(genericPathMap, url) {
-			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Page not found", "")
-		}
-
 		projectByCanonicalURL, err := h.app.GetProjectByCanonicalURL(ctx, url)
 		if err != nil {
 			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found", "Project not found")

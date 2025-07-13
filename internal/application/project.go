@@ -119,6 +119,11 @@ func (c *application) DeleteProject(id string) *imhttp.CustomError {
 }
 
 func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError) {
+
+	if request.Filters == nil {
+		request.Filters = make(map[string]interface{})
+	}
+
 	projects, err := c.repo.GetAllProjects(request.Filters)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list projects")

@@ -96,10 +96,14 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/content/text/html", imhttp.AppHandler(handler.GetHTMLContent)).Methods(http.MethodGet)
 
 	// generic search routes
-	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.GetGenericSearchData)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.AddGenericSearchData)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.UpdateGenericSearchData)).Methods(http.MethodPatch)
-	Router.Handle("/v1/api/generic-search", imhttp.AppHandler(handler.DeleteGenericSearchData)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/s/{slug}", imhttp.AppHandler(handler.GetCustomSearchPage)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/links", imhttp.AppHandler(handler.GetLinks)).Methods(http.MethodGet)
+
+	// internal route for generic search page
+	Router.Handle("/v1/api/internal/custom-search-page", imhttp.AppHandler(handler.GetAllCustomSearchPages)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/internal/custom-search-page", imhttp.AppHandler(handler.AddCustomSearchPage)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/internal/custom-search-page/{id}", imhttp.AppHandler(handler.UpdateCustomSearchPage)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/internal/custom-search-page/{id}", imhttp.AppHandler(handler.DeleteCustomSearchPage)).Methods(http.MethodDelete)
 
 	//TODO: leads generation routes
 	// 1.get otp

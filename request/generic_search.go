@@ -1,8 +1,17 @@
 package request
 
-type GenericSearchData struct {
-	Index        int               `json:"index,omitempty"`
-	CanonicalURL string            `json:"canonical_url"`
-	SearchTerm   string            `json:"title"`
-	Filters      map[string]string `json:"filters"`
+type CustomSearchPage struct {
+	ID          string                 `json:"id"`
+	Title       string                 `json:"title"`
+	Description string                 `json:"description"`
+	Slug        string                 `json:"slug,omitempty"`
+	Filters     map[string]interface{} `json:"filters"`
+	MetaInfo    *MetaInfo              `json:"meta_info"`
+	SearchTerm  string                 `json:"search_term"`
+}
+
+type MetaInfo struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Keywords    string `json:"keywords"`
 }

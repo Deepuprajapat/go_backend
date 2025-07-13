@@ -4,97 +4,162 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
-	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (a *application) GetGenericSearchData(ctx context.Context) ([]response.GenericSearchData, *imhttp.CustomError) {
-	genericSearchData, err := a.repo.GetGenericSearchData(ctx)
+func (a *application) GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError) {
+	var customSearchPage *response.CustomSearchPage
+	csp, err := a.repo.GetCustomSearchPageFromSlug(ctx, slug)
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get generic search data")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get generic search data", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Custom search page not found", "Custom search page not found")
 	}
 
-	responseGenericSearchData := make([]response.GenericSearchData, len(genericSearchData))
-	for i, data := range genericSearchData {
-		responseGenericSearchData[i] = response.GenericSearchData{
-			Index:        i,
-			CanonicalURL: data.CanonicalURL,
-			SearchTerm:   data.SearchTerm,
-			Filters:      data.Filters,
+	request := &request.GetAllAPIRequest{
+		Filters: csp.Filters,
+	}
+
+	fprojects, customErr := a.ListProjects(request)
+	if customErr != nil {
+		return nil, customErr
+	}
+
+	customSearchPage = &response.CustomSearchPage{
+		ID:          csp.ID,
+		Title:       csp.Title,
+		Description: csp.Description,
+		Projects:    fprojects,
+		Slug:        csp.Slug,
+		MetaInfo: &response.MetaInfo{
+			Title:       csp.MetaInfo.Title,
+			Description: csp.MetaInfo.Description,
+			Keywords:    csp.MetaInfo.Keywords,
+		},
+	}
+
+	return customSearchPage, nil
+}
+
+func (a *application) GetLinks(ctx context.Context) ([]*response.Link, *imhttp.CustomError) {
+
+	allCustomSearchPages, err := a.repo.GetAllCustomSearchPages(ctx)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list links", err.Error())
+	}
+
+	var links []*response.Link
+	for _, customSearchPage := range allCustomSearchPages {
+		links = append(links, &response.Link{
+			Title: customSearchPage.Title,
+			Slug:  customSearchPage.Slug,
+		})
+	}
+
+	return links, nil
+}
+
+func (a *application) GetAllCustomSearchPages(ctx context.Context) ([]*response.CustomSearchPage, *imhttp.CustomError) {
+
+	allCustomSearchPages, err := a.repo.GetAllCustomSearchPages(ctx)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to list custom search pages", err.Error())
+	}
+
+	customSearchPages := make([]*response.CustomSearchPage, len(allCustomSearchPages))
+	for i, customSearchPage := range allCustomSearchPages {
+		customSearchPages[i] = &response.CustomSearchPage{
+			ID:          customSearchPage.ID,
+			Title:       customSearchPage.Title,
+			Description: customSearchPage.Description,
+			Filters:     customSearchPage.Filters,
+			Slug:        customSearchPage.Slug,
+			MetaInfo: &response.MetaInfo{
+				Title:       customSearchPage.MetaInfo.Title,
+				Description: customSearchPage.MetaInfo.Description,
+				Keywords:    customSearchPage.MetaInfo.Keywords,
+			},
 		}
 	}
-	return responseGenericSearchData, nil
+
+	return customSearchPages, nil
 }
 
-func (a *application) AddGenericSearchData(ctx context.Context, input request.GenericSearchData) ([]*response.GenericSearchData, *imhttp.CustomError) {
-	if input.CanonicalURL == "" {
-		logger.Get().Error().Msg("Canonical URL is required")
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Canonical URL is required", "Canonical URL is required")
+func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage *response.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
+
+	customSearchPageEntity := &ent.CustomSearchPage{
+		Title:       customSearchPage.Title,
+		Description: customSearchPage.Description,
+		Filters:     customSearchPage.Filters,
+		MetaInfo: schema.MetaInfo{
+			Title:       customSearchPage.MetaInfo.Title,
+			Description: customSearchPage.MetaInfo.Description,
+			Keywords:    customSearchPage.MetaInfo.Keywords,
+		},
 	}
 
-	if input.SearchTerm == "" {
-		logger.Get().Error().Msg("Search term is required")
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Search term is required", "Search term is required")
-	}
-	genericSearchData, err := a.repo.AddGenericSearchData(ctx, &schema.GenericSearchData{
-		CanonicalURL: input.CanonicalURL,
-		SearchTerm:   input.SearchTerm,
-		Filters:      input.Filters,
-	})
+	customSearchPageEntity, err := a.repo.AddCustomSearchPage(ctx, customSearchPageEntity)
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to add generic search data")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add generic search data", err.Error())
-	}
-	responseGenericSearchData := make([]response.GenericSearchData, len(genericSearchData))
-	for i, data := range genericSearchData {
-		responseGenericSearchData[i] = response.GenericSearchData{
-			Index:        i,
-			CanonicalURL: data.CanonicalURL,
-			SearchTerm:   data.SearchTerm,
-			Filters:      data.Filters,
-		}
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add custom search page", err.Error())
 	}
 
-	responseGenericSearchDataPtr := make([]*response.GenericSearchData, len(responseGenericSearchData))
-	for i, data := range responseGenericSearchData {
-		responseGenericSearchDataPtr[i] = &data
+	response := &response.CustomSearchPage{
+		ID:          customSearchPageEntity.ID,
+		Title:       customSearchPageEntity.Title,
+		Description: customSearchPageEntity.Description,
+		Filters:     customSearchPageEntity.Filters,
+		MetaInfo: &response.MetaInfo{
+			Title:       customSearchPageEntity.MetaInfo.Title,
+			Description: customSearchPageEntity.MetaInfo.Description,
+			Keywords:    customSearchPageEntity.MetaInfo.Keywords,
+		},
 	}
-	return responseGenericSearchDataPtr, nil
+
+	return response, nil
 }
 
-func (a *application) UpdateGenericSearchData(ctx context.Context, input request.GenericSearchData) (*response.GenericSearchData, *imhttp.CustomError) {
-	if input.Index == 0 || input.Index < 0 {
-		logger.Get().Error().Msg("Index is required")
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Index is required", "Index is required")
+func (a *application) UpdateCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
+
+	customSearchPageEntity := &ent.CustomSearchPage{
+		ID:          customSearchPage.ID,
+		Title:       customSearchPage.Title,
+		Description: customSearchPage.Description,
+		Filters:     customSearchPage.Filters,
+		MetaInfo: schema.MetaInfo{
+			Title:       customSearchPage.MetaInfo.Title,
+			Description: customSearchPage.MetaInfo.Description,
+			Keywords:    customSearchPage.MetaInfo.Keywords,
+		},
 	}
 
-	genericSearchData, err := a.repo.UpdateGenericSearchData(ctx, &schema.GenericSearchData{
-		CanonicalURL: input.CanonicalURL,
-		SearchTerm:   input.SearchTerm,
-		Filters:      input.Filters,
-	}, input.Index)
+	customSearchPageEntity, err := a.repo.UpdateCustomSearchPage(ctx, customSearchPageEntity)
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to update generic search data")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update generic search data", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update custom search page", err.Error())
 	}
-	responseGenericSearchData := response.GenericSearchData{
-		Index:        input.Index,
-		CanonicalURL: genericSearchData.CanonicalURL,
-		SearchTerm:   genericSearchData.SearchTerm,
-		Filters:      genericSearchData.Filters,
+
+	response := &response.CustomSearchPage{
+
+		Title:       customSearchPageEntity.Title,
+		Description: customSearchPageEntity.Description,
+		Filters:     customSearchPageEntity.Filters,
+		MetaInfo: &response.MetaInfo{
+			Title:       customSearchPageEntity.MetaInfo.Title,
+			Description: customSearchPageEntity.MetaInfo.Description,
+			Keywords:    customSearchPageEntity.MetaInfo.Keywords,
+		},
 	}
-	return &responseGenericSearchData, nil
+
+	return response, nil
 }
 
-func (a *application) DeleteGenericSearchData(ctx context.Context, index int) *imhttp.CustomError {
-	err := a.repo.DeleteGenericSearchData(ctx, index)
+func (a *application) DeleteCustomSearchPage(ctx context.Context, id string) *imhttp.CustomError {
+
+	err := a.repo.DeleteCustomSearchPage(ctx, id)
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to delete generic search data")
-		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete generic search data", err.Error())
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete custom search page", err.Error())
 	}
+
 	return nil
 }
