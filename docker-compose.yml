@@ -22,19 +22,19 @@ services:
     networks:
       - im_network
 
-  backend:
-    image: ghcr.io/vi-im/im-backend-go:18d8200c
-    container_name: im-backend
-    restart: on-failure
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - .env
-    ports:
-      - "9999:9999"
-    networks:
-      - im_network
+#  backend:
+#    image: ghcr.io/vi-im/im-backend-go:18d8200c
+#    container_name: im-backend
+#    restart: on-failure
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    env_file:
+#      - .env
+#    ports:
+#      - "9999:9999"
+#    networks:
+#      - im_network
 
 volumes:
   postgres_data:

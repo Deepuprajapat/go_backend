@@ -53,3 +53,11 @@ dev-setup: docker-up migrate
 video-migration:
 	go run cmd/server/main.go video-migration
 
+# Mohan's Commands, If you find use-full, move them up but please dont remove.
+migrate-schema:
+	go run cmd/server/main.go run-migration
+
+seed-data:
+	@echo "Implement me"
+
+migrate: migrate-schema

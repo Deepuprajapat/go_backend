@@ -1,14 +1,13 @@
 package router
 
 import (
-	"net/http"
-	"os"
-	"path/filepath"
-
 	"github.com/VI-IM/im_backend_go/internal/application"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
 )
 
 var (
@@ -17,24 +16,46 @@ var (
 )
 
 // serveReactApp serves the React application static files
-func serveReactApp(w http.ResponseWriter, r *http.Request) {
-	// Path to React build directory
-	buildDir := "./build"
+//func serveReactApp(w http.ResponseWriter, r *http.Request) {
+//	// Path to React build directory
+//	buildDir := "./build"
+//
+//	// Check if file exists in build directory
+//	filePath := filepath.Join(buildDir, r.URL.Path)
+//	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+//		// If file doesn't exist, serve index.html for client-side routing
+//		filePath = filepath.Join(buildDir, "index.html")
+//	}
+//
+//	http.ServeFile(w, r, filePath)
+//}
 
-	// Check if file exists in build directory
-	filePath := filepath.Join(buildDir, r.URL.Path)
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		// If file doesn't exist, serve index.html for client-side routing
-		filePath = filepath.Join(buildDir, "index.html")
+func corsMiddleware(_ *mux.Router) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		})
 	}
+}
 
-	http.ServeFile(w, r, filePath)
+func serveReactApp(w http.ResponseWriter, r *http.Request) {
+	// create a proxy for the frontend
+	frontendProxy := httputil.NewSingleHostReverseProxy(&url.URL{
+		Scheme: "http",
+		Host:   "localhost:3000",
+	})
+
+	frontendProxy.ServeHTTP(w, r)
 }
 
 // Init initializes the router with all routes and middleware
 func Init(app application.ApplicationInterface) {
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
+	Router.Use(corsMiddleware(Router))
 
 	// Public routes
 	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -109,8 +130,8 @@ func Init(app application.ApplicationInterface) {
 	// 1.get otp
 	// 2.verify otp
 
+	// Catch-all route for React app - must be last to handle all non-API routes
 	Router.PathPrefix("/").HandlerFunc(serveReactApp)
-
 }
 
 /////   curl calls	/////
