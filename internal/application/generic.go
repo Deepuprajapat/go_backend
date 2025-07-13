@@ -87,7 +87,7 @@ func (a *application) GetAllCustomSearchPages(ctx context.Context) ([]*response.
 	return customSearchPages, nil
 }
 
-func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage *response.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
+func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
 
 	customSearchPageEntity := &ent.CustomSearchPage{
 		Title:       customSearchPage.Title,

@@ -27,7 +27,6 @@ func (StaticSiteData) Fields() []ent.Field {
 			} `json:"categories"`
 		}{}).Optional(),
 		field.JSON("property_types", PropertyTypes{}),
-		field.JSON("generic_search_data", []GenericSearchData{}),
 		field.Bool("is_active").Default(true),
 		field.Time("deleted_at").Optional().Nillable(),
 		field.Time("created_at").Default(time.Now).Immutable(),
@@ -46,10 +45,4 @@ func (StaticSiteData) Indexes() []ent.Index {
 type PropertyTypes struct {
 	Commercial  []string `json:"commercial"`
 	Residential []string `json:"residential"`
-}
-
-type GenericSearchData struct {
-	CanonicalURL string            `json:"canonical_url"`
-	SearchTerm   string            `json:"title"`
-	Filters      map[string]string `json:"filters"`
 }
