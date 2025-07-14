@@ -39,10 +39,10 @@ type (
 	}
 
 	S3 struct {
-		Bucket      string `envconfig:"S3_BUCKET"`
-		Region      string `envconfig:"S3_REGION"`
-		AccessKeyID string `envconfig:"S3_ACCESS_KEY_ID"`
-		SecretKey   string `envconfig:"S3_SECRET_KEY"`
+		Bucket      string `envconfig:"AWS_BUCKET"`
+		Region      string `envconfig:"AWS_REGION"`
+		AccessKeyID string `envconfig:"AWS_ACCESS_KEY_ID"`
+		SecretKey   string `envconfig:"AWS_SECRET_KEY"`
 	}
 )
 

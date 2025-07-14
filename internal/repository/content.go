@@ -32,7 +32,7 @@ func (r *repository) GetBlogByCanonicalURL(ctx context.Context, url string) (*en
 	return r.db.Blogs.Query().
 		Where(
 			func(s *sql.Selector) {
-				s.Where(sql.ExprP("(seo_meta_info->>'canonical') = $1", url))
+				s.Where(sql.ExprP("blog_url = $1", url))
 			},
 		).
 		Only(ctx)

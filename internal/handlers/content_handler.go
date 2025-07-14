@@ -118,12 +118,13 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		url = strings.TrimPrefix(url, "https://investmango.com/")
 	}
 
+	logger.Get().Info().Msgf("url after trimming ------> %s", url)
 	var htmlResponse string
 
 	//TODO: get generic path and get the projects
 
-	switch url {
-	case "", "/":
+	switch {
+	case url == "", url == "/":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
             <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
             <title>Real Estate Portfolio &amp; Strategic Management Company</title>
@@ -135,7 +136,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
             <link rel="canonical" href="https://www.investmango.com/">
             </head><body><h1>Welcome to Invest Mango</h1></body></html>`, "https://www.investmango.com/")
 
-	case "contact":
+	case url == "contact":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
             <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
             <title>Contact Us</title>
@@ -147,7 +148,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
             <link rel="canonical" href="https://www.investmango.com/contact">
             </head></html>`, url)
 
-	case "career", "career/":
+	case url == "career", url == "career/":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
             <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
             <title>Careers | Invest Mango</title>
@@ -159,7 +160,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
             <link rel="canonical" href="https://www.investmango.com/career">
             </head></html>`, url)
 
-	case "about", "about/":
+	case url == "about", url == "about/":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
             <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
             <title>About Us – Know About Invest Mango</title>
@@ -172,7 +173,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
             <link rel="canonical" href="https://www.investmango.com/about">
             </head></html>`, url)
 
-	case "sitemap":
+	case url == "sitemap":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
             <title>About Us – Know About Invest Mango</title>
             <meta property="og:title" content="About Us – Know About Invest Mango">
@@ -181,7 +182,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
             <link rel="canonical" href="https://www.investmango.com/sitemap">
             </head></html>`, url)
 
-	case "privacy-policy", "privacy-policy/":
+	case url == "privacy-policy", url == "privacy-policy/":
 		htmlResponse = "<!DOCTYPE html><html><head>" +
 			"<meta name=\"google-site-verification\" content=\"ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA\">" +
 			"<title>Privacy Policy | Invest Mango</title>" +
@@ -222,7 +223,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			"Website: <a href='https://www.investmango.com' target='_blank'>https://www.investmango.com</a></p>" +
 			"</div></body></html>"
 
-	case "terms-and-conditions", "terms-and-conditions/":
+	case url == "terms-and-conditions", url == "terms-and-conditions/":
 		htmlResponse = "<!DOCTYPE html><html><head>" +
 			"<meta name=\"google-site-verification\" content=\"ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA\">" +
 			"<title>Terms & Conditions | Invest Mango</title>" +
@@ -289,8 +290,11 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			"<p>Email: <a href='mailto:info@investmango.com'>info@investmango.com</a>, <a href='mailto:hr@investmango.com'>hr@investmango.com</a></p>" +
 			"</div></body></html>"
 
-	case "propertyforsale":
+	case strings.HasPrefix(url, "propertyforsale/"):
 		canonical := strings.TrimPrefix(url, "propertyforsale/")
+		logger.Get().Info().Msg("Hello from property")
+		logger.Get().Info().Msgf("Canocical in property-------->%s", canonical)
+
 		property, err := h.app.GetPropertyByCanonicalURL(ctx, canonical)
 		if err != nil {
 			return nil, imhttp.NewCustomErr(http.StatusNotFound, "Property not found with this url: "+url, "Property not found")
@@ -329,8 +333,17 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			StatusCode: http.StatusOK,
 		}, nil
 
-	case "blogs", "blogs/":
+	case strings.HasPrefix(url, "blogs/"):
 		canonical := strings.TrimPrefix(url, "blogs/")
+		logger.Get().Info().Msgf("Canonical------------------ %s", canonical)
+
+		parts := strings.Split(canonical, "/")
+		// logger.Get().Info().Msgf(" Part Canonical------------------ %s", parts)	
+		if len(parts) > 0 {
+			canonical = parts[0]
+		}
+		logger.Get().Info().Msgf("Part Canonical------------------ %s", canonical)
+
 		if canonical == "" {
 			logger.Get().Info().Msg("canonical is empty for blogs")
 			return &imhttp.Response{
