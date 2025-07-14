@@ -7,10 +7,10 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/VI-IM/im_backend_go/ent"
-	"github.com/VI-IM/im_backend_go/ent/developer"
-	"github.com/VI-IM/im_backend_go/ent/location"
-	"github.com/VI-IM/im_backend_go/ent/predicate"
-	"github.com/VI-IM/im_backend_go/ent/project"
+	developerEnt "github.com/VI-IM/im_backend_go/ent/developer"
+	locationEnt "github.com/VI-IM/im_backend_go/ent/location"
+	predicateEnt "github.com/VI-IM/im_backend_go/ent/predicate"
+	projectEnt "github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
@@ -19,7 +19,7 @@ import (
 
 func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
 	project, err := r.db.Project.Query().
-		Where(project.ID(id)).
+		Where(projectEnt.ID(id)).
 		WithDeveloper().
 		WithLocation().
 		Only(context.Background())
@@ -44,7 +44,7 @@ func (r *repository) AddProject(input domain.Project) (string, error) {
 		SetMetaInfo(schema.SEOMeta{
 			Canonical: input.ProjectURL,
 		}).
-		SetProjectType(project.ProjectType(input.ProjectType)).
+		SetProjectType(projectEnt.ProjectType(input.ProjectType)).
 		SetDescription("").
 		SetDeveloperID(input.DeveloperID).
 		Exec(context.Background()); err != nil {
@@ -56,7 +56,7 @@ func (r *repository) AddProject(input domain.Project) (string, error) {
 
 func (r *repository) ExistDeveloperByID(id string) (bool, error) {
 	exist, err := r.db.Developer.Query().
-		Where(developer.ID(id)).
+		Where(developerEnt.ID(id)).
 		Exist(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to check if developer exists")
@@ -67,7 +67,7 @@ func (r *repository) ExistDeveloperByID(id string) (bool, error) {
 
 func (r *repository) IsProjectDeleted(id string) (bool, error) {
 	project, err := r.db.Project.Query().
-		Where(project.ID(id)).
+		Where(projectEnt.ID(id)).
 		Only(context.Background())
 	if err != nil {
 		if ent.IsNotFound(err) {
@@ -95,12 +95,25 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 	defer tx.Rollback()
 
+	if input.MaxPrice != ""{
+		project.SetMaxPrice(input.MaxPrice)
+	}
+
+	if input.MinPrice != ""{
+		project.SetMaxPrice(input.MinPrice)
+	}
+	
 	if input.ProjectName != "" {
 		project.SetName(input.ProjectName)
 	}
 	if input.Status != "" {
 		project.SetStatus(input.Status)
 	}
+
+	if input.Description != "" {
+		project.SetDescription(input.Description)
+	}
+
 
 	// Handle TimelineInfo updates
 	if input.TimelineInfo != (schema.TimelineInfo{}) {
@@ -353,8 +366,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		project.SetIsDeleted(input.IsDeleted)
 	}
 
-	updatedProject, err := project.Save(context.Background())
-	if err != nil {
+	if _, err := project.Save(context.Background()); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update project")
 		return nil, err
 	}
@@ -364,7 +376,17 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		return nil, err
 	}
 
-	return updatedProject, nil
+	// Fetch the updated project with edges loaded
+	projectWithEdges, err := r.db.Project.Query().
+		Where(projectEnt.ID(input.ProjectID)).
+		WithDeveloper().
+		WithLocation().
+		Only(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to fetch updated project with edges")
+		return nil, err
+	}
+	return projectWithEdges, nil
 }
 
 func (r *repository) DeleteProject(id string, hardDelete bool) error {
@@ -399,58 +421,58 @@ func (r *repository) GetAllProjects(filters map[string]interface{}) ([]*ent.Proj
 	ctx := context.Background()
 
 	// Start building the query
-	query := r.db.Project.Query().Where(project.IsDeletedEQ(false))
+	query := r.db.Project.Query().Where(projectEnt.IsDeletedEQ(false))
 
 	// Apply filters if any are set
 	if len(filters) > 0 {
-		predicates := []predicate.Project{}
+		predicates := []predicateEnt.Project{}
 
 		// Apply boolean filters
 		if isPremium, ok := filters["is_premium"].(bool); ok && isPremium {
-			predicates = append(predicates, project.IsPremiumEQ(true))
+			predicates = append(predicates, projectEnt.IsPremiumEQ(true))
 		}
 		if isPriority, ok := filters["is_priority"].(bool); ok && isPriority {
-			predicates = append(predicates, project.IsPriorityEQ(true))
+			predicates = append(predicates, projectEnt.IsPriorityEQ(true))
 		}
 		if isFeatured, ok := filters["is_featured"].(bool); ok && isFeatured {
-			predicates = append(predicates, project.IsFeaturedEQ(true))
+			predicates = append(predicates, projectEnt.IsFeaturedEQ(true))
 		}
 
 		// Apply location filter
 		if locationID, ok := filters["location_id"].(string); ok && locationID != "" {
-			query = query.Where(project.HasLocationWith(location.ID(locationID)))
+			query = query.Where(projectEnt.HasLocationWith(locationEnt.ID(locationID)))
 		}
 
 		// Apply developer filter
 		if developerID, ok := filters["developer_id"].(string); ok && developerID != "" {
-			query = query.Where(project.HasDeveloperWith(developer.ID(developerID)))
+			query = query.Where(projectEnt.HasDeveloperWith(developerEnt.ID(developerID)))
 		}
 
 		// Apply name filter
 		if name, ok := filters["name"].(string); ok && name != "" {
-			query = query.Where(project.NameContainsFold(name))
+			query = query.Where(projectEnt.NameContainsFold(name))
 		}
 
 		if city, ok := filters["city"].(string); ok && city != "" {
 			// Remove quotes if present
 			city = strings.Trim(city, "\"")
 			// Filter projects that have a location with matching city
-			query = query.Where(project.HasLocationWith(location.CityEQ(city)))
+			query = query.Where(projectEnt.HasLocationWith(locationEnt.CityEQ(city)))
 		}
 
 		// Apply type filter
 		if projectType, ok := filters["type"].(string); ok && projectType != "" {
-			query = query.Where(project.ProjectTypeEQ(project.ProjectType(projectType)))
+			query = query.Where(projectEnt.ProjectTypeEQ(projectEnt.ProjectType(projectType)))
 		}
 
 		if len(predicates) > 0 {
-			query = query.Where(project.Or(predicates...))
+			query = query.Where(projectEnt.Or(predicates...))
 		}
 	}
 
 	// Execute the query with eager loading of related entities
 	projects, err := query.
-		Order(ent.Desc(project.FieldID)).
+		Order(ent.Desc(projectEnt.FieldID)).
 		WithDeveloper().
 		WithLocation().
 		All(ctx)
@@ -465,7 +487,7 @@ func (r *repository) GetProjectByURL(url string) (*ent.Project, error) {
 
 	project, err := r.db.Project.Query().
 		Where(
-			project.IsDeletedEQ(false),
+			projectEnt.IsDeletedEQ(false),
 			func(s *sql.Selector) {
 				s.Where(sql.ExprP("meta_info->>'canonical' = ?", url))
 			},

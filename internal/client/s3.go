@@ -28,6 +28,11 @@ type S3ClientInterface interface {
 }
 
 func NewS3Client(bucket string) (S3ClientInterface, error) {
+
+	region := os.Getenv("AWS_REGION")
+	if region == "" {
+		return nil, fmt.Errorf("AWS_REGION environment variable is not set")
+	}
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
 		return nil, err

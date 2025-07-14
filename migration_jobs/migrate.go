@@ -213,6 +213,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					BuildingArea: strconv.FormatInt(*floorPlan.Size, 10),
 					Image:        safeStr(floorPlan.ImgURL),
 				})
+
+
 				configurationProducts = append(configurationProducts, schema.ProductConfiguration{
 					ConfigurationName: safeStr(floorPlan.Title),
 					Size:              strconv.FormatInt(*floorPlan.Size, 10),
@@ -305,9 +307,9 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				imageURLs[i] = img.ImageURL
 			}
 
-			// for i, j := 0, len(faqs)-1; i < j; i, j = i+1, j-1 {
-			// 	faqs[i], faqs[j] = faqs[j], faqs[i]
-			// }
+			for i, j := 0, len(faqs)-1; i < j; i, j = i+1, j-1 {
+				faqs[i], faqs[j] = faqs[j], faqs[i]
+			}
 
 			faqsNew := []schema.FAQ{}
 			for _, faq := range faqs {
@@ -489,7 +491,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 							BookingLink    string `json:"booking_link,omitempty"`
 						}{
 							Name:           safeStr(developer.DeveloperName),
-							ProjectAddress: safeStr(developer.DeveloperAddress),
+							ProjectAddress: safeStr(project.ProjectAddress),
 							Phone:          safeStr(developer.Phone),
 							BookingLink:    safeStr(project.ProjectBrochure),
 						},

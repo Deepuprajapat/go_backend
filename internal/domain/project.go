@@ -15,8 +15,8 @@ type Project struct {
 	DeveloperID   string
 	Description   string
 	Status        enums.ProjectStatus
-	MinPrice      int
-	MaxPrice      int
+	MinPrice      string
+	MaxPrice      string
 	PriceUnit     string
 	TimelineInfo  schema.TimelineInfo
 	MetaInfo      schema.SEOMeta
