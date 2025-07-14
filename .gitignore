@@ -91,3 +91,8 @@ mysql_data/
 
 *.md
 
+
+test.json
+.gitignore
+
+

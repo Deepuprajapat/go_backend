@@ -1,21 +1,258 @@
 {
-    "title": "Check out the new launch projects in Yamuna Expressway that can perfectly fit in your budget on Invest Mango, your trusted Investment Partner.",
-    "keywords": "",
-    "canonical": "https://www.investmango.com/blog.php/new-launch-projects-in-yamuna-expressway",
-    "blog_schema": [
-        "<script type=\\\"application/ld+json\\\">\\n{\\n  \\\"@context\\\": \\\"https://schema.org\\",
-        "\\n  \\\"@type\\\": \\\"BlogPosting\\",
-        "\\n  \\\"mainEntityOfPage\\\": {\\n    \\\"@type\\\": \\\"WebPage\\",
-        "\\n    \\\"@id\\\": \\\"https://www.investmango.com/blog.php/new-launch-projects-in-yamuna-expressway\\\"\\n  },\\n  \\\"headline\\\": \\\"New Launch Projects in Yamuna Expressway\\",
-        "\\n  \\\"description\\\": \\\"New Launch Projects in Yamuna Expressway\\",
-        "\\n  \\\"image\\\": \\\"https://www.investmango.com/img/ace-yamuna-expressway/3.webp\\",
-        "\\n  \\\"author\\\": {\\n    \\\"@type\\\": \\\"Organization\\",
-        "\\n    \\\"name\\\": \\\"Invest Mango\\",
-        "\\n    \\\"url\\\": \\\"https://www.investmango.com/\\\"\\n  },  \\n  \\\"publisher\\\": {\\n    \\\"@type\\\": \\\"Organization\\",
-        "\\n    \\\"name\\\": \\\"Invest Mango\\",
-        "\\n    \\\"logo\\\": {\\n      \\\"@type\\\": \\\"ImageObject\\",
-        "\\n      \\\"url\\\": \\\"https://www.investmango.com/img/logo.jpg\\\"\\n    }\\n  },\\n  \\\"datePublished\\\": \\\"2024-11-22\\",
-        "\\n  \\\"dateModified\\\": \\\"2024-11-22\\\"\\n}\\n"
+    "faqs": [
+        {
+            "answer": "The total land area covered to develop EROS Sampoornam 2 is 3.34 Acres.",
+            "question": "How much is the total size of Eros Sampoornam 2?"
+        },
+        {
+            "answer": "The project of Eros Sampoornam is located in sector 2, Greater Noida West, Uttar Pradesh 203207.",
+            "question": "What is the project location?"
+        },
+        {
+            "answer": "There are a total of 6 towers in EROS Sampoornam.",
+            "question": "How many towers are there in Eros Sampoornam 2?"
+        },
+        {
+            "answer": "There are a total of 378 apartment units with different configurations in EROS Sampoornam 2.",
+            "question": "How many apartment units are there in EROS Sampoornam 2?"
+        },
+        {
+            "answer": "The sizes of the apartments in EROS Sampoornam 2 vary between 835 Sq. Ft. To 1765 Sq. Ft.",
+            "question": "What are the sizes of the apartments in EROS Sampoornam 2?"
+        },
+        {
+            "answer": "You can easily download the Eros Sampoornam 2 brochure from our website.",
+            "question": "Where can I download the brochure PDF of Eros Sampoornam 2 from?"
+        }
     ],
-    "description": ""
+    "about": {
+        "logo_url": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-by-eros-group-logo.webp",
+        "total_projects": "33",
+        "contact_details": {
+            "name": "Eros Group",
+            "booking_link": "img/eros-sampoornam-i/eros-sampoornam-I-brochure.pdf",
+            "project_address": "Sector 2, Greater Noida west, Uttar Pradesh 203207"
+        },
+        "establishment_year": "1940"
+    },
+    "images": [
+        "https://image.investmango.com/images/img/all-logo/eros-sampoornam-logo.webp",
+        "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-by-eros-developers.webp",
+        "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-by-eros-group.webp",
+        "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-entrance.webp",
+        "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-parking.webp"
+    ],
+    "amenities": {
+        "description": "The Amenities of Eros Sampoornam 2 for the Residential Project is mentioned below."
+    },
+    "rera_info": {},
+    "site_plan": {
+        "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-site-plan.webp",
+        "description": "If we talk about the Eros Sampoornam 2 site plan, it spreads over 3.34 acres of area. In fact, it has 70% Green landscape and its rest 30% will be used for Construction according to sustainable lifestyle living."
+    },
+    "floor_plan": {
+        "products": [
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-2-bhk-835sqft.webp",
+                "price": "8767000",
+                "title": "2 BHK Apartment + 2 Toilets",
+                "flat_type": "2 BHK Apartment + 2 Toilets",
+                "building_area": "835"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-2.5bhk-1060sqft.webp",
+                "price": "11100000",
+                "title": "2.5 BHK Apartment + 3 Toilets",
+                "flat_type": "2.5 BHK Apartment + 3 Toilets",
+                "building_area": "1060"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-2.5bhk-1070sqft.webp",
+                "price": "11200000",
+                "title": "2.5 BHK Apartment + 3 Toilets",
+                "flat_type": "2.5 BHK Apartment + 3 Toilets",
+                "building_area": "1070"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-3bhk-1350sqft.webp",
+                "price": "14100000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1350"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-3bhk-1425sqft.webp",
+                "price": "14899998",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1425"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-3bhk-1435sqft.webp",
+                "price": "15000000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1435"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-3bhk-1560sqft.webp",
+                "price": "16300000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1560"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-floor-plan-3bhk-1765sqft.webp",
+                "price": "18500000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1765"
+            },
+            {
+                "price": "18900000",
+                "title": "3 BHK Apartment + 4 Toilets + Servant",
+                "flat_type": "3 BHK Apartment + 4 Toilets + Servant",
+                "building_area": "1800"
+            }
+        ],
+        "description": "Check the Price List of Eros Sampoornam 2 of 2/2.5/3 Bhk Residential Apartments."
+    },
+    "know_about": {
+        "description": "<p>Eros Sampoornam 2 is located in Sector 2 Greater Noida West and it is a sprawling residential project which has been set across a total land area of 3.34 acres. The project of EROS Sampoornam caters to the varied needs of homebuyers with a diverse range of configurations including 2BHK, 2.5BHK, and 3BHK apartments. Offering a total of 378 apartment units distributed across 6 towers, the residential project of Eros Sampoornam 2 Greater Noida West promises an extensive living experience to the community of Delhi NCR.</p>\n\n<p>Launched in February 2020, the project of Eros Sampoornam in Sector 2 Noida Extension is currently under construction and is expected to be ready for possession in September 2025. The sizes of these meticulously planned residential units range from 835 - 1800 Sq. Ft. and with such huge configurations these apartments are offering ample space for residents. The 15 floors within each tower enhance the vertical aesthetics of the development and also provide panoramic views of the surrounding areas.</p>\n\n<h2>EROS SAMPOORNAM 2 RERA NUMBER</h2>\n<p>The residential development of EROS Sampoornam 2 has got its RERA Approval and the RERA registration number for EROS Sampoornam 2 is UPRERAPRJ301564. It means you can find all the project-related information on the RERA website.</p>\n\n<h2>SITE LAYOUT</h2>\n<p>The residential development of EROS Sampoornam 2 in Sector-2 Greater Noida West is spread over a total land area of 3.34 acres with apartments of 3 configurations including 2 BHK, 2.5 BHK, and 3 BHK apartments. The sizes of the apartments in different configurations vary from 835 sq. Ft. to 1800 Sq. Ft. There are a total of 378 units that are distributed in 6 towers with 15 floors in each tower. The project was launched in February 2020 and possession of these apartments will start in September 2025.</p>\n\n<h2>DETAILED FEATURES & AMENITIES</h2>\n<p>Eros Sampoornam 2 transcends the conventional notion of living spaces, offering a lavish lifestyle enriched by an array of contemporary facilities.</p>\n\n<ul>\n<li>Pavilion Yoga/Meditation</li>\n<li>Surprise Jet Fountain</li>\n<li>Flower Beds</li>\n<li>Community Centre with Recreational facilities</li>\n<li>Fragrance Garden</li>\n<li>Relaxing Buddha Park</li>\n<li>Illuminated Dancing fountain for kids</li>\n<li>Breathtaking water bodies, etc.</li>\n</ul>\n\n<h2>SPECIFICATIONS</h2>\n<b>LIVING ROOM/DINING AREA</b>\n<ul>\n<li>Walls are painted with oil-bound distemper over the cement plaster</li>\n<li>The ceiling is prepared with whitewash and the floors are designed with vitrified tiles</li>\n<li>External doors and windows of the living and dining area are made with anodized aluminium UPVC (glazed) with aluminium fixtures</li>\n<li>Internal doors are the flush doors with Meranti hardwood frames, and</li>\n</ul>\n\n<b>BEDROOMS</b>\n<ul>\n<li>Walls are plastered with the oil-bound distemper over the cement plaster</li>\n<li>The ceiling is provided with whitewash and floors are built with vitrified tiles</li>\n<li>External doors and windows of the bedrooms are anodized aluminium UPVC (glazed) with aluminium fixtures</li>\n<li>Internal doors are the flush doors with the Meranti hardwood frames.</li>\n</ul>\n\n<b>KITCHEN</b>\n<ul>\n<li>Walls of the kitchen are provided with the 2'ceramic glazed tile dado above the counter and oil-bound distemper up to the ceiling level</li>\n<li>The ceiling is being prepared with whitewash and the floors of the kitchen are made with non-skid ceramic tiles</li>\n<li>External doors and windows of the kitchen are being prepared with the anodized aluminium UPVC (glazed) with the aluminium fixtures</li>\n<li>Internal doors of the kitchen are the flush doors with the Meranti hardwood frames</li>\n<li>A granite/marble countertop and stainless steel kitchen sink with the provision for RO system is provided in the kitchen.</li>\n</ul>\n\n<b>TOILETS</b>\n<ul>\n<li>Walls of the toilets are made with glazed tile dado up to the ceiling height,</li>\n<li>The ceiling is being prepared with false ceiling and the floor of the toilets is prepared with non-skid ceramic tiles,</li>\n<li>External doors and windows of the toilets are anodized aluminium UPVC (glazed) with aluminium fixtures,</li>\n<li>Internal doors of the toilets are flush doors with Meranti hardwood frames, and</li>\n<li>White sanitary fixtures and CP fittings are provided in the toilets.</li>\n</ul>\n\n<b>BALCONIES</b>\n<ul>\n<li>Balcony walls are designed with texture paint or cement paint</li>\n<li>The ceiling is provided with whitewash and the floors of the balconies are prepared with non-skid ceramic tiles</li>\n</ul>\n\n<h2>SERVANT'S ROOM</h2>\n<ul>\n<li>The walls of the servant rooms are prepared with the oil-bound distemper over the cement plaster</li>\n<li>The ceiling is prepared with whitewash and the floors are designed with ceramic tiles</li>\n<li>External doors and windows of the servant's room are anodized aluminium UPVC (glazed) with aluminium fixtures</li>\n<li>Internal doors are the flush doors with the Meranti hardwood frames</li>\n</ul>\n\n<h2>HOME LOAN OFFER</h2>\n<p>Many listed Indian Banks are associated with providing home loan offers for EROS Sampoornam projects. Some major banks providing hassle-free home loan offers are HDFC Bank, SBI Bank, and AXIS BANK.</p>\n\n<h2>DOWNLOAD BROCHURE</h2>",
+        "download_link": "img/eros-sampoornam-i/eros-sampoornam-I-brochure.pdf"
+    },
+    "price_list": {
+        "description": "Check the Price List of Eros Sampoornam 2 of 2/2.5/3 Bhk Residential Apartments.",
+        "product_configurations": [
+            {
+                "size": "835",
+                "price": "8767000",
+                "configuration_name": "2 BHK Apartment + 2 Toilets"
+            },
+            {
+                "size": "1060",
+                "price": "11100000",
+                "configuration_name": "2.5 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1070",
+                "price": "11200000",
+                "configuration_name": "2.5 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1350",
+                "price": "14100000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1425",
+                "price": "14899998",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1435",
+                "price": "15000000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1560",
+                "price": "16300000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1765",
+                "price": "18500000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1800",
+                "price": "18900000",
+                "configuration_name": "3 BHK Apartment + 4 Toilets + Servant"
+            }
+        ]
+    },
+    "payment_plans": {
+        "plans": [
+            {
+                "name": "On application of booking",
+                "details": "10%"
+            },
+            {
+                "name": "Within 60 days of booking ",
+                "details": "30%"
+            },
+            {
+                "name": "On completion of 2nd last floor slab",
+                "details": "10%"
+            },
+            {
+                "name": "On completion of the top floor slab",
+                "details": "10%"
+            },
+            {
+                "name": "on completion of external plaster of respective tower",
+                "details": "20%"
+            },
+            {
+                "name": "On application of OC/CC",
+                "details": "10%"
+            },
+            {
+                "name": "On offer of possession",
+                "details": "10%+IFMS+Other charges"
+            }
+        ],
+        "description": "The flexibility of Eros Sampoornam 2 Payment Plan makes it easy for buyers to purchase flats in this housing project. The payment plan has been divided into the following."
+    },
+    "why_to_choose": {
+        "usp_list": [
+            "Maximum Towers in EROS Sampoornam having 4 towers per floor",
+            "Well-connected to Delhi NCR and Noida’s Major Parts",
+            "Situated on 130 meters eight lanes wide road in Greater Noida",
+            "Illuminated Dancing fountain for kids and Breathtaking water bodies",
+            "Beautifully landscaped and Lush green open areas",
+            "Upcoming metro station is at stone's throw distance"
+        ],
+        "image_urls": [
+            "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-by-eros-developers.webp",
+            "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-by-eros-group.webp",
+            "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-entrance.webp",
+            "https://image.investmango.com/images/img/eros-sampoornam-i/eros-sampoornam-i-greater-noida-west-parking.webp"
+        ]
+    },
+    "project_details": {
+        "area": {
+            "value": "3.34 Acres"
+        },
+        "type": {
+            "value": "RESIDENTIAL"
+        },
+        "sizes": {
+            "value": "835 - 1800 sq.ft."
+        },
+        "units": {
+            "value": "378 Flats"
+        },
+        "launch_date": {
+            "value": "Feb,2020"
+        },
+        "total_floor": {
+            "value": "15"
+        },
+        "total_towers": {
+            "value": "6"
+        },
+        "configuration": {
+            "value": "[ \"2BHK\", \"3BHK\", \"2.5BHK\" ]"
+        },
+        "possession_date": {
+            "value": "Sep,2025"
+        }
+    },
+    "video_presentation": {
+        "urls": [
+            ""
+        ],
+        "description": "Video of Eros Sampoornam 2 Sector 2, Greater Noida will come soon. Till then Check out our channel to explore different properties that can be your dream home. <b>Join our community and become a part of the IM Family!</b>"
+    }
 }

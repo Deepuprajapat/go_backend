@@ -45,7 +45,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	if property.Edges.Developer != nil {
 		var developerAddress string
 		if property.Edges.Developer.MediaContent.DeveloperAddress != "" {
-			developerAddress = property.Edges.Project.WebCards.About.ContactDetails.ProjectAddress
+			developerAddress = property.Edges.Developer.MediaContent.DeveloperAddress
 		}
 		developer = &SimpleDeveloper{
 			Name:             property.Edges.Developer.Name,
@@ -103,7 +103,7 @@ type PropertyListResponse struct {
 	Location         string   `json:"location"`
 	DeveloperName    string   `json:"developer_name"`
 	Configuration    string   `json:"configuration"`
-	Slug             string   `json:"slug"`
+	Slug 			string    `json:"slug"`
 }
 
 func GetPropertyListResponse(property *ent.Property, developerName string, location string) *PropertyListResponse {
@@ -118,6 +118,6 @@ func GetPropertyListResponse(property *ent.Property, developerName string, locat
 		Configuration:    property.WebCards.PropertyDetails.Configuration.Value,
 		Location:         location,
 		DeveloperName:    developerName,
-		Slug:             property.Slug,
+		Slug: 			  property.Slug,
 	}
 }
