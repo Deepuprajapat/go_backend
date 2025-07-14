@@ -79,7 +79,6 @@ type ProjectListResponse struct {
 }
 
 func GetProjectFromEnt(project *ent.Project) *Project {
-
 	return &Project{
 		ProjectID:   project.ID,
 		ProjectName: project.Name,
@@ -102,7 +101,7 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 		DeveloperInfo: DeveloperInfo{
 			DeveloperID:     project.Edges.Developer.ID,
 			DeveloperName:   project.Edges.Developer.Name,
-			Phone:           project.Edges.Developer.MediaContent.Phone,
+			Phone:           project.Edges.Location.PhoneNumber,
 			Logo:            project.Edges.Developer.MediaContent.DeveloperLogo,
 			AltLogo:         project.Edges.Developer.MediaContent.AltDeveloperLogo,
 			Address:         project.Edges.Developer.MediaContent.DeveloperAddress,

@@ -45,7 +45,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	if property.Edges.Developer != nil {
 		var developerAddress string
 		if property.Edges.Developer.MediaContent.DeveloperAddress != "" {
-			developerAddress = property.Edges.Developer.MediaContent.DeveloperAddress
+			developerAddress = property.Edges.Project.WebCards.About.ContactDetails.ProjectAddress
 		}
 		developer = &SimpleDeveloper{
 			Name:             property.Edges.Developer.Name,
