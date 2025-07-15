@@ -52,6 +52,8 @@ func (h AppHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+
+
 func writeErrorResponse(err *CustomError, w http.ResponseWriter) []byte {
 	// Check if the header has already been written
 	if w.Header().Get("Content-Type") == "" {

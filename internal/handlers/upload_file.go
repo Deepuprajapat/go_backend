@@ -10,6 +10,7 @@ import (
 )
 
 // UploadFile handles file upload requests
+// UploadFile handles file upload requests
 func (h *Handler) UploadFile(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// Parse multipart form
 	var req request.UploadFileRequest
@@ -22,12 +23,8 @@ func (h *Handler) UploadFile(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 	if req.FileName == "" || req.FilePath == "" || req.AltKeywords == "" {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "File name, file path and alt keywords are required", "File name, file path and alt keywords are required")
 	}
-
 	presignedURL, imageURL, err := h.app.UploadFile(req)
-	if err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to upload file", err.Error())
-	}
-
+	
 	return &imhttp.Response{
 		Data: struct {
 			PresignedURL string `json:"presigned_url"`
