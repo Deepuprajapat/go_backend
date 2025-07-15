@@ -83,3 +83,21 @@ func RequireSuperAdmin(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	}))
 }
+
+// RequireDM ensures only dm (data manager) role can access
+func RequireDM(next http.Handler) http.Handler {
+	return Auth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+		if !ok {
+			http.Error(w, "Invalid user context", http.StatusUnauthorized)
+			return
+		}
+
+		if claims.Role != "dm" {
+			http.Error(w, "Access denied: requires dm role", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}))
+}
