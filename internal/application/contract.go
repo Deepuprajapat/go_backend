@@ -12,8 +12,10 @@ import (
 )
 
 type application struct {
-	repo     repository.AppRepository
-	s3Client client.S3ClientInterface
+	repo      repository.AppRepository
+	s3Client  client.S3ClientInterface
+	smsClient client.SMSClientInterface
+	crmClient client.CRMClientInterface
 }
 
 type ApplicationInterface interface {
@@ -83,8 +85,16 @@ type ApplicationInterface interface {
 	AddCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
 	UpdateCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
 	DeleteCustomSearchPage(ctx context.Context, id string) *imhttp.CustomError
+
+	// Leads
+	CreateLeadWithOTP(ctx context.Context, req *request.CreateLeadRequest) (*response.CreateLeadResponse, *imhttp.CustomError)
+	CreateLead(ctx context.Context, req *request.CreateLeadRequest) (*response.CreateLeadResponse, *imhttp.CustomError)
+	GetLeadByID(ctx context.Context, id int) (*response.Lead, *imhttp.CustomError)
+	GetAllLeads(ctx context.Context, req *request.GetLeadsRequest) (*response.LeadListResponse, *imhttp.CustomError)
+	ValidateOTP(ctx context.Context, req *request.ValidateOTPRequest) (*response.ValidateOTPResponse, *imhttp.CustomError)
+	ResendOTP(ctx context.Context, req *request.ResendOTPRequest) (*response.ResendOTPResponse, *imhttp.CustomError)
 }
 
-func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface) ApplicationInterface {
-	return &application{repo: repo, s3Client: s3Client}
+func NewApplication(repo repository.AppRepository, s3Client client.S3ClientInterface, smsClient client.SMSClientInterface, crmClient client.CRMClientInterface) ApplicationInterface {
+	return &application{repo: repo, s3Client: s3Client, smsClient: smsClient, crmClient: crmClient}
 }

@@ -136,7 +136,15 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.DeleteBlog)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
 
-	//lead routes
+	// lead routes - public endpoints for lead creation and OTP operations
+	Router.Handle("/v1/api/leads/send-otp", imhttp.AppHandler(handler.CreateLeadWithOTP)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/leads", imhttp.AppHandler(handler.CreateLead)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/leads/validate-otp", imhttp.AppHandler(handler.ValidateOTP)).Methods(http.MethodPatch)
+	Router.Handle("/v1/api/leads/resend-otp", imhttp.AppHandler(handler.ResendOTP)).Methods(http.MethodPatch)
+	
+	// Protected lead routes - only dm role can access lead data
+	Router.Handle("/v1/api/leads/get/by/{id}", middleware.RequireDM(imhttp.AppHandler(handler.GetLeadByID))).Methods(http.MethodGet)
+	Router.Handle("/v1/api/leads", middleware.RequireDM(imhttp.AppHandler(handler.GetAllLeads))).Methods(http.MethodGet)
 
 	//content routes
 	Router.Handle("/v1/api/content/test/{url}", imhttp.AppHandler(handler.GetProjectSEOContent)).Methods(http.MethodGet)

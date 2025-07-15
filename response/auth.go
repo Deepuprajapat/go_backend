@@ -2,6 +2,8 @@ package response
 
 type GenerateTokenResponse struct {
 	AccessToken  string `json:"access_token"`
+	Role         string `json:"role"`
+	Name         string `json:"name"`
 	RefreshToken string `json:"refresh_token"`
 }
 

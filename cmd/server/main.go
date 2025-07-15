@@ -78,8 +78,11 @@ func main() {
 		logger.Get().Fatal().Err(err).Msg("Failed to create S3 client")
 	}
 
+	smsClient := s3client.NewSMSClient()
+	crmClient := s3client.NewCRMClient()
+
 	repo := repository.NewRepository(client)
-	app := application.NewApplication(repo, s3Client)
+	app := application.NewApplication(repo, s3Client, smsClient, crmClient)
 
 	// Initialize router
 	router.Init(app)

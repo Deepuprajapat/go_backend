@@ -72,6 +72,14 @@ type AppRepository interface {
 	AddCustomSearchPage(ctx context.Context, customSearchPage *ent.CustomSearchPage) (*ent.CustomSearchPage, error)
 	UpdateCustomSearchPage(ctx context.Context, customSearchPage *ent.CustomSearchPage) (*ent.CustomSearchPage, error)
 	DeleteCustomSearchPage(ctx context.Context, id string) error
+
+	// Leads
+	CreateLead(ctx context.Context, lead *ent.Leads) (*ent.Leads, error)
+	GetLeadByID(ctx context.Context, id int) (*ent.Leads, error)
+	GetLeadByPhone(ctx context.Context, phone string) (*ent.Leads, error)
+	GetLeadByPhoneAndOTP(ctx context.Context, phone, otp string) (*ent.Leads, error)
+	UpdateLead(ctx context.Context, lead *ent.Leads) (*ent.Leads, error)
+	GetAllLeads(ctx context.Context, offset, limit int, filters map[string]interface{}) ([]*ent.Leads, int, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

@@ -27,7 +27,7 @@ func (User) Fields() []ent.Field {
 		field.String("phone_number").Optional(),
 		field.String("current_address").Optional(),
 		field.String("permanent_address").Optional(),
-		field.Enum("role").Values("business_partner", "superadmin").Default("business_partner"),
+		field.Enum("role").Values("business_partner", "superadmin", "dm").Default("business_partner"),
 		field.Bool("is_active").Default(true),
 		field.Bool("is_email_verified").Default(false),
 		field.Bool("is_verified").Default(false),

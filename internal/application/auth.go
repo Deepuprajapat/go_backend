@@ -56,6 +56,8 @@ func (c *application) GetAccessToken(email string, password string) (*response.G
 	return &response.GenerateTokenResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		Role:         user.Role.String(),
+		Name:         user.Name,
 	}, nil
 }
 
