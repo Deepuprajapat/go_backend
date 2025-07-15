@@ -69,6 +69,7 @@ type ProjectListResponse struct {
 	ProjectID     string   `json:"project_id"`
 	ProjectName   string   `json:"project_name"`
 	ShortAddress  string   `json:"short_address"`
+	City 		  string	`json:"city"`
 	Canonical     string   `json:"canonical"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
@@ -119,6 +120,7 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 	return &ProjectListResponse{
 		ProjectID:     project.ID,
 		ProjectName:   project.Name,
+		City: 		   project.Edges.Location.City,
 		ShortAddress:  project.LocationInfo.ShortAddress,
 		IsPremium:     project.IsPremium,
 		Images:        project.WebCards.Images,
