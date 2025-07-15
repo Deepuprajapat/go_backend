@@ -10,6 +10,7 @@ type SimpleDeveloper struct {
 	Name             string `json:"name"`
 	DeveloperLogo    string `json:"developer_logo"`
 	DeveloperAddress string `json:"developer_address"`
+	EstablishedYear	 int  `json:"establised_year"`
 }
 
 type Property struct {
@@ -51,6 +52,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 			Name:             property.Edges.Developer.Name,
 			DeveloperLogo:    property.Edges.Developer.MediaContent.DeveloperLogo,
 			DeveloperAddress: developerAddress,
+			EstablishedYear: property.Edges.Developer.EstablishedYear,
 		}
 	}
 
