@@ -305,7 +305,6 @@ func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error)
 		SetID(propertyID).
 		SetProjectID(input.ProjectID).
 		SetName(input.Name).
-		SetSlug(slug).
 		SetPropertyType(input.PropertyType).
 		SetWebCards(defaultWebCards).
 		SetPricingInfo(defaultPricingInfo).

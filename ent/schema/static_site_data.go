@@ -17,7 +17,7 @@ func (StaticSiteData) Fields() []ent.Field {
 		field.String("id").Unique(),
 		field.JSON("about_us", []byte{}).Optional(),
 		field.JSON("how_we_work", []byte{}).Optional(),
-		field.JSON("testimonials", []byte{}).Optional(),
+		field.JSON("testimonials", []Testimonials{}).Optional(),
 		field.JSON("mango_insights", []byte{}).Optional(),
 		field.JSON("our_associations", []byte{}).Optional(),
 		field.JSON("categories_with_amenities", struct {
@@ -45,4 +45,16 @@ func (StaticSiteData) Indexes() []ent.Index {
 type PropertyTypes struct {
 	Commercial  []string `json:"commercial"`
 	Residential []string `json:"residential"`
+}
+
+
+type Testimonials struct {
+	CreatedDate int64   `json:"created_date"`   // maps to created_date (epoch millis)
+	Description string  `json:"description"`    // maps to description
+	IsApproved  bool    `json:"is_approved"`    // maps to is_approved
+	Name        string  `json:"name"`           // maps to name
+	Rating      float64 `json:"rating"`         // maps to rating
+	Type        string  `json:"type"`           // maps to type
+	UpdatedDate int64   `json:"updated_date"`   // maps to updated_date (epoch millis)
+	UserID      *int64  `json:"user_id"`        // maps to user_id, nullable
 }

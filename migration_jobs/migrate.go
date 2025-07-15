@@ -205,6 +205,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					}
 				}
 
+				
+
 				floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
 					Title:        safeStr(floorPlan.Title),
 					FlatType:     safeStr(floorPlan.Title),

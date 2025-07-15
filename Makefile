@@ -4,6 +4,11 @@
 build:
 	go build -o bin/server cmd/server/main.go
 
+
+# Seed testimonials into static_site_data
+seed-testimonials:
+	PGPASSWORD=password psql -h localhost -p 5434 -U im_db_dev -d mydb -f sql/seed_testimonials.sql
+
 # Run the application
 build-run: build
 	./bin/server
@@ -88,3 +93,4 @@ initialize-json-loader:
 
 seed-projects:
 	go run cmd/server/main.go seed-projects
+
