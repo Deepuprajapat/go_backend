@@ -160,3 +160,22 @@ func (h *Handler) CompareProjects(r *http.Request) (*imhttp.Response, *imhttp.Cu
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *Handler) GetProjectFilters(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+
+	filters, err := h.app.GetProjectFilters()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project filters")
+		return nil, err
+	}
+
+	if filters == nil {
+		logger.Get().Error().Msg("Failed to get project filters")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project filters", "Failed to get project filters")
+	}
+
+	return &imhttp.Response{
+		Data:       filters,
+		StatusCode: http.StatusOK,
+	}, nil
+}

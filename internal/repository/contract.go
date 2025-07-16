@@ -38,6 +38,8 @@ type AppRepository interface {
 	ListLocations(filters map[string]interface{}) ([]*ent.Location, error)
 	GetLocationByID(id string) (*ent.Location, error)
 	SoftDeleteLocation(id string) error
+	GetAllUniqueCities() ([]string, error)
+	GetAllUniqueLocations() ([]string, error)
 
 	// Property
 	GetPropertyByID(id string) (*ent.Property, error)

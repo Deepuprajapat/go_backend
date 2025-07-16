@@ -216,3 +216,33 @@ func (c *application) GetProjectByURL(url string) (*ent.Project, *imhttp.CustomE
 
 	return project, nil
 }
+
+func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.CustomError) {
+	cities, err := c.repo.GetAllUniqueCities()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get cities")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get cities", err.Error())
+	}
+
+	developers, err := c.repo.GetAllDevelopers()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get developers")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get developers", err.Error())
+	}
+
+	locations, err := c.repo.GetAllUniqueLocations()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get locations")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get locations", err.Error())
+	}
+
+	return map[string]interface{}{
+		"cities":     cities,
+		"developers": developers,
+		"locations":  locations,
+		"types":      []string{"Residential", "Commercial"},
+		"isPremium":  []bool{true, false},
+		"isPriority": []bool{true, false},
+		"isFeatured": []bool{true, false},
+	}, nil
+}

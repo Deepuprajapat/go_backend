@@ -43,3 +43,21 @@ func (r *repository) SoftDeleteLocation(id string) error {
 		Save(context.Background())
 	return err
 }
+
+func (r *repository) GetAllUniqueCities() ([]string, error) {
+	cities, err := r.db.Location.Query().Select(location.FieldCity).Strings(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get all unique cities")
+		return nil, err
+	}
+	return cities, nil
+}
+
+func (r *repository) GetAllUniqueLocations() ([]string, error) {
+	locations, err := r.db.Location.Query().Select(location.FieldLocalityName).Strings(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get all unique locations")
+		return nil, err
+	}
+	return locations, nil
+}
