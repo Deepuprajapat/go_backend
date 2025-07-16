@@ -7,6 +7,7 @@ type CustomSearchPage struct {
 	Slug        string                 `json:"slug,omitempty"`
 	Projects    []*ProjectListResponse `json:"projects,omitempty"`
 	Filters     map[string]interface{} `json:"filters,omitempty"`
+	SearchTerm  string                 `json:"search_term,omitempty"`
 	MetaInfo    *MetaInfo              `json:"meta_info,omitempty"`
 }
 

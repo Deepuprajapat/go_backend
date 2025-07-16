@@ -137,9 +137,9 @@ func (h *Handler) AddCustomSearchPage(r *http.Request) (*imhttp.Response, *imhtt
 	}
 
 	customSearchPageResponse, err := h.app.AddCustomSearchPage(ctx, customSearchPage)
-	if err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Custom search page not found", "Custom search page not found")
-	}
+	// if err != nil {
+	// 	return nil, imhttp.NewCustomErr(http.StatusNotFound, "Custom search page not found", err.Error())
+	// }
 
 	return &imhttp.Response{
 		Data:       customSearchPageResponse,

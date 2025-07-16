@@ -6,6 +6,8 @@ import (
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/customsearchpage"
 	"github.com/VI-IM/im_backend_go/ent/schema"
+	"github.com/VI-IM/im_backend_go/shared/logger"
+	"github.com/google/uuid"
 )
 
 func (r *repository) GetCustomSearchPageFromSlug(ctx context.Context, slug string) (*ent.CustomSearchPage, error) {
@@ -26,10 +28,29 @@ func (r *repository) GetAllCustomSearchPages(ctx context.Context) ([]*ent.Custom
 }
 
 func (r *repository) AddCustomSearchPage(ctx context.Context, customSearchPage *ent.CustomSearchPage) (*ent.CustomSearchPage, error) {
-	customSearchPage, err := r.db.CustomSearchPage.Create().SetTitle(customSearchPage.Title).SetDescription(customSearchPage.Description).SetFilters(customSearchPage.Filters).SetMetaInfo(customSearchPage.MetaInfo).SetSearchTerm(customSearchPage.SearchTerm).Save(ctx)
+	logger.Get().Info().Msg("Adding custom search page from repository")
+	customSearchPage, err := r.db.CustomSearchPage.Create().
+		SetID(uuid.New().String()).
+		SetTitle(customSearchPage.Title).
+		SetDescription(customSearchPage.Description).
+		SetFilters(customSearchPage.Filters).
+		SetMetaInfo(customSearchPage.MetaInfo).
+		SetSearchTerm(customSearchPage.SearchTerm).
+		SetSlug(customSearchPage.Slug).
+		Save(ctx)
 	if err != nil {
+		logger.Get().Error().Err(err).Msg(err.Error())
 		return nil, err
 	}
+
+	logger.Get().Info().Msg("Search Term: " + customSearchPage.SearchTerm)
+	logger.Get().Info().Msg(customSearchPage.Title)
+	logger.Get().Info().Msg(customSearchPage.Description)
+	logger.Get().Info().Interface("filters", customSearchPage.Filters).Msg("CustomSearchPageEntity Filters")
+	logger.Get().Info().Msg(customSearchPage.MetaInfo.Title)
+	logger.Get().Info().Msg(customSearchPage.MetaInfo.Description)
+	logger.Get().Info().Msg(customSearchPage.MetaInfo.Keywords)
+	logger.Get().Info().Msg("Custom search page added from repository")
 	return customSearchPage, nil
 }
 
