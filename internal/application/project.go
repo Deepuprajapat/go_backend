@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"net/http"
@@ -270,4 +271,33 @@ func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.Custo
 		"isPriority": []bool{true, false},
 		"isFeatured": []bool{true, false},
 	}, nil
+}
+
+func (c *application) GetProjectBySlug(slug string) (*response.Project, *imhttp.CustomError) {
+	project, err := c.repo.GetProjectByCanonicalURL(context.Background(), slug)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project by slug")
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found", err.Error())
+	}
+
+	// Convert to response format
+	projectResponse := &response.Project{
+		ProjectID:     project.ID,
+		ProjectName:   project.Name,
+		Description:   project.Description,
+		Status:        project.Status, // enums.ProjectStatus type expected
+		Slug:          project.Slug,
+		MinPrice:      project.MinPrice,
+		MaxPrice:      project.MaxPrice,
+		TimelineInfo:  project.TimelineInfo,
+		ProjectType:   string(project.ProjectType),
+		MetaInfo:      project.MetaInfo,
+		WebCards:      project.WebCards,
+		LocationInfo:  project.LocationInfo,
+		IsFeatured:    project.IsFeatured,
+		IsPremium:     project.IsPremium,
+		IsPriority:    project.IsPriority,
+	}
+
+	return projectResponse, nil
 }

@@ -31,6 +31,7 @@ type Project struct {
 	ProjectID     string                 `json:"project_id"`
 	ProjectName   string                 `json:"project_name"`
 	Description   string                 `json:"description"`
+	ProjectType   string                 `json:"project_type"`
 	Slug          string                 `json:"slug"`
 	Status        enums.ProjectStatus    `json:"status"`
 	MinPrice      string                 `json:"min_price"`

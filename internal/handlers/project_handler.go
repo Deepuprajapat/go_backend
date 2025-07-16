@@ -179,3 +179,19 @@ func (h *Handler) GetProjectFilters(r *http.Request) (*imhttp.Response, *imhttp.
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+
+func (h *Handler) GetProjectBySlug(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	response, err := h.app.GetProjectBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
+}

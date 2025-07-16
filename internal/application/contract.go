@@ -78,6 +78,7 @@ type ApplicationInterface interface {
 	GetProjectByCanonicalURL(ctx context.Context, url string) (*ent.Project, *imhttp.CustomError)
 	GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
 	GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, *imhttp.CustomError)
+	GetProjectBySlug(slug string) (*response.Project, *imhttp.CustomError)
 
 	// Generic Search
 	GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError)
