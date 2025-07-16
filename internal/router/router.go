@@ -94,6 +94,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.DeleteProject)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/projects/filters", imhttp.AppHandler(handler.GetProjectFilters)).Methods(http.MethodGet)
 
 	// upload file routes
 	Router.Handle("/v1/api/upload", imhttp.AppHandler(handler.UploadFile)).Methods(http.MethodPost)
@@ -141,7 +142,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/leads", imhttp.AppHandler(handler.CreateLead)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/leads/validate-otp", imhttp.AppHandler(handler.ValidateOTP)).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/leads/resend-otp", imhttp.AppHandler(handler.ResendOTP)).Methods(http.MethodPatch)
-	
+
 	// Protected lead routes - only dm role can access lead data
 	Router.Handle("/v1/api/leads/get/by/{id}", middleware.RequireDM(imhttp.AppHandler(handler.GetLeadByID))).Methods(http.MethodGet)
 	Router.Handle("/v1/api/leads", middleware.RequireDM(imhttp.AppHandler(handler.GetAllLeads))).Methods(http.MethodGet)

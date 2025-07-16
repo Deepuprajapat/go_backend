@@ -32,7 +32,7 @@ type ApplicationInterface interface {
 	ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError)
 	CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError)
 	GetProjectByURL(url string) (*ent.Project, *imhttp.CustomError)
-	G
+	GetProjectFilters() (map[string]interface{}, *imhttp.CustomError)
 
 	// Developer
 	ListDevelopers(pagination *request.GetAllAPIRequest) ([]*response.Developer, *imhttp.CustomError)
