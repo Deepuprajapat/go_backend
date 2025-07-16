@@ -62,7 +62,6 @@ func (r *repository) AddProject(input domain.Project) (string, error) {
 		SetProjectType(projectEnt.ProjectType(input.ProjectType)).
 		SetDeveloperID(input.DeveloperID)
 
-	// Associate with location if one was created
 	if locationID != "" {
 		projectCreate.SetLocationID(locationID)
 	}

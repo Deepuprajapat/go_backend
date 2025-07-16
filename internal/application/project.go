@@ -146,7 +146,7 @@ func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*respon
 				Configuration: fullProject.WebCards.Details.Configuration.Value,
 				MinPrice:      fullProject.MinPrice,
 				Sizes:         fullProject.WebCards.Details.Sizes.Value,
-				Canonical:     project.Slug,
+				Slug:          fullProject.Slug,
 				// Add full project details
 				FullDetails: fullProject,
 			})
