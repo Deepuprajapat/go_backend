@@ -9,7 +9,6 @@ import (
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
-	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
 func (a *application) GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError) {
@@ -93,6 +92,7 @@ func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage 
 	customSearchPageEntity := &ent.CustomSearchPage{
 		Title:       customSearchPage.Title,
 		Description: customSearchPage.Description,
+		Slug:        customSearchPage.Slug,
 		Filters:     customSearchPage.Filters,
 		SearchTerm:  customSearchPage.SearchTerm,
 		MetaInfo: schema.MetaInfo{
@@ -101,15 +101,7 @@ func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage 
 			Keywords:    customSearchPage.MetaInfo.Keywords,
 		},
 	}
-	logger.Get().Info().Msg("Adding custom search page from application")
-	logger.Get().Info().Msg(customSearchPageEntity.SearchTerm)
-	logger.Get().Info().Msg(customSearchPageEntity.Title)
-	logger.Get().Info().Msg(customSearchPageEntity.Description)
-	logger.Get().Info().Interface("filters", customSearchPageEntity.Filters).Msg("CustomSearchPageEntity Filters")
-	logger.Get().Info().Msg(customSearchPageEntity.MetaInfo.Title)
-	logger.Get().Info().Msg(customSearchPageEntity.MetaInfo.Description)
-	logger.Get().Info().Msg(customSearchPageEntity.MetaInfo.Keywords)
-
+	
 	customSearchPageEntity, err := a.repo.AddCustomSearchPage(ctx, customSearchPageEntity)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add custom search page", err.Error())

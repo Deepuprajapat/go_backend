@@ -1,42 +1,250 @@
-[
-    {
-        "name": "Priyanka Khatri",
-        "type": "Client ",
-        "rating": 5,
-        "user_id": 1,
-        "description": "Now the search is over finally, I would like to thanks Mr. Aditya Sharma for all the help and support. He offered Ace Divino to us and in just one visit we decided to book our dream home. His marketing skills and attention to detail made the process easy and lucrative for us. He help us for further processing too which was seemless and efficient. That’s not the easy lift but with your efforts all settled on time. Thanks once again, will love to have more happy experiences with you in future deals.",
-        "is_approved": true,
-        "created_date": 1728545088910,
-        "updated_date": 1737622816291
+{
+    "faqs": [
+        {
+            "answer": "<li>7% of Freehold Land </li>\r\n<li>Well ventilated apartments</li> \r\n<li>In proximity with good schools, colleges, and offices</li>",
+            "question": "Why choose Ramprastha Imperial Heights apartments?"
+        },
+        {
+            "answer": "The project is located at Indirapuram, Ghaziabad.",
+            "question": "What is the location of the project?"
+        },
+        {
+            "answer": "Imperial Heights RERA Number is UPRERAPRJ504323.",
+            "question": "What is the RERA Number of Imperial Heights?"
+        },
+        {
+            "answer": "The project is spread over 7 acres of area.",
+            "question": "What is the project area of Imperial Heights?"
+        },
+        {
+            "answer": "Imperial Heights was launched in August 2019.",
+            "question": "On which date it was launched?"
+        },
+        {
+            "answer": "Possession will start in January 2025.",
+            "question": "What is the possession date of Imperial Heights?"
+        },
+        {
+            "answer": "7 towers are in the project.",
+            "question": "How many towers are there in the project?"
+        },
+        {
+            "answer": "The project Imperial Heights Is under construction.",
+            "question": "What is the current status of Imperial Heights?"
+        },
+        {
+            "answer": "It's a 'Residential' Project.",
+            "question": "What type of 'Property' is there in  Imperial Heights?"
+        },
+        {
+            "answer": "You can download it from the website.",
+            "question": "Where can I download the Imperial Heights Brochure?"
+        }
+    ],
+    "about": {
+        "logo_url": "https://image.investmango.com/images/img/imperial-heights/ramprastha-urban-development-logo.jpg",
+        "description": "<br>\n<p>Ramprastha Urban Development has an elite lifestyle enriched with the rich heritage of the Ramprastha Group. The philosophy of the Group strongly believes that design is like a natural flow that insights 'oneself'. The extraordinary architecture helps to immerse oneself into the realms of not only 'one client' but the community as well.</p> \n\n<p>Along with the infrastructure the residents of Ramprastha Imperial Heights have the most versatile amenities. The ultra-luxury apartments come along with world-class facilities after studying the on-time needs of the lifestyle. Imperial Heights project, Indirapuram, Ghaziabad is extremely for those investors who have achieved a triumph in life and deserve nothing less than a peaceful and elite living.</p> \n\n<h3>Awards And Achievements</h3>\n<p>Ramprastha Imperial Heights in Indirapuram, Ghaziabad invention, sustainability, and excellence-focused philosophies are brought to the real estate sector from time to time. Each Ramprastha Urban Development project reflects the dedication and trust that it has earned from the people of the country. The recognition has brought more appreciation and motivation to stand out on the needs of the investors.</p>\n\n<h3>Why choose APEX's Properties?</h3>\n<p>Imperial Heights believes in putting State-of-the-art with outstanding construction quality. With dedication, they have turned many stones into milestones of various landmark projects pan India. They are a team of 'Professionals' from reputed institutions like S.P.A., IIT, and Karlsruhe Institute of Technology(Germany). And with time Imperial Heights in Indirapuram has become the most chosen Developer by the investors.</p> \n<ul>\n<li>Superior Quality of Construction.</li>\n<li>Creative and Dynamic Mindset of the Developer</li>\n<li>Imperial Heights is more user-driven than the investor.</li> \n<li>Signature of Style & Luxury with Magnificent Township with landscape view</li>\n<li>Redefining the meaning of 'Luxury with an international touch of architecture and designs.</li>\n<li>A multitude of Amenities both outdoor and indoor ensure the wellness of the residents.</li>\n<li>Service beyond Satisfaction</li>\n<li>Awards and Recognitions have been given to the Imperial Heights project in Indirapuram, Ghaziabad from time to time.</li>\n<li>NRI supportive of investment.</li>\n<li>From 24*7 hospital services close to educational institutions, public parks, metro connectivity, and many more.</li>  \n<li>Amenities are provided after studying the needs and requirements of the residents.</li>\n<li>55000+ happy customers nationally and internationally</li>\n</ul>",
+        "total_projects": "3",
+        "contact_details": {
+            "name": "Ramprastha Urban Development\r\n",
+            "booking_link": "img/imperial-heights/imperial-heights-brochure.pdf",
+            "project_address": "Plot No. 2B, Nyay Khand 1, Indirapuram,\r\nGhaziabad, Uttar Pradesh 201014\r\nIndia"
+        },
+        "establishment_year": "2008"
     },
-    {
-        "name": "Chaudhary Gaurav Malik",
-        "type": "Client ",
-        "rating": 5,
-        "user_id": 1,
-        "description": "I am satisfied with Invest Mango team. They supervised and made the whole process super easy. The team is very friendly and professional at the same time.",
-        "is_approved": true,
-        "created_date": 1728545097942,
-        "updated_date": 1737622373063
+    "images": [
+        "https://image.investmango.com/images/img/all-logo/imperial-heights-logo.webp",
+        "https://image.investmango.com/images/img/imperial-heights/1.webp",
+        "https://image.investmango.com/images/img/imperial-heights/2.webp",
+        "https://image.investmango.com/images/img/imperial-heights/3.webp",
+        "https://image.investmango.com/images/img/imperial-heights/4.webp",
+        "https://image.investmango.com/images/img/imperial-heights/5.webp"
+    ],
+    "amenities": {
+        "description": "The Amenities of Imperial Heights for the Residential Project is mentioned below.\t"
     },
-    {
-        "name": "Saurabh Kumar Agrawal",
-        "type": "Client ",
-        "rating": 5,
-        "user_id": 1,
-        "description": " Invest Mango is excellent in his service and deal. We are in touch with Mr.Varun last 2 years, Finally after long time, I have done deal with help of Varun. Thanks for your nice effort. ",
-        "is_approved": true,
-        "created_date": 1728545221043,
-        "updated_date": 1737622869537
+    "rera_info": {},
+    "site_plan": {
+        "image": "https://image.investmango.com/images/img/imperial-heights/imperial-heights-site-plan.webp",
+        "description": "If we talk about the Imperial Heights site plan, it spreads over 7 acres of area. In fact, it has 70% Green landscape and its rest 30% will be used for Construction according to sustainable lifestyle living."
     },
-    {
-        "name": "George Gomes",
-        "type": "Client",
-        "rating": 5,
-        "user_id": 1,
-        "description": "I would like to thanks Invest Mango for helping us out and giving the best supervision during the whole process of purchasing this property Thank you, this is what I was looking for",
-        "is_approved": true,
-        "created_date": 1737622649174,
-        "updated_date": null
+    "floor_plan": {
+        "products": [
+            {
+                "image": "https://image.investmango.com/images/img/imperial-heights/imperial-heights-floor-plan-3bhk-1490-sqft.webp",
+                "price": "18700000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1490"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/imperial-heights/imperial-heights-floor-plan-3bhk-1715-sqft.webp",
+                "price": "21400000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1715"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/imperial-heights/imperial-heights-floor-plan-3bhk-1735-sqft.webp",
+                "price": "22300000",
+                "title": "3 BHK Apartment + 3 Toilets",
+                "flat_type": "3 BHK Apartment + 3 Toilets",
+                "building_area": "1780"
+            },
+            {
+                "image": "https://image.investmango.com/images/img/imperial-heights/imperial-heights-floor-plan-4bhk-2380-sqft.webp",
+                "price": "32700000",
+                "title": "4 BHK Apartment + 4 Toilets",
+                "flat_type": "4 BHK Apartment + 4 Toilets",
+                "building_area": "2420"
+            }
+        ],
+        "description": "Check the Price List of Imperial Heights of 3/4 Bhk Residential Apartments."
+    },
+    "know_about": {
+        "description": "<p><b>Imperial Heights Indirapuram Ghaziabad</b> is one of the most talk-of-the-town projects of Ramprastha Imperial Heights. The Developer made sure that the residents get easy connectivity to all the locations.</p>\n\n<p>As it takes many years of dedication to 'quality' delivery. An exclusive, Luxurious Dream Home with world-class amenities is possible with Imperial Heights. The project Ramprastha Imperial Heights Indirapuram Ghaziabad is currently an under-construction property and is one of its kind.</p>\n\n<p>This society consists of all the facilities and amenities to match the home buyers' needs and requirements. The Developer is bringing the luxury project in Ghaziabad to offer a luxurious lifestyle to the buyers and investors. Visit the site and change your address of residence with Imperial Heights flats Indirapuram, Ghaziabad.</p>\n\n<h3>SITE LAYOUT</h3>\n<p>A site plan is also known as a 'site layout' it is a form of drawing used by architects, landscape architects, and engineers to represent the desired conditions for a specific area, usually a parcel of land that is to be altered.</p> \n\n<p>If we talk about the luxury project in Indirapuram, Ghaziabad then looks into the Imperial Heights site layout, it spreads over 7 acres of area. It has a 70% Green landscape and the rest 30% will be used for Construction according to Sustainable Lifestyle Living.</p> \n\n<h3>FEATURES & AMENITIES</h3>\n<p>A property's Features and Amenities are the characteristics that promote its appeal to potential buyers or investors. The ultra-luxury project in Ghaziabad features in detail as follows:</p>\n\n<li>Golf course field</li>\n<li>Elevated walkway</li>\n<li>Creche for the working parents</li>\n<li>There are several wonderful amenities available at Imperial Heights Indirapuram Ghaziabad, including a clinic, a park, and concierge services.</li>\n<li>A well-known landmark in Indirapuram, Ghaziabad - easy to commute</li>\n<li>Amphitheater entertainment center for the residents.</li>\n<li>Cafe overlooking the forest</li>\n<li>5 Star Club with a heated Swimming Pool at Imperial Heights</li>\n<li>Waiting for the lounge for the residents.</li>\n<li>Exclusive Air conditioned Gymnasium and Fitness Area</li>\n<br>\n<h3>LOCATION ADVANTAGE</h3>\n<p>The location is excellent for individuals and families too, who wish to invest in apartments at Imperial Heights Indirapuram Ghaziabad. \"Ice on the Cake\" for the buyers is its 'prime location'. It is home to several schools, colleges, hospitals, recreation places, parks, entertainment centers, and all other facilities.</p>\n\n<b>SPORTS FACILITIES</b>\n<li>Authority Park</li>\n<br>\n\n<b>ROAD CONNECTIVITY</b>\n<li>Nizamuddin Railway Station - 10 mins</li> \n<li>IGI Airport (upcoming) - 45 mins</li> \n<br>\n\n<b>PUBLIC TRANSPORT</b>\n<li>Anand Vihar ISBT - 10 mins</li>\n<br>\n\n<b>MEDICAL FACILITIES</b>\n<li>Max Hospital - 4 mins</li>\n<br>\n\n<b>ENTERTAINMENT HUB</b>\n<li>Shipra Mall - 10 mins</li>\n<br>\n\n<b>EDUCATIONAL INSTITUTIONS</b>\n<li>IIHS</li>\n<br>\n\n<h3>SPECIFICATIONS</h3> \n<h5>a. Tower</h5> \n<li>Glossy Finish on M.S. Railing</li>\n<li>Inside tower movements from the top level to the Basement by lift.</li>\n<li>Every elevator lobby has flooring with granite matching, along with in-trend interior designs.</li>\n<li>Implementing the MOEF's (Ministry of Environment, Forests, and Climate Change) guidelines in the Imperial Heights</li>\n<li>According to fire regulations, fire suppression, detection, and alarm systems are installed in Ramprastha Imperial Heights</li>\n<br>\n\n<h5>b. Apartments Interior</h5>\n<li>The main door is 8' high and has a veneered front</li>\n<li>There are vitrified tiles in every room</li>\n<li>Granite stone kitchen countertop</li>\n<li>Wall-hung toilets and shower cubicles made of glass and tiles up to 8' are in the bathrooms.</li>\n<br>\n\n<h5>c. Lobby</h5>\n<p>Buyers generally look for a 2/4Bhk flat in Imperial Heights apartment in Indirapuram, Ghaziabad that is spacious and fits in with their daily lifestyle in the most innovative way. Air conditioning in the family room, dining room, and all bedrooms. One will get the best under-construction Imperial Heights Indirapuram, Ghaziabad like never before:</p>\n\n<p><b>Read out the features that are there in this residential project:</b></p> \n<li>Well-ventilated and spacious apartments</li>\n<li>Lobby with two levels.</li>\n<li>Separate Mini theaters for every tower.</li>\n<li>Underground water tanks and pump room</li>\n<li>A generator will be available for emergency facilities.</li>\n<li>Power Distribution System</li>\n<li>The entrance gates are made of materials like brass and glass.</li>\n<li>7 acres of Freehold Land</li>\n<li>Finishing as required by fire regulations</li>\n<li>Seasoned hardwood, aluminum, and UPVC for door frames and window panels.</li>\n<li>Italian marble on the walls and wooden paneling, with a brass line between the road.</li>\n<li>Multipurpose kid's sports area</li>\n<li>Drop Off with paving stones and an accent wall interior design.</li>\n<br>\n\n<h5>d. Flooring Style</h5>\n<p>The master bedroom has laminated wooden flooring. Even ceramic tiles in bathrooms have vitrified tiles in the kitchen, utility, and servant rooms. Kota/terrazzo flooring is to be used for the staircase and landings. Ceramic anti-slip flooring will be used for balconies as well.</p>\n\n<h5>e. Doors and Windows</h5>\n<p>External windows and doors are either anodized Aluminum or UPVC. Doors like Hardwood Frames with molded shutters. One will get the best quality grade texture paint. The interior of the entire project is a well-versed one.</p>\n\n<h5>f. Kitchen</h5>\n<p>The kitchen is the 'heart' of the home. And it needs all the more reasons to look perfect and to look delicious. Keeping in mind the in-trend demands of the best luxury 4Bhk flats in Imperial Heights Indirapuram Ghaziabad that are ready to move in have magnificent interiors like:</p>\n\n<li>Pre-polished platforms with granite tops</li>\n<li>Anti Skid Ceramic Tiles</li>\n<li>A hardened stainless steel sink</li>\n<li>Locks of branded makers</li>\n<li>Elegant ceiling designs</li>\n<li>Hob and chimney</li>\n<li>Modular kitchen style</li>\n<br>\n\n<h5>g. Toilet</h5>\n<b>Know about the tiles used in the Washroom:</b> \n<li>Premium plumbing fixtures and chrome-plated fixtures</li>\n<li>Interior wall finish with Anti-Skid tiles</li>\n<li>As is typical, all internal plumbing is made of CPVC, composite, or GI.</li>\n<li>Every exterior is CI/UPVC.</li>\n<li>The CP Fittings of makers (Jaguar/ Equivalent Kohler)</li>\n<li>Traditional bathroom fixtures and a setup that combines hot and cold water</li>\n<br>\n\n<h3>HOME LOAN OFFER</h3> \n<p>Majorly, many listed Indian Banks like Union Bank of India, Citibank, IDFC Bank, IDFC First Bank, and Bank of Baroda are associated with providing the best home loans to buyers to make your loan communication go hassle-free.</p> \n\n<h3>CONSTRUCTION UPDATE</h3>\n<p>Current Status:  Under Construction Project</p>\n\n<p>Starting in January 2026 some of the tower's possessions will be provided. And the rest of the towers will be delivered by June 2026.</p>\n\n<h3>DOWNLOAD BROCHURE</h3>\n<p>To get a thorough overview of this brand-new townhouse complex, kindly download the Imperial Heights Official Brochure. It contains comprehensive information that relents services like:</p>\n\n<li>amenities</li>\n<li>features</li>\n<li>benefits</li>\n<li>Utility</li>\n<li>security</li>\n<li>payment plan options, and much more.</li>\n<br>",
+        "download_link": "img/imperial-heights/imperial-heights-brochure.pdf"
+    },
+    "price_list": {
+        "description": "Check the Price List of Imperial Heights of 3/4 Bhk Residential Apartments.",
+        "product_configurations": [
+            {
+                "size": "1490",
+                "price": "18700000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1715",
+                "price": "21400000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "1780",
+                "price": "22300000",
+                "configuration_name": "3 BHK Apartment + 3 Toilets"
+            },
+            {
+                "size": "2420",
+                "price": "32700000",
+                "configuration_name": "4 BHK Apartment + 4 Toilets"
+            }
+        ]
+    },
+    "payment_plans": {
+        "plans": [
+            {
+                "name": "At the Time of Booking",
+                "details": "10%"
+            },
+            {
+                "name": "Within 45 Days from the Date of Booking",
+                "details": "10%"
+            },
+            {
+                "name": "on Completion of Excavation",
+                "details": "10%"
+            },
+            {
+                "name": "on Completion of 3rd Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of 6th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of 9th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "On Completion of 12th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "On Completion of 15th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of 18th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of 21st Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of 24th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of 27th Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of Top Floor Roof Slab",
+                "details": "5%"
+            },
+            {
+                "name": "on Completion of Flooring",
+                "details": "15%"
+            },
+            {
+                "name": "at the Time of Offer of Possession",
+                "details": "5%"
+            }
+        ],
+        "description": "The flexibility of Imperial Heights Payment Plan makes it easy for buyers to purchase flats in this housing project. The payment plan has been divided into the following.\t"
+    },
+    "why_to_choose": {
+        "usp_list": [
+            "Top-notch construction quality",
+            "Healthy, peaceful and an elite living",
+            "mple open space and peaceful neighborhood",
+            "Fortis Hospital Noida - 5 Min.",
+            "Anand Vihar ISBT - 10 Min.",
+            "Metro Station Sector 62 - 3 Min."
+        ],
+        "image_urls": [
+            "https://image.investmango.com/images/img/imperial-heights/1.webp",
+            "https://image.investmango.com/images/img/imperial-heights/2.webp",
+            "https://image.investmango.com/images/img/imperial-heights/3.webp",
+            "https://image.investmango.com/images/img/imperial-heights/4.webp",
+            "https://image.investmango.com/images/img/imperial-heights/5.webp"
+        ]
+    },
+    "project_details": {
+        "area": {
+            "value": "7.09 Acres"
+        },
+        "type": {
+            "value": "RESIDENTIAL"
+        },
+        "sizes": {
+            "value": "1490 - 2420 sq.ft."
+        },
+        "units": {
+            "value": "600 Flats"
+        },
+        "launch_date": {
+            "value": "Aug, 2019"
+        },
+        "total_floor": {
+            "value": "30"
+        },
+        "total_towers": {
+            "value": "7"
+        },
+        "configuration": {
+            "value": "[ \"4BHK\", \"3BHK\" ]"
+        },
+        "possession_date": {
+            "value": "Jan, 2026"
+        }
+    },
+    "video_presentation": {
+        "urls": [
+            ""
+        ],
+        "description": "Video of Imperial Heights Indirapuram Ghaziabad will come soon. Till then Check out our channel to explore different properties that can be your dream home.\r\n<b>Join our community and become a part of the IM Family!</b>\t"
     }
-]
+}

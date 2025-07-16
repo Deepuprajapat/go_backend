@@ -42,15 +42,6 @@ func (r *repository) AddCustomSearchPage(ctx context.Context, customSearchPage *
 		logger.Get().Error().Err(err).Msg(err.Error())
 		return nil, err
 	}
-
-	logger.Get().Info().Msg("Search Term: " + customSearchPage.SearchTerm)
-	logger.Get().Info().Msg(customSearchPage.Title)
-	logger.Get().Info().Msg(customSearchPage.Description)
-	logger.Get().Info().Interface("filters", customSearchPage.Filters).Msg("CustomSearchPageEntity Filters")
-	logger.Get().Info().Msg(customSearchPage.MetaInfo.Title)
-	logger.Get().Info().Msg(customSearchPage.MetaInfo.Description)
-	logger.Get().Info().Msg(customSearchPage.MetaInfo.Keywords)
-	logger.Get().Info().Msg("Custom search page added from repository")
 	return customSearchPage, nil
 }
 
