@@ -61,7 +61,7 @@ type ApplicationInterface interface {
 	// DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
 	// DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
 	// UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
-	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
+	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) (*response.StaticSiteDataResponse, *imhttp.CustomError)
 
 	// Upload File
 	UploadFile(request request.UploadFileRequest) (string, string, *imhttp.CustomError)

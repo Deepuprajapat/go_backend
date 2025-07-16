@@ -62,11 +62,13 @@ func (h *Handler) UpdateStaticSiteData(r *http.Request) (*imhttp.Response, *imht
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
 	}
 
-	if err := h.app.UpdateStaticSiteData(&req); err != nil {
+	staticSiteData, err := h.app.UpdateStaticSiteData(&req)
+	if err != nil {
 		return nil, err
 	}
 
 	return &imhttp.Response{
+		Data:       staticSiteData,
 		StatusCode: http.StatusOK,
 		Message:    "Static site data updated successfully",
 	}, nil

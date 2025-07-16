@@ -31,6 +31,7 @@ type Project struct {
 	ProjectID     string                 `json:"project_id"`
 	ProjectName   string                 `json:"project_name"`
 	Description   string                 `json:"description"`
+	Slug          string                 `json:"slug"`
 	Status        enums.ProjectStatus    `json:"status"`
 	MinPrice      string                 `json:"min_price"`
 	MaxPrice      string                 `json:"max_price"`
@@ -86,6 +87,7 @@ func GetProjectFromEnt(project *ent.Project) *Project {
 		ProjectName: project.Name,
 		Description: project.Description,
 		Status:      project.Status,
+		Slug:        project.Slug,
 		MinPrice:    project.MinPrice,
 		MaxPrice:    project.MaxPrice,
 		TimelineInfo: schema.TimelineInfo{
@@ -143,6 +145,6 @@ func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 		Sizes:         project.WebCards.Details.Sizes.Value,
 		VideoURLs:     project.WebCards.VideoPresentation.URLs,
 		MinPrice:      project.MinPrice,
-		Canonical:     project.MetaInfo.Canonical,
+		Canonical:     project.Slug,
 	}
 }

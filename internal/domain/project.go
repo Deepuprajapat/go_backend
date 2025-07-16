@@ -9,6 +9,7 @@ type Project struct {
 	ProjectID     string
 	ProjectName   string
 	ProjectURL    string
+	Slug          string
 	ProjectType   string
 	Locality      string
 	ProjectCity   string

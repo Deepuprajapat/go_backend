@@ -33,7 +33,7 @@ func (h *Handler) AddProject(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
-	if input.ProjectName == "" || input.ProjectURL == "" || input.ProjectType == "" || input.Locality == "" || input.ProjectCity == "" || input.DeveloperID == "" {
+	if input.ProjectName == "" || input.ProjectType == "" || input.Slug == "" || input.Locality == "" || input.ProjectCity == "" || input.DeveloperID == "" {
 		logger.Get().Error().Msg("Invalid request body")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Project name, project URL, project type, locality, project city, and developer ID are required")
 	}

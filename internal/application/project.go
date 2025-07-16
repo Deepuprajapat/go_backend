@@ -49,8 +49,8 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 
 	project.ProjectID = fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(time.Now().Unix(), 10))))[:16]
 	project.ProjectName = input.ProjectName
-	project.ProjectURL = input.ProjectURL
 	project.ProjectType = input.ProjectType
+	project.Slug = input.Slug
 	project.DeveloperID = input.DeveloperID
 	project.Locality = input.Locality
 	project.ProjectCity = input.ProjectCity
@@ -146,7 +146,7 @@ func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*respon
 				Configuration: fullProject.WebCards.Details.Configuration.Value,
 				MinPrice:      fullProject.MinPrice,
 				Sizes:         fullProject.WebCards.Details.Sizes.Value,
-				Canonical:     fullProject.MetaInfo.Canonical,
+				Canonical:     project.Slug,
 				// Add full project details
 				FullDetails: fullProject,
 			})

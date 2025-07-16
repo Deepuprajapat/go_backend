@@ -368,6 +368,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				SetName(safeStr(project.ProjectName)).
 				SetMinPrice(strconv.FormatFloat(minPrice, 'f', -1, 64)).
 				SetMaxPrice(strconv.FormatFloat(maxPrice, 'f', -1, 64)).
+				SetSlug(safeStr(project.ProjectURL)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
 				SetTimelineInfo(schema.TimelineInfo{
@@ -378,7 +379,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Title:         safeStr(project.MetaTitle),
 					Description:   safeStr(project.MetaDescription),
 					Keywords:      safeStr(project.MetaKeywords),
-					Canonical:     safeStr(project.ProjectURL),
 					ProjectSchema: projectSchema,
 				}).
 				SetWebCards(schema.ProjectWebCards{
