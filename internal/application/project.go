@@ -52,6 +52,8 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 	project.ProjectURL = input.ProjectURL
 	project.ProjectType = input.ProjectType
 	project.DeveloperID = input.DeveloperID
+	project.Locality = input.Locality
+	project.ProjectCity = input.ProjectCity
 
 	projectID, err := c.repo.AddProject(project)
 	if err != nil {

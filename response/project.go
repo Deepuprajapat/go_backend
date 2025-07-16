@@ -39,7 +39,7 @@ type Project struct {
 	MetaInfo      schema.SEOMeta         `json:"meta_info"`
 	WebCards      schema.ProjectWebCards `json:"web_cards"`
 	LocationInfo  schema.LocationInfo    `json:"location_info"`
-	City 		  string                  `json:"city"`
+	City          string                 `json:"city"`
 	DeveloperInfo DeveloperInfo          `json:"developer_info"`
 	IsFeatured    bool                   `json:"is_featured"`
 	IsPremium     bool                   `json:"is_premium"`
@@ -69,7 +69,7 @@ type ProjectListResponse struct {
 	ProjectID     string   `json:"project_id"`
 	ProjectName   string   `json:"project_name"`
 	ShortAddress  string   `json:"short_address"`
-	City 		  string	`json:"city"`
+	City          string   `json:"city"`
 	Canonical     string   `json:"canonical"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
@@ -80,47 +80,62 @@ type ProjectListResponse struct {
 	FullDetails   *Project `json:"full_details,omitempty"`
 }
 
-	func GetProjectFromEnt(project *ent.Project) *Project {
-		return &Project{
-			ProjectID:   project.ID,
-			ProjectName: project.Name,
-			Description: project.Description,
-			Status:      project.Status,
-			MinPrice:    project.MinPrice,
-			MaxPrice:    project.MaxPrice,
-			TimelineInfo: schema.TimelineInfo{
-				ProjectLaunchDate:     project.TimelineInfo.ProjectLaunchDate,
-				ProjectPossessionDate: project.TimelineInfo.ProjectPossessionDate,
-			},
-			MetaInfo: project.MetaInfo,
-			WebCards: project.WebCards,
-			LocationInfo: schema.LocationInfo{
-				ShortAddress:  project.LocationInfo.ShortAddress,
-				Longitude:     project.LocationInfo.Longitude,
-				Latitude:      project.LocationInfo.Latitude,
-				GoogleMapLink: project.LocationInfo.GoogleMapLink, // project.Edges.Location.PhoneNumber
-			},
-			City: project.Edges.Location.City,
-			DeveloperInfo: DeveloperInfo{
-				DeveloperID:     project.Edges.Developer.ID,
-				DeveloperName:   project.Edges.Developer.Name,
-				Phone:           project.Edges.Location.PhoneNumber,
-				Logo:            project.Edges.Developer.MediaContent.DeveloperLogo,
-				AltLogo:         project.Edges.Developer.MediaContent.AltDeveloperLogo,
-				Address:         project.Edges.Developer.MediaContent.DeveloperAddress,
-				EstablishedYear: project.Edges.Developer.EstablishedYear,
-			},
-			IsFeatured: project.IsFeatured,
-			IsPremium:  project.IsPremium,
-			IsPriority: project.IsPriority,
-		}
+func GetProjectFromEnt(project *ent.Project) *Project {
+	return &Project{
+		ProjectID:   project.ID,
+		ProjectName: project.Name,
+		Description: project.Description,
+		Status:      project.Status,
+		MinPrice:    project.MinPrice,
+		MaxPrice:    project.MaxPrice,
+		TimelineInfo: schema.TimelineInfo{
+			ProjectLaunchDate:     project.TimelineInfo.ProjectLaunchDate,
+			ProjectPossessionDate: project.TimelineInfo.ProjectPossessionDate,
+		},
+		MetaInfo: project.MetaInfo,
+		WebCards: project.WebCards,
+		LocationInfo: schema.LocationInfo{
+			ShortAddress:  project.LocationInfo.ShortAddress,
+			Longitude:     project.LocationInfo.Longitude,
+			Latitude:      project.LocationInfo.Latitude,
+			GoogleMapLink: project.LocationInfo.GoogleMapLink, // project.Edges.Location.PhoneNumber
+		},
+		City: func() string {
+			if project.Edges.Location != nil {
+				return project.Edges.Location.City
+			}
+			return ""
+		}(),
+		DeveloperInfo: DeveloperInfo{
+			DeveloperID:   project.Edges.Developer.ID,
+			DeveloperName: project.Edges.Developer.Name,
+			Phone: func() string {
+				if project.Edges.Location != nil {
+					return project.Edges.Location.PhoneNumber
+				}
+				return ""
+			}(),
+			Logo:            project.Edges.Developer.MediaContent.DeveloperLogo,
+			AltLogo:         project.Edges.Developer.MediaContent.AltDeveloperLogo,
+			Address:         project.Edges.Developer.MediaContent.DeveloperAddress,
+			EstablishedYear: project.Edges.Developer.EstablishedYear,
+		},
+		IsFeatured: project.IsFeatured,
+		IsPremium:  project.IsPremium,
+		IsPriority: project.IsPriority,
 	}
+}
 
 func GetProjectListResponse(project *ent.Project) *ProjectListResponse {
 	return &ProjectListResponse{
-		ProjectID:     project.ID,
-		ProjectName:   project.Name,
-		City: 		   project.Edges.Location.City,
+		ProjectID:   project.ID,
+		ProjectName: project.Name,
+		City: func() string {
+			if project.Edges.Location != nil {
+				return project.Edges.Location.City
+			}
+			return ""
+		}(),
 		ShortAddress:  project.LocationInfo.ShortAddress,
 		IsPremium:     project.IsPremium,
 		Images:        project.WebCards.Images,

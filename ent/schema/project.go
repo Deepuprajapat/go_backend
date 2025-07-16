@@ -19,7 +19,7 @@ func (Project) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
 		field.String("name"),
-		field.Text("description"),
+		field.Text("description").Optional(),
 		field.String("status").GoType(enums.ProjectStatus("")),
 		field.String("min_price").Default("0").Optional(),
 		field.String("max_price").Default("0").Optional(),

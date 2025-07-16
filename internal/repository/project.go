@@ -15,6 +15,7 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 	"github.com/VI-IM/im_backend_go/shared/logger"
+	"github.com/google/uuid"
 )
 
 func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
@@ -37,7 +38,23 @@ func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
 }
 
 func (r *repository) AddProject(input domain.Project) (string, error) {
-	if err := r.db.Project.Create().
+	// Create location first if locality and project city are provided
+	var locationID string
+	if input.Locality != "" && input.ProjectCity != "" {
+		locationID = uuid.New().String()
+		err := r.db.Location.Create().
+			SetID(locationID).
+			SetCity(input.ProjectCity).
+			SetLocalityName(input.Locality).
+			Exec(context.Background())
+		if err != nil {
+			logger.Get().Error().Err(err).Msg("Failed to create location")
+			return "", err
+		}
+	}
+
+	// Create project
+	projectCreate := r.db.Project.Create().
 		SetID(input.ProjectID).
 		SetName(input.ProjectName).
 		SetStatus(enums.ProjectStatusNEWLAUNCH).
@@ -45,9 +62,14 @@ func (r *repository) AddProject(input domain.Project) (string, error) {
 			Canonical: input.ProjectURL,
 		}).
 		SetProjectType(projectEnt.ProjectType(input.ProjectType)).
-		SetDescription("").
-		SetDeveloperID(input.DeveloperID).
-		Exec(context.Background()); err != nil {
+		SetDeveloperID(input.DeveloperID)
+
+	// Associate with location if one was created
+	if locationID != "" {
+		projectCreate.SetLocationID(locationID)
+	}
+
+	if err := projectCreate.Exec(context.Background()); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to add project")
 		return "", err
 	}
@@ -95,14 +117,14 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 	defer tx.Rollback()
 
-	if input.MaxPrice != ""{
+	if input.MaxPrice != "" {
 		project.SetMaxPrice(input.MaxPrice)
 	}
 
-	if input.MinPrice != ""{
+	if input.MinPrice != "" {
 		project.SetMaxPrice(input.MinPrice)
 	}
-	
+
 	if input.ProjectName != "" {
 		project.SetName(input.ProjectName)
 	}
@@ -113,7 +135,6 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	if input.Description != "" {
 		project.SetDescription(input.Description)
 	}
-
 
 	// Handle TimelineInfo updates
 	if input.TimelineInfo != (schema.TimelineInfo{}) {
