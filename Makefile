@@ -1,4 +1,4 @@
-.PHONY: build run test clean docker-up docker-down deps generate migrate migrate-status migrate-validate migrate-diff migrate-reset dev-setup db-reset
+.PHONY: build run test test-integration test-unit clean docker-up docker-down deps generate migrate migrate-status migrate-validate migrate-diff migrate-reset dev-setup db-reset test-setup
 
 # Build the application
 build:
@@ -13,11 +13,41 @@ seed-testimonials:
 build-run: build
 	./bin/server
 
-# Run tests
-test: docker-up
-	@echo "Waiting for MySQL to be ready..."
-	@sleep 5
+# Run all tests (no external dependencies needed - testcontainers handles DB)
+test:
 	go test -v ./...
+
+# Run only unit tests (excluding integration tests)
+test-unit:
+	go test -v ./... -short
+
+# Run integration tests (self-contained with testcontainers)
+test-integration:
+	go test -v ./tests/integration/...
+
+# Run integration tests with coverage
+test-integration-coverage:
+	go test -v -coverprofile=coverage.out ./tests/integration/...
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+# Run specific integration test suites
+test-auth:
+	go test -v ./tests/integration/ -run TestAuthEndpoints
+
+test-projects:
+	go test -v ./tests/integration/ -run TestProjectEndpoints
+
+test-properties:
+	go test -v ./tests/integration/ -run TestPropertyEndpoints
+
+test-leads:
+	go test -v ./tests/integration/ -run TestLeadEndpoints
+
+# Legacy test-setup command (now just a message since testcontainers handles everything)
+test-setup:
+	@echo "Tests now use testcontainers - no manual setup required!"
+	@echo "Docker containers are created automatically during test execution."
 
 # Clean build artifacts
 clean:

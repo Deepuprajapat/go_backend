@@ -85,34 +85,15 @@ func (h *Handler) GetLeadByID(r *http.Request) (*imhttp.Response, *imhttp.Custom
 
 func (h *Handler) GetAllLeads(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	queryParams := r.URL.Query()
-	
+
 	var req request.GetLeadsRequest
 	req.ProjectID = queryParams.Get("project_id")
 	req.PropertyID = queryParams.Get("property_id")
 	req.Phone = queryParams.Get("phone")
 	req.StartDate = queryParams.Get("start_date")
 	req.EndDate = queryParams.Get("end_date")
-
-	// Parse pagination parameters
-	if pageStr := queryParams.Get("page"); pageStr != "" {
-		if page, err := strconv.Atoi(pageStr); err == nil {
-			req.Page = page
-		}
-	}
-
-	if sizeStr := queryParams.Get("size"); sizeStr != "" {
-		if size, err := strconv.Atoi(sizeStr); err == nil {
-			req.Size = size
-		}
-	}
-
-	// Set defaults
-	if req.Size <= 0 {
-		req.Size = 12
-	}
-	if req.Page < 0 {
-		req.Page = 0
-	}
+	req.Date = queryParams.Get("date")
+	req.Source = queryParams.Get("source")
 
 	result, customErr := h.app.GetAllLeads(r.Context(), &req)
 	if customErr != nil {
@@ -127,7 +108,7 @@ func (h *Handler) GetAllLeads(r *http.Request) (*imhttp.Response, *imhttp.Custom
 
 func (h *Handler) ValidateOTP(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	queryParams := r.URL.Query()
-	
+
 	phone := queryParams.Get("phone")
 	otp := queryParams.Get("OTP")
 
@@ -162,7 +143,7 @@ func (h *Handler) ValidateOTP(r *http.Request) (*imhttp.Response, *imhttp.Custom
 
 func (h *Handler) ResendOTP(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	queryParams := r.URL.Query()
-	
+
 	phone := queryParams.Get("phone")
 
 	if phone == "" {

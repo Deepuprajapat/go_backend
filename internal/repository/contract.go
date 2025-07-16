@@ -79,7 +79,8 @@ type AppRepository interface {
 	GetLeadByPhone(ctx context.Context, phone string) (*ent.Leads, error)
 	GetLeadByPhoneAndOTP(ctx context.Context, phone, otp string) (*ent.Leads, error)
 	UpdateLead(ctx context.Context, lead *ent.Leads) (*ent.Leads, error)
-	GetAllLeads(ctx context.Context, offset, limit int, filters map[string]interface{}) ([]*ent.Leads, int, error)
+	GetAllLeads(ctx context.Context, filters map[string]interface{}) ([]*ent.Leads, error)
+	GetLeadsByDate(ctx context.Context, date string) ([]*ent.Leads, error)
 }
 
 func NewRepository(db *ent.Client) AppRepository {

@@ -90,7 +90,7 @@ type ApplicationInterface interface {
 	CreateLeadWithOTP(ctx context.Context, req *request.CreateLeadRequest) (*response.CreateLeadResponse, *imhttp.CustomError)
 	CreateLead(ctx context.Context, req *request.CreateLeadRequest) (*response.CreateLeadResponse, *imhttp.CustomError)
 	GetLeadByID(ctx context.Context, id int) (*response.Lead, *imhttp.CustomError)
-	GetAllLeads(ctx context.Context, req *request.GetLeadsRequest) (*response.LeadListResponse, *imhttp.CustomError)
+	GetAllLeads(ctx context.Context, req *request.GetLeadsRequest) (*response.DateLeadsData, *imhttp.CustomError)
 	ValidateOTP(ctx context.Context, req *request.ValidateOTPRequest) (*response.ValidateOTPResponse, *imhttp.CustomError)
 	ResendOTP(ctx context.Context, req *request.ResendOTPRequest) (*response.ResendOTPResponse, *imhttp.CustomError)
 }

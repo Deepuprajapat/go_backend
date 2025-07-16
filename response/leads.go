@@ -23,11 +23,7 @@ type Lead struct {
 }
 
 type LeadListResponse struct {
-	Content      []*Lead `json:"content"`
-	TotalElements int     `json:"total_elements"`
-	TotalPages    int     `json:"total_pages"`
-	Size          int     `json:"size"`
-	Number        int     `json:"number"`
+	Content []*Lead `json:"content"`
 }
 
 type CreateLeadResponse struct {
@@ -40,6 +36,20 @@ type ValidateOTPResponse struct {
 
 type ResendOTPResponse struct {
 	Message string `json:"message"`
+}
+
+type DuplicateLeadGroup struct {
+	Last    *Lead   `json:"last"`
+	History []*Lead `json:"history"`
+}
+
+type DateLeadsResponse struct {
+	Date map[string]*DateLeadsData `json:"date"`
+}
+
+type DateLeadsData struct {
+	UniqueLeads    []*Lead                       `json:"unique_leads"`
+	DuplicateLeads map[string]*DuplicateLeadGroup `json:"duplicate_leads"`
 }
 
 func ToLeadResponse(lead *ent.Leads) *Lead {
@@ -68,19 +78,13 @@ func ToLeadResponse(lead *ent.Leads) *Lead {
 	return response
 }
 
-func ToLeadListResponse(leads []*ent.Leads, totalElements, size, page int) *LeadListResponse {
+func ToLeadListResponse(leads []*ent.Leads) *LeadListResponse {
 	content := make([]*Lead, len(leads))
 	for i, lead := range leads {
 		content[i] = ToLeadResponse(lead)
 	}
 
-	totalPages := (totalElements + size - 1) / size
-
 	return &LeadListResponse{
-		Content:       content,
-		TotalElements: totalElements,
-		TotalPages:    totalPages,
-		Size:          size,
-		Number:        page,
+		Content: content,
 	}
 }

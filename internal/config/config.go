@@ -36,6 +36,7 @@ type (
 	}
 	Logger struct {
 		Level zerolog.Level `envconfig:"LOG_LEVEL" default:"1"`
+		Mode  string        `envconfig:"LOG_MODE" default:"simple"`
 	}
 
 	S3 struct {

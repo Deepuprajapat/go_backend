@@ -1,77 +1,101 @@
 package testutil
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-const (
-	testDBName = "im_test_db"
-	maxRetries = 30 // Increased retries for initial connection
-)
+// SetupTestClient creates an Ent client using testcontainers for complete isolation
+func SetupTestClient(t *testing.T) (*ent.Client, func()) {
+	ctx := context.Background()
 
-// waitForMySQL waits for MySQL to be ready
-func waitForMySQL(dsn string) error {
-	var db *sql.DB
-	var err error
+	// Start PostgreSQL container with testcontainers
+	postgresContainer, err := postgres.RunContainer(ctx,
+		testcontainers.WithImage("postgres:15"),
+		postgres.WithDatabase("testdb"),
+		postgres.WithUsername("testuser"),
+		postgres.WithPassword("testpass"),
+		testcontainers.WithWaitStrategy(wait.ForLog("database system is ready to accept connections").WithOccurrence(2)),
+	)
+	if err != nil {
+		t.Fatalf("Failed to start PostgreSQL container: %v", err)
+	}
 
-	for i := 0; i < maxRetries; i++ {
-		db, err = sql.Open("mysql", dsn)
-		if err == nil {
-			err = db.Ping()
-			if err == nil {
-				db.Close()
-				return nil
-			}
-		}
-		if i < maxRetries-1 {
-			time.Sleep(time.Second)
+	// Get connection string from container
+	connStr, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
+	if err != nil {
+		postgresContainer.Terminate(ctx)
+		t.Fatalf("Failed to get connection string: %v", err)
+	}
+
+	// Set environment variable for the test (some parts of the app might read this)
+	os.Setenv("DATABASE_URL", connStr)
+
+	// Create Ent client
+	drv, err := entsql.Open(dialect.Postgres, connStr)
+	if err != nil {
+		postgresContainer.Terminate(ctx)
+		t.Fatalf("Failed opening connection to test postgres: %v", err)
+	}
+
+	client := ent.NewClient(ent.Driver(drv))
+
+	// Run the auto migration tool
+	if err := client.Schema.Create(context.Background()); err != nil {
+		client.Close()
+		postgresContainer.Terminate(ctx)
+		t.Fatalf("Failed creating schema resources: %v", err)
+	}
+
+	// Return client and cleanup function
+	return client, func() {
+		client.Close()
+		if err := postgresContainer.Terminate(ctx); err != nil {
+			t.Errorf("Failed to terminate PostgreSQL container: %v", err)
 		}
 	}
-	return fmt.Errorf("failed to connect to MySQL after %d retries: %v", maxRetries, err)
 }
 
-// SetupTestDB creates a test database and returns a cleanup function
+// SetupTestDB creates a test database using testcontainers (legacy function, use SetupTestClient instead)
 func SetupTestDB(t *testing.T) func() {
-	// Connect to MySQL without specifying a database
-	dsn := fmt.Sprintf("root:password@tcp(localhost:3306)/")
+	client, cleanup := SetupTestClient(t)
+	client.Close() // We only want the database setup, not the client
+	return cleanup
+}
 
-	// Wait for MySQL to be ready
-	if err := waitForMySQL(dsn); err != nil {
-		t.Fatalf("MySQL not ready: %v", err)
-	}
+// GetTestConnectionString returns a connection string to a test PostgreSQL instance
+func GetTestConnectionString(t *testing.T) (string, func()) {
+	ctx := context.Background()
 
-	// Now connect for real
-	db, err := sql.Open("mysql", dsn)
+	postgresContainer, err := postgres.RunContainer(ctx,
+		testcontainers.WithImage("postgres:15"),
+		postgres.WithDatabase("testdb"),
+		postgres.WithUsername("testuser"),
+		postgres.WithPassword("testpass"),
+		testcontainers.WithWaitStrategy(wait.ForLog("database system is ready to accept connections").WithOccurrence(2)),
+	)
 	if err != nil {
-		t.Fatalf("Failed to connect to MySQL: %v", err)
+		t.Fatalf("Failed to start PostgreSQL container: %v", err)
 	}
 
-	// Create test database
-	_, err = db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", testDBName))
+	connStr, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
 	if err != nil {
-		t.Fatalf("Failed to drop existing test database: %v", err)
+		postgresContainer.Terminate(ctx)
+		t.Fatalf("Failed to get connection string: %v", err)
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE %s", testDBName))
-	if err != nil {
-		t.Fatalf("Failed to create test database: %v", err)
-	}
-
-	// Set environment variable for the test
-	os.Setenv("DB_DSN", fmt.Sprintf("root:password@tcp(localhost:3306)/%s", testDBName))
-
-	// Return cleanup function
-	return func() {
-		_, err := db.Exec(fmt.Sprintf("DROP DATABASE IF EXISTS %s", testDBName))
-		if err != nil {
-			t.Errorf("Failed to drop test database: %v", err)
+	return connStr, func() {
+		if err := postgresContainer.Terminate(ctx); err != nil {
+			t.Errorf("Failed to terminate PostgreSQL container: %v", err)
 		}
-		db.Close()
 	}
 }
