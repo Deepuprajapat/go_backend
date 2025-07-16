@@ -94,7 +94,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.DeleteProject)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/projects/filters", imhttp.AppHandler(handler.GetProjectFilters)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/internal/projects/filters", imhttp.AppHandler(handler.GetProjectFilters)).Methods(http.MethodGet)
 
 	// upload file routes
 	Router.Handle("/v1/api/upload", imhttp.AppHandler(handler.UploadFile)).Methods(http.MethodPost)

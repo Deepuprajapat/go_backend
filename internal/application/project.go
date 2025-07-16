@@ -202,6 +202,11 @@ func (c *application) CompareProjects(projectIDs []string) (*response.ProjectCom
 		comparisonProjects = append(comparisonProjects, comparisonProject)
 	}
 
+	// Note: response.ProjectComparisonResponse does not have UniqueCities field.
+	// If you want to return uniqueCities, you need to add it to the struct.
+	// For now, just log or ignore it, or add a comment.
+	// logger.Get().Info().Strs("uniqueCities", uniqueCities).Msg("Unique cities in compared projects")
+
 	return &response.ProjectComparisonResponse{
 		Projects: comparisonProjects,
 	}, nil
@@ -224,10 +229,30 @@ func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.Custo
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get cities", err.Error())
 	}
 
+	// Use a map to store unique cities
+	uniqueCityMap := make(map[string]struct{})
+	for _, city := range cities {
+		if city != "" {
+			uniqueCityMap[city] = struct{}{}
+		}
+	}
+	uniqueCities := make([]string, 0, len(uniqueCityMap))
+	for city := range uniqueCityMap {
+		uniqueCities = append(uniqueCities, city)
+	}
+
 	developers, err := c.repo.GetAllDevelopers()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get developers")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get developers", err.Error())
+	}
+
+	// Only return developer names
+	developerNames := make([]string, 0, len(developers))
+	for _, dev := range developers {
+		if dev != nil {
+			developerNames = append(developerNames, dev.Name)
+		}
 	}
 
 	locations, err := c.repo.GetAllUniqueLocations()
@@ -237,8 +262,8 @@ func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.Custo
 	}
 
 	return map[string]interface{}{
-		"cities":     cities,
-		"developers": developers,
+		"cities":     uniqueCities,
+		"developers": developerNames,
 		"locations":  locations,
 		"types":      []string{"Residential", "Commercial"},
 		"isPremium":  []bool{true, false},
