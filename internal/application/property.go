@@ -55,6 +55,9 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 	property.DeveloperID = input.DeveloperID
 	property.LocationID = input.LocationID
 	property.ProjectID = input.ProjectID
+	if input.Slug != "" {
+		property.Slug = input.Slug
+	}
 
 	updatedProperty, err := c.repo.UpdateProperty(property)
 	if err != nil {

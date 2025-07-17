@@ -244,6 +244,10 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		property.SetProjectID(input.ProjectID)
 	}
 
+	if input.Slug != "" {
+		property.SetSlug(input.Slug)
+	}
+
 	updatedProperty, err := property.Save(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update property")

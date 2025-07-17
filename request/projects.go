@@ -38,6 +38,7 @@ type UpdatePropertyRequest struct {
 	PricingInfo      schema.PropertyPricingInfo `json:"pricing_info"`
 	PropertyReraInfo schema.PropertyReraInfo    `json:"property_rera_info"`
 	MetaInfo         schema.PropertyMetaInfo    `json:"meta_info"`
+	Slug             string                     `json:"slug"`
 	IsFeatured       bool                       `json:"is_featured"`
 	IsDeleted        bool                       `json:"is_deleted"`
 	DeveloperID      string                     `json:"developer_id"`
