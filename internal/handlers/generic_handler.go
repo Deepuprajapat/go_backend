@@ -132,21 +132,8 @@ func (h *Handler) AddCustomSearchPage(r *http.Request) (*imhttp.Response, *imhtt
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
 	}
-
-	if customSearchPage.Title == "" ||
-		customSearchPage.Description == "" ||
-		customSearchPage.Slug == "" ||
-		customSearchPage.Filters == nil ||
-		customSearchPage.MetaInfo == nil ||
-		customSearchPage.MetaInfo.Title == "" ||
-		customSearchPage.MetaInfo.Description == "" ||
-		customSearchPage.MetaInfo.Keywords == "" ||
-		customSearchPage.SearchTerm == "" {
-
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Missing or invalid required fields", "One or more required fields are missing or invalid")
-	}
-
 	customSearchPageResponse, err := h.app.AddCustomSearchPage(ctx, customSearchPage)
+	
 
 	return &imhttp.Response{
 		Data:       customSearchPageResponse,

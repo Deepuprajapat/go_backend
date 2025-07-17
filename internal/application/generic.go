@@ -3,12 +3,14 @@ package application
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
+	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
 func (a *application) GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError) {
@@ -89,6 +91,35 @@ func (a *application) GetAllCustomSearchPages(ctx context.Context) ([]*response.
 
 func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
 
+	if customSearchPage.Title == "" ||
+		customSearchPage.Description == "" ||
+		customSearchPage.Slug == "" ||
+		customSearchPage.Filters == nil ||
+		customSearchPage.MetaInfo == nil ||
+		customSearchPage.MetaInfo.Title == "" ||
+		customSearchPage.MetaInfo.Description == "" ||
+		customSearchPage.MetaInfo.Keywords == "" ||
+		customSearchPage.SearchTerm == "" {
+
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Missing or invalid required fields", "One or more required fields are missing or invalid")
+	}
+
+	if customSearchPage.Slug != "" {
+		customSearchPage.Slug = strings.ReplaceAll(customSearchPage.Slug, " ", "-")
+	}
+	// check if slug is already in use
+	existingCustomSearchPage, err := a.repo.GetCustomSearchPageFromSlug(ctx, customSearchPage.Slug)
+	if err != nil {
+		// If it's a "not found" error, that's what we want - slug is available
+		if !ent.IsNotFound(err) {
+			return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check if slug is already in use", err.Error())
+		}
+		// Slug doesn't exist, which is good for creating a new one
+	} else if existingCustomSearchPage != nil {
+		logger.Get().Info().Msg("Slug already in use")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Slug already in use", "Slug already in use")
+	}
+
 	customSearchPageEntity := &ent.CustomSearchPage{
 		Title:       customSearchPage.Title,
 		Description: customSearchPage.Description,
@@ -101,8 +132,8 @@ func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage 
 			Keywords:    customSearchPage.MetaInfo.Keywords,
 		},
 	}
-	
-	customSearchPageEntity, err := a.repo.AddCustomSearchPage(ctx, customSearchPageEntity)
+
+	customSearchPageEntity, err = a.repo.AddCustomSearchPage(ctx, customSearchPageEntity)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add custom search page", err.Error())
 	}

@@ -13,6 +13,11 @@ import (
 func (r *repository) GetCustomSearchPageFromSlug(ctx context.Context, slug string) (*ent.CustomSearchPage, error) {
 	customSearchPage, err := r.db.CustomSearchPage.Query().Where(customsearchpage.Slug(slug)).First(ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			logger.Get().Debug().Str("slug", slug).Msg("Custom search page not found")
+			return nil, err
+		}
+		logger.Get().Error().Err(err).Msg("Failed to get custom search page by slug")
 		return nil, err
 	}
 	return customSearchPage, nil
