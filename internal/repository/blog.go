@@ -50,7 +50,7 @@ func (r *repository) GetBlogByID(id string) (*ent.Blogs, error) {
 func (r *repository) CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error) {
 	blog, err := r.db.Blogs.Create().
 		SetID(uuid.New().String()).
-		SetBlogURL(blogURL).
+		SetSlug(blogURL).
 		SetBlogContent(blogContent).
 		SetSeoMetaInfo(seoMetaInfo).
 		SetIsPriority(isPriority).
@@ -97,7 +97,7 @@ func (r *repository) UpdateBlog(ctx context.Context, id string, blogURL *string,
 	update := r.db.Blogs.UpdateOneID(id)
 
 	if blogURL != nil {
-		update.SetBlogURL(*blogURL)
+		update.SetSlug(*blogURL)
 	}
 	if blogContent != nil {
 		update.SetBlogContent(*blogContent)

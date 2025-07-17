@@ -985,7 +985,7 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 			// Create blog entry
 			if err := txn.Blogs.Create().
 				SetID(id).
-				SetBlogURL(safeStr(blog.BlogURL)).
+				SetSlug(safeStr(blog.BlogURL)).
 				SetBlogContent(blogContent).
 				SetSeoMetaInfo(seoMetaInfo).
 				SetIsPriority(blog.IsPriority).
