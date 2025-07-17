@@ -224,28 +224,34 @@ func (c *application) GetProjectByURL(url string) (*ent.Project, *imhttp.CustomE
 }
 
 func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.CustomError) {
-	cities, err := c.repo.GetAllUniqueCities()
+
+	allLocations, err := c.repo.ListLocations(map[string]interface{}{})
 	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get cities")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get cities", err.Error())
+		logger.Get().Error().Err(err).Msg("Failed to get locations")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get locations", err.Error())
 	}
 
-	// Use a map to store unique cities
-	uniqueCityMap := make(map[string]struct{})
-	for _, city := range cities {
-		if city != "" {
-			uniqueCityMap[city] = struct{}{}
-		}
+	if len(allLocations) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "No locations found", "No locations found")
 	}
-	uniqueCities := make([]string, 0, len(uniqueCityMap))
-	for city := range uniqueCityMap {
-		uniqueCities = append(uniqueCities, city)
+
+	cityWithLocations := make(map[string][]string)
+	for _, location := range allLocations {
+		cityWithLocations[location.City] = append(cityWithLocations[location.City], location.LocalityName)
+	}
+
+	if len(cityWithLocations) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "No locations found", "No locations found")
 	}
 
 	developers, err := c.repo.GetAllDevelopers()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get developers")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get developers", err.Error())
+	}
+
+	if len(developers) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "No developers found", "No developers found")
 	}
 
 	// Only return developer names
@@ -256,16 +262,9 @@ func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.Custo
 		}
 	}
 
-	locations, err := c.repo.GetAllUniqueLocations()
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get locations")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get locations", err.Error())
-	}
-
 	return map[string]interface{}{
-		"cities":     uniqueCities,
 		"developers": developerNames,
-		"locations":  locations,
+		"locations":  cityWithLocations,
 		"types":      []string{"Residential", "Commercial"},
 		"isPremium":  []bool{true, false},
 		"isPriority": []bool{true, false},
@@ -282,21 +281,21 @@ func (c *application) GetProjectBySlug(slug string) (*response.Project, *imhttp.
 
 	// Convert to response format
 	projectResponse := &response.Project{
-		ProjectID:     project.ID,
-		ProjectName:   project.Name,
-		Description:   project.Description,
-		Status:        project.Status, // enums.ProjectStatus type expected
-		Slug:          project.Slug,
-		MinPrice:      project.MinPrice,
-		MaxPrice:      project.MaxPrice,
-		TimelineInfo:  project.TimelineInfo,
-		ProjectType:   string(project.ProjectType),
-		MetaInfo:      project.MetaInfo,
-		WebCards:      project.WebCards,
-		LocationInfo:  project.LocationInfo,
-		IsFeatured:    project.IsFeatured,
-		IsPremium:     project.IsPremium,
-		IsPriority:    project.IsPriority,
+		ProjectID:    project.ID,
+		ProjectName:  project.Name,
+		Description:  project.Description,
+		Status:       project.Status, // enums.ProjectStatus type expected
+		Slug:         project.Slug,
+		MinPrice:     project.MinPrice,
+		MaxPrice:     project.MaxPrice,
+		TimelineInfo: project.TimelineInfo,
+		ProjectType:  string(project.ProjectType),
+		MetaInfo:     project.MetaInfo,
+		WebCards:     project.WebCards,
+		LocationInfo: project.LocationInfo,
+		IsFeatured:   project.IsFeatured,
+		IsPremium:    project.IsPremium,
+		IsPriority:   project.IsPriority,
 	}
 
 	return projectResponse, nil
