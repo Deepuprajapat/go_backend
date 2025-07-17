@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/leads"
 	"github.com/VI-IM/im_backend_go/internal/client"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
@@ -162,7 +163,7 @@ func (a *application) GetAllLeads(ctx context.Context, req *request.GetLeadsRequ
 func (a *application) getLeadsByDateGrouped(ctx context.Context, req *request.GetLeadsRequest) (*response.DateLeadsData, *imhttp.CustomError) {
 	// Build filters for all requests - support both single date and date range
 	filters := make(map[string]interface{})
-	
+
 	if req.ProjectID != "" {
 		filters["project_id"] = req.ProjectID
 	}
@@ -175,7 +176,7 @@ func (a *application) getLeadsByDateGrouped(ctx context.Context, req *request.Ge
 	if req.Source != "" {
 		filters["source"] = req.Source
 	}
-	
+
 	// Handle date filtering - support both single date and date range
 	if req.Date != "" {
 		filters["date"] = req.Date
@@ -186,7 +187,7 @@ func (a *application) getLeadsByDateGrouped(ctx context.Context, req *request.Ge
 	if req.EndDate != "" {
 		filters["end_date"] = req.EndDate
 	}
-	
+
 	// Get leads with all filters applied
 	leads, err := a.repo.GetAllLeads(ctx, filters)
 	if err != nil {
@@ -199,7 +200,7 @@ func (a *application) getLeadsByDateGrouped(ctx context.Context, req *request.Ge
 
 	for _, lead := range leads {
 		leadResponse := response.ToLeadResponse(lead)
-		
+
 		if !lead.IsDuplicate {
 			uniqueLeads = append(uniqueLeads, leadResponse)
 		} else {
@@ -225,7 +226,7 @@ func (a *application) getLeadsByDateGrouped(ctx context.Context, req *request.Ge
 		// So the first one is the most recent (last)
 		last := duplicates[0]
 		var history []*response.Lead
-		
+
 		// Add remaining leads from the same date to history (already in reverse chronological order)
 		if len(duplicates) > 1 {
 			history = duplicates[1:]
@@ -285,7 +286,6 @@ func (a *application) buildDuplicateHistory(ctx context.Context, referenceID str
 
 	return history, nil
 }
-
 
 func (a *application) ValidateOTP(ctx context.Context, req *request.ValidateOTPRequest) (*response.ValidateOTPResponse, *imhttp.CustomError) {
 	lead, err := a.repo.GetLeadByPhoneAndOTP(ctx, req.Phone, req.OTP)
@@ -353,6 +353,10 @@ func (a *application) sendToCRM(ctx context.Context, lead *ent.Leads, req *reque
 		projectName = lead.Edges.Property.Edges.Project.Name
 	}
 
+	if projectName == "" {
+		projectName = "Main Page"
+	}
+
 	crmData := client.CRMLeadData{
 		Name:        lead.Name,
 		Email:       lead.Email,
@@ -362,7 +366,18 @@ func (a *application) sendToCRM(ctx context.Context, lead *ent.Leads, req *reque
 		Source:      lead.Source,
 	}
 
+	var syncStatus string
 	if err := a.crmClient.SendLead(crmData); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to send lead to CRM")
+		syncStatus = "rejected"
+	} else {
+		logger.Get().Info().Int("lead_id", lead.ID).Msg("Lead sent to CRM successfully")
+		syncStatus = "synced"
+	}
+
+	// Update sync status in database
+	lead.SyncStatus = leads.SyncStatus(syncStatus)
+	if _, err := a.repo.UpdateLead(context.Background(), lead); err != nil {
+		logger.Get().Error().Err(err).Int("lead_id", lead.ID).Str("sync_status", syncStatus).Msg("Failed to update lead sync status")
 	}
 }

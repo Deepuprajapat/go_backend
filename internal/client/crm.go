@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
+	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
 type CRMClient struct {
-	baseURL string
-	client  *http.Client
+	config config.CRM
+	client *http.Client
 }
 
 type CRMClientInterface interface {
@@ -33,16 +33,21 @@ type CRMResponse struct {
 	Message string `json:"message"`
 }
 
-func NewCRMClient() CRMClientInterface {
+func NewCRMClient(cfg config.CRM) CRMClientInterface {
 	return &CRMClient{
-		baseURL: "http://148.66.133.154:8181/new-leads/from/open-source",
+		config: cfg,
 		client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: cfg.Timeout,
 		},
 	}
 }
 
 func (c *CRMClient) SendLead(leadData CRMLeadData) error {
+	if !c.config.Enabled {
+		logger.Get().Info().Msg("CRM is disabled, skipping lead submission")
+		return nil
+	}
+
 	logger.Get().Info().
 		Str("phone", leadData.Phone).
 		Str("email", leadData.Email).
@@ -54,32 +59,53 @@ func (c *CRMClient) SendLead(leadData CRMLeadData) error {
 		return fmt.Errorf("failed to marshal CRM lead data: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", c.baseURL, bytes.NewBuffer(jsonData))
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to create CRM request")
-		return fmt.Errorf("failed to create CRM request: %w", err)
+	var lastErr error
+	for attempt := 0; attempt <= c.config.MaxRetries; attempt++ {
+		if attempt > 0 {
+			logger.Get().Info().
+				Int("attempt", attempt).
+				Int("max_retries", c.config.MaxRetries).
+				Msg("Retrying CRM request")
+		}
+
+		req, err := http.NewRequest("POST", c.config.BaseURL, bytes.NewBuffer(jsonData))
+		if err != nil {
+			logger.Get().Error().Err(err).Msg("Failed to create CRM request")
+			return fmt.Errorf("failed to create CRM request: %w", err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		resp, err := c.client.Do(req)
+		if err != nil {
+			lastErr = err
+			logger.Get().Error().Err(err).
+				Int("attempt", attempt+1).
+				Msg("Failed to send lead to CRM")
+			continue
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+			lastErr = fmt.Errorf("CRM service returned status: %d", resp.StatusCode)
+			logger.Get().Error().
+				Int("status_code", resp.StatusCode).
+				Int("attempt", attempt+1).
+				Msg("CRM service returned non-success status")
+			continue
+		}
+
+		logger.Get().Info().
+			Str("phone", leadData.Phone).
+			Str("email", leadData.Email).
+			Int("attempt", attempt+1).
+			Msg("Lead sent to CRM successfully")
+
+		return nil
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to send lead to CRM")
-		return fmt.Errorf("failed to send lead to CRM: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		logger.Get().Error().
-			Int("status_code", resp.StatusCode).
-			Msg("CRM service returned non-success status")
-		return fmt.Errorf("CRM service returned status: %d", resp.StatusCode)
-	}
-
-	logger.Get().Info().
-		Str("phone", leadData.Phone).
-		Str("email", leadData.Email).
-		Msg("Lead sent to CRM successfully")
-
-	return nil
+	logger.Get().Error().Err(lastErr).
+		Int("max_retries", c.config.MaxRetries).
+		Msg("Failed to send lead to CRM after all retries")
+	return fmt.Errorf("failed to send lead to CRM after %d retries: %w", c.config.MaxRetries, lastErr)
 }

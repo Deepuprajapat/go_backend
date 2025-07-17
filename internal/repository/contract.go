@@ -27,6 +27,7 @@ type AppRepository interface {
 	IsProjectDeleted(id string) (bool, error)
 	GetAllProjects(filters map[string]interface{}) ([]*ent.Project, error)
 	GetProjectByURL(url string) (*ent.Project, error)
+	GetProjectNamesOnly() ([]*ent.Project, error)
 
 	// Developer
 	ExistDeveloperByID(id string) (bool, error)

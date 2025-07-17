@@ -214,3 +214,21 @@ func (c *application) GetProjectByURL(url string) (*ent.Project, *imhttp.CustomE
 
 	return project, nil
 }
+
+func (c *application) GetProjectNamesOnly() ([]*response.ProjectNameResponse, *imhttp.CustomError) {
+	projects, err := c.repo.GetProjectNamesOnly()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project names")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project names", err.Error())
+	}
+
+	var projectNames []*response.ProjectNameResponse
+	for _, project := range projects {
+		projectNames = append(projectNames, &response.ProjectNameResponse{
+			ProjectID:   project.ID,
+			ProjectName: project.Name,
+		})
+	}
+
+	return projectNames, nil
+}

@@ -74,7 +74,9 @@ func (r *repository) CreateLead(ctx context.Context, lead *ent.Leads) (*ent.Lead
 func (r *repository) GetLeadByID(ctx context.Context, id int) (*ent.Leads, error) {
 	lead, err := r.db.Leads.Query().
 		Where(leads.ID(id)).
-		WithProperty().
+		WithProperty(func(q *ent.PropertyQuery) {
+			q.WithProject()
+		}).
 		WithProject().
 		First(ctx)
 
@@ -93,7 +95,9 @@ func (r *repository) GetLeadByID(ctx context.Context, id int) (*ent.Leads, error
 func (r *repository) GetLeadByPhone(ctx context.Context, phone string) (*ent.Leads, error) {
 	lead, err := r.db.Leads.Query().
 		Where(leads.Phone(phone)).
-		WithProperty().
+		WithProperty(func(q *ent.PropertyQuery) {
+			q.WithProject()
+		}).
 		WithProject().
 		Order(ent.Desc(leads.FieldCreatedAt)).
 		First(ctx)
@@ -116,7 +120,9 @@ func (r *repository) GetLeadByPhoneAndOTP(ctx context.Context, phone, otp string
 			leads.Phone(phone),
 			leads.Otp(otp),
 		).
-		WithProperty().
+		WithProperty(func(q *ent.PropertyQuery) {
+			q.WithProject()
+		}).
 		WithProject().
 		First(ctx)
 
@@ -154,6 +160,10 @@ func (r *repository) UpdateLead(ctx context.Context, lead *ent.Leads) (*ent.Lead
 		updateBuilder.SetDuplicateReferenceID(lead.DuplicateReferenceID)
 	}
 
+	if lead.SyncStatus != "" {
+		updateBuilder.SetSyncStatus(leads.SyncStatus(lead.SyncStatus))
+	}
+
 	updatedLead, err := updateBuilder.Save(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Int("lead_id", lead.ID).Msg("Failed to update lead")
@@ -166,7 +176,9 @@ func (r *repository) UpdateLead(ctx context.Context, lead *ent.Leads) (*ent.Lead
 
 func (r *repository) GetAllLeads(ctx context.Context, filters map[string]interface{}) ([]*ent.Leads, error) {
 	query := r.db.Leads.Query().
-		WithProperty().
+		WithProperty(func(q *ent.PropertyQuery) {
+			q.WithProject()
+		}).
 		WithProject()
 
 	// Apply filters
@@ -248,7 +260,9 @@ func (r *repository) GetLeadsByDate(ctx context.Context, date string) ([]*ent.Le
 			leads.CreatedAtGTE(startOfDay),
 			leads.CreatedAtLTE(endOfDay),
 		).
-		WithProperty().
+		WithProperty(func(q *ent.PropertyQuery) {
+			q.WithProject()
+		}).
 		WithProject().
 		Order(ent.Desc(leads.FieldCreatedAt)).
 		All(ctx)

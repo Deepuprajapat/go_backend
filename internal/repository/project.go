@@ -504,3 +504,17 @@ func (r *repository) GetProjectByURL(url string) (*ent.Project, error) {
 
 	return project, nil
 }
+
+func (r *repository) GetProjectNamesOnly() ([]*ent.Project, error) {
+	projects, err := r.db.Project.Query().
+		Where(projectEnt.IsDeletedEQ(false)).
+		Select(projectEnt.FieldID, projectEnt.FieldName).
+		Order(ent.Asc(projectEnt.FieldName)).
+		All(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project names")
+		return nil, err
+	}
+
+	return projects, nil
+}

@@ -61,6 +61,11 @@ type AddProjectResponse struct {
 	ProjectID string `json:"project_id"`
 }
 
+type ProjectNameResponse struct {
+	ProjectID   string `json:"project_id"`
+	ProjectName string `json:"project_name"`
+}
+
 type UpdateProjectResponse struct {
 	ProjectID string `json:"project_id"`
 }

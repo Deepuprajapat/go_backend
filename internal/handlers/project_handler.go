@@ -160,3 +160,15 @@ func (h *Handler) CompareProjects(r *http.Request) (*imhttp.Response, *imhttp.Cu
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *Handler) GetProjectNames(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	projectNames, err := h.app.GetProjectNamesOnly()
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       projectNames,
+		StatusCode: http.StatusOK,
+	}, nil
+}

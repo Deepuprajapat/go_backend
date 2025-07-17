@@ -87,13 +87,14 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/auth/refresh-token", imhttp.AppHandler(handler.RefreshToken)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/auth/signup", imhttp.AppHandler(handler.Signup)).Methods(http.MethodPost)
 
-	// project routes
+	// project routes - specific routes must come before wildcard routes
+	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/projects/names", middleware.Auth(imhttp.AppHandler(handler.GetProjectNames))).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.GetProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.UpdateProject)).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.DeleteProject)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
 
 	// upload file routes
 	Router.Handle("/v1/api/upload", imhttp.AppHandler(handler.UploadFile)).Methods(http.MethodPost)
