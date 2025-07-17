@@ -42,6 +42,7 @@ type ApplicationInterface interface {
 	// Location
 	GetAllLocations(filters map[string]interface{}) ([]*response.Location, *imhttp.CustomError)
 	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
+	AddLocation(input request.AddLocationRequest) (*response.Location, *imhttp.CustomError)
 	DeleteLocation(id string) *imhttp.CustomError
 
 	// Property

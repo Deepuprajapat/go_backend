@@ -78,11 +78,11 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/projects/{slug}", imhttp.AppHandler(handler.GetProjectBySlug)).Methods(http.MethodGet)
 
-	// projectinternal routes
+	// project internal routes
 	Router.Handle("/v1/api/internal/projects", middleware.RequireDM(imhttp.AppHandler(handler.AddProject))).Methods(http.MethodPost)                   // internal
-	Router.Handle("/v1/api/internal/projects/{project_id}", middleware.RequireDM(imhttp.AppHandler(handler.UpdateProject))).Methods(http.MethodPatch)  // internal
+	Router.Handle("/v1/api/internal/projects/{project_id}", imhttp.AppHandler(handler.UpdateProject)).Methods(http.MethodPatch)                        // internal
 	Router.Handle("/v1/api/internal/projects/{project_id}", middleware.RequireDM(imhttp.AppHandler(handler.DeleteProject))).Methods(http.MethodDelete) // internal
-	Router.Handle("/v1/api/internal/projects/filters", middleware.RequireDM(imhttp.AppHandler(handler.GetProjectFilters))).Methods(http.MethodGet)     //internal
+	Router.Handle("/v1/api/internal/projects/filters", imhttp.AppHandler(handler.GetProjectFilters)).Methods(http.MethodGet)                           // internal
 
 	// upload file routes
 	Router.Handle("/v1/api/upload", imhttp.AppHandler(handler.UploadFile)).Methods(http.MethodPost)
@@ -111,8 +111,8 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/locations", imhttp.AppHandler(handler.ListLocations)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(handler.GetLocation)).Methods(http.MethodGet)
 
-	// localation internal routes
-	// TODO: Add and Update location API
+	// location internal routes
+	Router.Handle("/v1/api/internal/location", imhttp.AppHandler(handler.AddLocation)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/locations/{location_id}", imhttp.AppHandler(handler.DeleteLocation)).Methods(http.MethodDelete)
 
 	// internal amenity routes

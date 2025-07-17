@@ -180,7 +180,6 @@ func (h *Handler) GetProjectFilters(r *http.Request) (*imhttp.Response, *imhttp.
 	}, nil
 }
 
-
 func (h *Handler) GetProjectBySlug(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	slug := vars["slug"]

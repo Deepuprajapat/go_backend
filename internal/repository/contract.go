@@ -37,6 +37,7 @@ type AppRepository interface {
 	// Location
 	ListLocations(filters map[string]interface{}) ([]*ent.Location, error)
 	GetLocationByID(id string) (*ent.Location, error)
+	AddLocation(localityName, city, state, phoneNumber, country, pincode string) (*ent.Location, error)
 	SoftDeleteLocation(id string) error
 	GetAllUniqueCities() ([]string, error)
 	GetAllUniqueLocations() ([]string, error)

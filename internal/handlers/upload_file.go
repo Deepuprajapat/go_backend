@@ -24,7 +24,7 @@ func (h *Handler) UploadFile(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "File name, file path and alt keywords are required", "File name, file path and alt keywords are required")
 	}
 	presignedURL, imageURL, err := h.app.UploadFile(req)
-	
+
 	return &imhttp.Response{
 		Data: struct {
 			PresignedURL string `json:"presigned_url"`

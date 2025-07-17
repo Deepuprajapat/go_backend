@@ -133,7 +133,10 @@ func (h *Handler) AddCustomSearchPage(r *http.Request) (*imhttp.Response, *imhtt
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
 	}
 	customSearchPageResponse, err := h.app.AddCustomSearchPage(ctx, customSearchPage)
-	
+
+	// if err == nil {
+	// 	return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Failed to add custom search page", err.Error())
+	// }
 
 	return &imhttp.Response{
 		Data:       customSearchPageResponse,

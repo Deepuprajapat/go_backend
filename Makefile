@@ -94,8 +94,9 @@ generate:
 run:
 	go run cmd/server/main.go
 
-run-migration:
+run-migration: 
 	go run cmd/server/main.go run-migration ./migration_jobs/database_export
+
 
 # Setup fresh development environment
 dev-setup: docker-up migrate
