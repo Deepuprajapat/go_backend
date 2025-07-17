@@ -62,7 +62,7 @@ docker-down:
 	docker-compose down
 
 # Reset database by dropping all tables
-db-reset: docker-up
+db-reset: 
 	@echo "Dropping all tables from database..."
 	@sleep 3
 	@docker exec -i im_postgres_db psql -U im_db_dev -d mydb -c "\

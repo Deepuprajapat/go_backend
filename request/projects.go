@@ -8,7 +8,7 @@ import (
 type AddProjectRequest struct {
 	ProjectName string `json:"project_name" validate:"required"`
 	ProjectType string `json:"project_type" validate:"required"`
-	Slug string `json:"slug" validate:"required"`
+	Slug        string `json:"slug" validate:"required"`
 	Locality    string `json:"locality" validate:"required"`
 	ProjectCity string `json:"project_city" validate:"required"`
 	DeveloperID string `json:"developer_id" validate:"required"`
@@ -50,6 +50,7 @@ type AddPropertyRequest struct {
 	Name            string  `json:"name"`
 	PropertyType    string  `json:"property_type"`
 	CreatedByUserID *string `json:"created_by_user_id,omitempty"`
+	Slug            string  `json:"slug"`
 }
 
 type ProjectFilterRequest struct {
