@@ -94,8 +94,10 @@ generate:
 run:
 	go run cmd/server/main.go
 
-run-migration: 
+run-migration:
 	go run cmd/server/main.go run-migration ./migration_jobs/database_export
+	make seed-testimonials
+	
 
 
 # Setup fresh development environment
