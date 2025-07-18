@@ -59,11 +59,9 @@ func NewS3Client(bucket string) (S3ClientInterface, error) {
 			o.BaseEndpoint = aws.String(endpointURL)
 			o.UsePathStyle = true // LocalStack requires path-style addressing
 		})
-		logger.Get().Info().Msgf("S3 client configured for LocalStack endpoint: %s with region: %s", endpointURL, region)
 	} else {
 		// Use default AWS configuration with explicit region
 		client = s3.NewFromConfig(cfg)
-		logger.Get().Info().Msgf("S3 client configured for AWS with region: %s", region)
 	}
 
 	presignClient := s3.NewPresignClient(client)

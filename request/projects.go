@@ -51,7 +51,6 @@ type AddPropertyRequest struct {
 	Name            string  `json:"name"`
 	PropertyType    string  `json:"property_type"`
 	CreatedByUserID *string `json:"created_by_user_id,omitempty"`
-	Slug            string  `json:"slug"`
 }
 
 type ProjectFilterRequest struct {

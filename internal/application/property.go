@@ -90,7 +90,6 @@ func (c *application) AddProperty(input request.AddPropertyRequest) (*response.A
 	property.Name = input.Name
 	property.PropertyType = input.PropertyType
 	property.CreatedByUserID = input.CreatedByUserID
-	property.Slug = input.Slug
 
 	result, err := c.repo.AddProperty(property)
 	if err != nil {
