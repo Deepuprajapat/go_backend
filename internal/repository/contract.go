@@ -6,6 +6,7 @@ import (
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
+	"github.com/VI-IM/im_backend_go/response"
 )
 
 type repository struct {
@@ -56,13 +57,15 @@ type AppRepository interface {
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
 	CheckCategoryExists(category string) (bool, error)
 
+	// Custom Search
+	CheckURLExists(ctx context.Context, url string) (*response.URLExistsResult, error)
+
 	// Blogs
 	GetAllBlogs() ([]*ent.Blogs, error)
 	GetBlogByID(id string) (*ent.Blogs, error)
 	CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
-	CheckBlogSlugExists(slug string) (bool, error)
 
 	//content
 

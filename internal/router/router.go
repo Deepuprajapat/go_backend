@@ -123,12 +123,14 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.GetBlog)).Methods(http.MethodGet)
 	
-
 	// internal blog routes
 	Router.Handle("/v1/api/internal/blogs", imhttp.AppHandler(handler.CreateBlog)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/internal/blogs/{blog_id}", imhttp.AppHandler(handler.DeleteBlog)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/internal/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
-	Router.Handle("/v1/api/internal/blogs/slug/{slug}", imhttp.AppHandler(handler.CheckBlogSlugExists)).Methods(http.MethodGet)
+
+
+	// URL availability checking route
+	Router.Handle("/v1/api/internal/check-avialable-url", imhttp.AppHandler(handler.CheckURLExists)).Methods(http.MethodGet)
 
 	// lead routes - public endpoints for lead creation and OTP operations
 	Router.Handle("/v1/api/leads/send-otp", imhttp.AppHandler(handler.CreateLeadWithOTP)).Methods(http.MethodPost)

@@ -74,13 +74,15 @@ type ApplicationInterface interface {
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
 	UpdateBlog(ctx context.Context, id string, req *request.UpdateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
-	CheckBlogSlugExists(slug string) (bool, *imhttp.CustomError)
 
 	// Content
 	GetProjectByCanonicalURL(ctx context.Context, url string) (*ent.Project, *imhttp.CustomError)
 	GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
 	GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, *imhttp.CustomError)
 	GetProjectBySlug(slug string) (*response.Project, *imhttp.CustomError)
+
+	// Generic URL checking
+	CheckURLExists(ctx context.Context, url string) (*response.CheckURLExistsResponse, *imhttp.CustomError)	
 
 	// Generic Search
 	GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError)

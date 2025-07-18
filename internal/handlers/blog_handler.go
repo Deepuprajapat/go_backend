@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/VI-IM/im_backend_go/request"
-	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
@@ -92,20 +91,6 @@ func (h *Handler) UpdateBlog(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 
 	return &imhttp.Response{
 		Data:       blog,
-		StatusCode: http.StatusOK,
-	}, nil
-}
-func (h *Handler) CheckBlogSlugExists(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	vars := mux.Vars(r)
-	slug := vars["slug"]
-
-	exists, err := h.app.CheckBlogSlugExists(slug)
-	if err != nil {
-		return nil, err
-	}
-
-	return &imhttp.Response{
-		Data:       &response.BlogSlugExistsResponse{Exists: exists},
 		StatusCode: http.StatusOK,
 	}, nil
 }

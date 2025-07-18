@@ -94,12 +94,3 @@ func (c *application) UpdateBlog(ctx context.Context, id string, req *request.Up
 
 	return response.GetBlogFromEnt(blog), nil
 }
-
-func (c *application) CheckBlogSlugExists(slug string) (bool, *imhttp.CustomError) {
-	exists, err := c.repo.CheckBlogSlugExists(slug)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to check blog slug existence")
-		return false, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check blog slug existence", err.Error())
-	}
-	return exists, nil
-}

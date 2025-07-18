@@ -54,7 +54,3 @@ func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
 type BlogListResponse struct {
 	Blogs []*BlogListItem `json:"blogs"`
 }
-
-type BlogSlugExistsResponse struct {
-	Exists bool `json:"exists"`
-}

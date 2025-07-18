@@ -118,15 +118,3 @@ func (r *repository) UpdateBlog(ctx context.Context, id string, blogURL *string,
 	return blog, nil
 }
 
-
-func (r *repository) CheckBlogSlugExists(slug string) (bool, error) {
-	exists, err := r.db.Blogs.Query().
-		Where(blogs.Slug(slug)).
-		Exist(context.Background())
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to check blog slug existence")
-		return false, err
-	}
-	return exists, nil
-}
-
