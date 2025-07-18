@@ -29,7 +29,7 @@ type BlogListItem struct {
 func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
 	return &BlogResponse{
 		ID:          blog.ID,
-		Slug:        *blog.Slug,
+		Slug:        blog.Slug,
 		BlogContent: blog.BlogContent,
 		SEOMetaInfo: blog.SeoMetaInfo,
 		IsPriority:  blog.IsPriority,
@@ -42,7 +42,7 @@ func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
 	return &BlogListItem{
 		ID:          blog.ID,
 		Image:       blog.BlogContent.Image,
-		Slug:        blog.Slug,
+		Slug:        &blog.Slug,
 		Title:       blog.BlogContent.Title,
 		Description: blog.BlogContent.Description,
 		IsPriority:  blog.IsPriority,
@@ -53,4 +53,8 @@ func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
 
 type BlogListResponse struct {
 	Blogs []*BlogListItem `json:"blogs"`
+}
+
+type BlogSlugExistsResponse struct {
+	Exists bool `json:"exists"`
 }

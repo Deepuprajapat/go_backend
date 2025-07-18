@@ -47,10 +47,10 @@ func (r *repository) GetBlogByID(id string) (*ent.Blogs, error) {
 	return blog, nil
 }
 
-func (r *repository) CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error) {
+func (r *repository) CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error) {
 	blog, err := r.db.Blogs.Create().
 		SetID(uuid.New().String()).
-		SetSlug(blogURL).
+		SetSlug(slug).
 		SetBlogContent(blogContent).
 		SetSeoMetaInfo(seoMetaInfo).
 		SetIsPriority(isPriority).
@@ -117,3 +117,16 @@ func (r *repository) UpdateBlog(ctx context.Context, id string, blogURL *string,
 
 	return blog, nil
 }
+
+
+func (r *repository) CheckBlogSlugExists(slug string) (bool, error) {
+	exists, err := r.db.Blogs.Query().
+		Where(blogs.Slug(slug)).
+		Exist(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check blog slug existence")
+		return false, err
+	}
+	return exists, nil
+}
+

@@ -48,7 +48,9 @@ func (c *application) GetBlogByID(id string) (*response.BlogResponse, *imhttp.Cu
 }
 
 func (c *application) CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError) {
-	blog, err := c.repo.CreateBlog(ctx, req.BlogURL, req.BlogContent, req.SEOMetaInfo, req.IsPriority)
+   
+
+	blog, err := c.repo.CreateBlog(ctx, req.Slug, req.BlogContent, req.SEOMetaInfo, req.IsPriority)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to create blog")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create blog", err.Error())
@@ -91,4 +93,13 @@ func (c *application) UpdateBlog(ctx context.Context, id string, req *request.Up
 	}
 
 	return response.GetBlogFromEnt(blog), nil
+}
+
+func (c *application) CheckBlogSlugExists(slug string) (bool, *imhttp.CustomError) {
+	exists, err := c.repo.CheckBlogSlugExists(slug)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to check blog slug existence")
+		return false, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to check blog slug existence", err.Error())
+	}
+	return exists, nil
 }
