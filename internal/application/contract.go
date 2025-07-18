@@ -70,6 +70,7 @@ type ApplicationInterface interface {
 
 	// Blogs
 	ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError)
+	ListBlogsWithFilter(isPublished *bool) (*response.BlogListResponse, *imhttp.CustomError) 
 	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
@@ -89,7 +90,7 @@ type ApplicationInterface interface {
 	GetLinks(ctx context.Context) ([]*response.Link, *imhttp.CustomError)
 	GetAllCustomSearchPages(ctx context.Context) ([]*response.CustomSearchPage, *imhttp.CustomError)
 	AddCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
-	UpdateCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
+	UpdateCustomSearchPage(ctx context.Context, id string, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
 	DeleteCustomSearchPage(ctx context.Context, id string) *imhttp.CustomError
 
 	// Leads

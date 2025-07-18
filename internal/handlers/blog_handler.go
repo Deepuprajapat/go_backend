@@ -5,12 +5,40 @@ import (
 	"net/http"
 
 	"github.com/VI-IM/im_backend_go/request"
+	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
 func (h *Handler) ListBlogs(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	response, err := h.app.ListBlogs(nil)
+	// ✅ Check for is_published query parameter
+	isPublishedParam := r.URL.Query().Get("is_published")
+
+	var isPublished *bool
+	if isPublishedParam != "" {
+		// Parse the boolean value
+		switch isPublishedParam {
+		case "true":
+			value := true
+			isPublished = &value
+		case "false":
+			value := false
+			isPublished = &value
+		}
+		// If it's neither "true" nor "false", isPublished remains nil (no filter)
+	}
+
+	var response *response.BlogListResponse
+	var err *imhttp.CustomError
+
+	if isPublished != nil {
+		// ✅ Use filtered method
+		response, err = h.app.ListBlogsWithFilter(isPublished)
+	} else {
+		// ✅ Use original method (no filter)
+		response, err = h.app.ListBlogs(nil)
+	}
+
 	if err != nil {
 		return nil, err
 	}

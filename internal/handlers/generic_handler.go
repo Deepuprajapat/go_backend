@@ -148,12 +148,19 @@ func (h *Handler) UpdateCustomSearchPage(r *http.Request) (*imhttp.Response, *im
 
 	ctx := r.Context()
 
+
+	vars := mux.Vars(r)
+    id := vars["id"]
+    if id == "" {
+        return nil, imhttp.NewCustomErr(http.StatusBadRequest, "ID is required", "ID is required")
+    }
+    
 	var customSearchPage *request.CustomSearchPage
 	err := json.NewDecoder(r.Body).Decode(&customSearchPage)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
 	}
-	customSearchPageResponse, err := h.app.UpdateCustomSearchPage(ctx, customSearchPage)
+	customSearchPageResponse, err := h.app.UpdateCustomSearchPage(ctx, id, customSearchPage)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Custom search page not found", "Custom search page not found")
 	}
@@ -167,7 +174,8 @@ func (h *Handler) UpdateCustomSearchPage(r *http.Request) (*imhttp.Response, *im
 func (h *Handler) DeleteCustomSearchPage(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 
 	ctx := r.Context()
-	id := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	id := vars["id"]
 	if id == "" {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "ID is required", "ID is required")
 	}

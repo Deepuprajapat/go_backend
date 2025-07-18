@@ -62,8 +62,9 @@ type AppRepository interface {
 
 	// Blogs
 	GetAllBlogs() ([]*ent.Blogs, error)
+	GetAllBlogsWithFilter(isPublished *bool) ([]*ent.Blogs, error)  // ✅ Add this
 	GetBlogByID(id string) (*ent.Blogs, error)
-	CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
+	CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool, isPublished bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
 

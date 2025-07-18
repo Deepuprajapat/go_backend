@@ -13,6 +13,7 @@ type BlogResponse struct {
 	IsPriority  bool               `json:"is_priority"`
 	CreatedAt   int64              `json:"created_at"`
 	UpdatedAt   int64              `json:"updated_at"`
+	IsPublished bool               `json:"is_published"`
 }
 
 type BlogListItem struct {
@@ -24,6 +25,7 @@ type BlogListItem struct {
 	IsPriority  bool    `json:"is_priority"`
 	CreatedAt   int64   `json:"created_at"`
 	UpdatedAt   int64   `json:"updated_at"`
+	IsPublished bool    `json:"is_published"`
 }
 
 func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
@@ -35,6 +37,7 @@ func GetBlogFromEnt(blog *ent.Blogs) *BlogResponse {
 		IsPriority:  blog.IsPriority,
 		CreatedAt:   blog.CreatedAt.Unix(),
 		UpdatedAt:   blog.UpdatedAt.Unix(),
+		IsPublished: blog.IsPublished,
 	}
 }
 
@@ -48,6 +51,7 @@ func GetBlogListItemFromEnt(blog *ent.Blogs) *BlogListItem {
 		IsPriority:  blog.IsPriority,
 		CreatedAt:   blog.CreatedAt.Unix(),
 		UpdatedAt:   blog.UpdatedAt.Unix(),
+		IsPublished: blog.IsPublished,
 	}
 }
 

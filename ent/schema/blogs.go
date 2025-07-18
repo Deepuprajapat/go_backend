@@ -18,6 +18,7 @@ func (Blogs) Fields() []ent.Field {
 		field.JSON("seo_meta_info", SEOMetaInfo{}),
 		field.String("slug").Optional(),
 		field.JSON("blog_content", BlogContent{}),
+		field.Bool("is_published").Optional(),
 		field.Bool("is_priority").Default(false),
 		field.Bool("is_deleted").Default(false),
 		field.Time("deleted_at").Optional().Nillable(),

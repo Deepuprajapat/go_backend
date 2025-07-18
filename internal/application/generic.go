@@ -154,10 +154,10 @@ func (a *application) AddCustomSearchPage(ctx context.Context, customSearchPage 
 	return response, nil
 }
 
-func (a *application) UpdateCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
+func (a *application) UpdateCustomSearchPage(ctx context.Context, id string, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError) {
 
 	customSearchPageEntity := &ent.CustomSearchPage{
-		ID:          customSearchPage.ID,
+		ID:          id,
 		Title:       customSearchPage.Title,
 		Description: customSearchPage.Description,
 		Filters:     customSearchPage.Filters,
