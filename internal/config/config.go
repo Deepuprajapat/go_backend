@@ -18,6 +18,7 @@ type (
 		JWTConfig
 		Logger
 		S3
+		CRM
 	}
 
 	Server struct {
@@ -44,6 +45,13 @@ type (
 		Region      string `envconfig:"AWS_REGION"`
 		AccessKeyID string `envconfig:"AWS_ACCESS_KEY_ID"`
 		SecretKey   string `envconfig:"AWS_SECRET_KEY"`
+	}
+
+	CRM struct {
+		BaseURL    string        `envconfig:"CRM_BASE_URL" default:"http://148.66.133.154:8181/new-leads/from/open-source"`
+		Timeout    time.Duration `envconfig:"CRM_TIMEOUT" default:"30s"`
+		Enabled    bool          `envconfig:"CRM_ENABLED" default:"true"`
+		MaxRetries int           `envconfig:"CRM_MAX_RETRIES" default:"3"`
 	}
 )
 

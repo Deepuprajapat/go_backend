@@ -36,6 +36,10 @@ func (Leads) Fields() []ent.Field {
 		field.Bool("otp_verified").
 			Optional().
 			Default(false),
+		field.Enum("sync_status").
+			Values("fresh", "synced", "rejected").
+			Optional().
+			Default("fresh"),
 		field.Time("deleted_at").Optional().Nillable(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),

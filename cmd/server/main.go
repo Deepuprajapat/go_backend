@@ -47,6 +47,8 @@ func main() {
 			return
 		case "seed-admin":
 			seedAdmin(ctx)
+			seedBusinessPartner(ctx)
+			seedDM(ctx)
 			return
 		case "export-database":
 			exportDatabase(ctx)
@@ -79,7 +81,7 @@ func main() {
 	}
 
 	smsClient := s3client.NewSMSClient()
-	crmClient := s3client.NewCRMClient()
+	crmClient := s3client.NewCRMClient(cfg.CRM)
 
 	repo := repository.NewRepository(client)
 	app := application.NewApplication(repo, s3Client, smsClient, crmClient)
@@ -203,12 +205,123 @@ func seedAdmin(ctx context.Context) {
 		SetIsVerified(true).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
+		SetRole("admin").
 		Save(ctx)
 
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to create admin user")
 	} else {
 		logger.Get().Info().Msgf("Admin user created successfully!")
+		logger.Get().Info().Msgf("Username: %s", adminUsername)
+		logger.Get().Info().Msgf("Password: %s", adminPassword)
+		logger.Get().Info().Msgf("Email: %s", adminEmail)
+		logger.Get().Info().Msgf("User ID: %s", adminUser.ID)
+		fmt.Printf("\n=== ADMIN CREDENTIALS ===\n")
+		fmt.Printf("Username: %s\n", adminUsername)
+		fmt.Printf("Password: %s\n", adminPassword)
+		fmt.Printf("Email: %s\n", adminEmail)
+		fmt.Printf("========================\n\n")
+	}
+}
+
+func seedBusinessPartner(ctx context.Context) {
+	logger.Get().Info().Msg("Starting bp user seeding...")
+
+	// Load configuration
+	if err := config.LoadConfig(); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to load configuration")
+	}
+
+	cfg := config.GetConfig()
+	client := database.NewClient(cfg.Database.URL)
+	defer client.Close()
+
+	// Default admin credentials
+	adminUsername := "business_partner"
+	adminPassword := "bp123"
+	adminEmail := "bp@example.com"
+	adminName := "Business Partner"
+
+	// Hash the password
+	hashedPassword, err := utils.HashPassword(adminPassword)
+	if err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to hash password")
+	}
+
+	// Create admin user
+	adminUser, err := client.User.Create().
+		SetID(uuid.New().String()).
+		SetUsername(adminUsername).
+		SetPassword(hashedPassword).
+		SetEmail(adminEmail).
+		SetName(adminName).
+		SetIsActive(true).
+		SetIsEmailVerified(true).
+		SetIsVerified(true).
+		SetCreatedAt(time.Now()).
+		SetUpdatedAt(time.Now()).
+		SetRole("business_partner").
+		Save(ctx)
+
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to create bp user")
+	} else {
+		logger.Get().Info().Msgf("BP user created successfully!")
+		logger.Get().Info().Msgf("Username: %s", adminUsername)
+		logger.Get().Info().Msgf("Password: %s", adminPassword)
+		logger.Get().Info().Msgf("Email: %s", adminEmail)
+		logger.Get().Info().Msgf("User ID: %s", adminUser.ID)
+		fmt.Printf("\n=== ADMIN CREDENTIALS ===\n")
+		fmt.Printf("Username: %s\n", adminUsername)
+		fmt.Printf("Password: %s\n", adminPassword)
+		fmt.Printf("Email: %s\n", adminEmail)
+		fmt.Printf("========================\n\n")
+	}
+}
+
+func seedDM(ctx context.Context) {
+	logger.Get().Info().Msg("Starting dm user seeding...")
+
+	// Load configuration
+	if err := config.LoadConfig(); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to load configuration")
+	}
+
+	cfg := config.GetConfig()
+	client := database.NewClient(cfg.Database.URL)
+	defer client.Close()
+
+	// Default admin credentials
+	adminUsername := "digital_marketing"
+	adminPassword := "dm123"
+	adminEmail := "dm@example.com"
+	adminName := "DM User"
+
+	// Hash the password
+	hashedPassword, err := utils.HashPassword(adminPassword)
+	if err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to hash password")
+	}
+
+	// Create admin user
+	adminUser, err := client.User.Create().
+		SetID(uuid.New().String()).
+		SetUsername(adminUsername).
+		SetPassword(hashedPassword).
+		SetEmail(adminEmail).
+		SetName(adminName).
+		SetIsActive(true).
+		SetIsEmailVerified(true).
+		SetIsVerified(true).
+		SetCreatedAt(time.Now()).
+		SetUpdatedAt(time.Now()).
+		SetRole("dm").
+		Save(ctx)
+
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to create bp user")
+	} else {
+		logger.Get().Info().Msgf("BP user created successfully!")
 		logger.Get().Info().Msgf("Username: %s", adminUsername)
 		logger.Get().Info().Msgf("Password: %s", adminPassword)
 		logger.Get().Info().Msgf("Email: %s", adminEmail)

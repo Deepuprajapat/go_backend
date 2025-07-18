@@ -33,6 +33,7 @@ type ApplicationInterface interface {
 	CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError)
 	GetProjectByURL(url string) (*ent.Project, *imhttp.CustomError)
 	GetProjectFilters() (map[string]interface{}, *imhttp.CustomError)
+	GetProjectNamesOnly() ([]*response.ProjectNameResponse, *imhttp.CustomError)
 
 	// Developer
 	ListDevelopers(pagination *request.GetAllAPIRequest) ([]*response.Developer, *imhttp.CustomError)
@@ -70,7 +71,7 @@ type ApplicationInterface interface {
 
 	// Blogs
 	ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError)
-	ListBlogsWithFilter(isPublished *bool) (*response.BlogListResponse, *imhttp.CustomError) 
+	ListBlogsWithFilter(isPublished *bool) (*response.BlogListResponse, *imhttp.CustomError)
 	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
@@ -83,7 +84,7 @@ type ApplicationInterface interface {
 	GetProjectBySlug(slug string) (*response.Project, *imhttp.CustomError)
 
 	// Generic URL checking
-	CheckURLExists(ctx context.Context, url string) (*response.CheckURLExistsResponse, *imhttp.CustomError)	
+	CheckURLExists(ctx context.Context, url string) (*response.CheckURLExistsResponse, *imhttp.CustomError)
 
 	// Generic Search
 	GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError)

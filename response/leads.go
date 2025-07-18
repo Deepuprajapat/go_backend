@@ -16,8 +16,10 @@ type Lead struct {
 	IsDuplicate          bool      `json:"is_duplicate"`
 	DuplicateReferenceID string    `json:"duplicate_reference_id,omitempty"`
 	OtpVerified          bool      `json:"otp_verified"`
+	SyncStatus           string    `json:"sync_status"`
 	PropertyID           string    `json:"property_id,omitempty"`
 	ProjectID            string    `json:"project_id,omitempty"`
+	ProjectName          string    `json:"project_name,omitempty"`
 	CreatedAt            time.Time `json:"created_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
 }
@@ -63,6 +65,7 @@ func ToLeadResponse(lead *ent.Leads) *Lead {
 		IsDuplicate:          lead.IsDuplicate,
 		DuplicateReferenceID: lead.DuplicateReferenceID,
 		OtpVerified:          lead.OtpVerified,
+		SyncStatus:           string(lead.SyncStatus),
 		CreatedAt:            lead.CreatedAt,
 		UpdatedAt:            lead.UpdatedAt,
 	}
@@ -73,6 +76,12 @@ func ToLeadResponse(lead *ent.Leads) *Lead {
 
 	if lead.Edges.Project != nil {
 		response.ProjectID = lead.Edges.Project.ID
+		response.ProjectName = lead.Edges.Project.Name
+	}
+
+	// Get project name from property->project relationship if direct project is not available
+	if response.ProjectName == "" && lead.Edges.Property != nil && lead.Edges.Property.Edges.Project != nil {
+		response.ProjectName = lead.Edges.Property.Edges.Project.Name
 	}
 
 	return response

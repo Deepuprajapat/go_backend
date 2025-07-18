@@ -72,9 +72,12 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/auth/refresh-token", imhttp.AppHandler(handler.RefreshToken)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/auth/signup", imhttp.AppHandler(handler.Signup)).Methods(http.MethodPost)
 
-	// project routes
+	// project routes - specific routes must come before wildcard routes
+	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/projects/names", middleware.Auth(imhttp.AppHandler(handler.GetProjectNames))).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.GetProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
+
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/projects/{slug}", imhttp.AppHandler(handler.GetProjectBySlug)).Methods(http.MethodGet)
 
@@ -122,12 +125,11 @@ func Init(app application.ApplicationInterface) {
 	// blog routes
 	Router.Handle("/v1/api/blogs", imhttp.AppHandler(handler.ListBlogs)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/blogs/{blog_id}", imhttp.AppHandler(handler.GetBlog)).Methods(http.MethodGet)
-	
+
 	// internal blog routes
 	Router.Handle("/v1/api/internal/blogs", imhttp.AppHandler(handler.CreateBlog)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/internal/blogs/{blog_id}", imhttp.AppHandler(handler.DeleteBlog)).Methods(http.MethodDelete)
 	Router.Handle("/v1/api/internal/blogs/{blog_id}", imhttp.AppHandler(handler.UpdateBlog)).Methods(http.MethodPatch)
-
 
 	// URL availability checking route
 	Router.Handle("/v1/api/internal/check-avialable-url", imhttp.AppHandler(handler.CheckURLExists)).Methods(http.MethodGet)
