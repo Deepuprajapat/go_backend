@@ -298,7 +298,7 @@ func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error)
 	}
 
 	propertyID := uuid.New().String()
-	slug := strings.ReplaceAll(strings.ToLower(input.Name), " ", "-")
+	slug := strings.ReplaceAll(strings.ToLower(input.Name), " ", "-") + "-" + strings.ToLower(propertyID[:4])
 
 	// Create default values for required JSON fields
 	defaultWebCards := createDefaultWebCards()

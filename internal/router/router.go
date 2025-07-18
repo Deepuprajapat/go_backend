@@ -82,7 +82,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{slug}", imhttp.AppHandler(handler.GetProjectBySlug)).Methods(http.MethodGet)
 
 	// project internal routes
-	Router.Handle("/v1/api/internal/projects", middleware.RequireDM(imhttp.AppHandler(handler.AddProject))).Methods(http.MethodPost)                   // internal
+	Router.Handle("/v1/api/internal/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)                   // internal
 	Router.Handle("/v1/api/internal/projects/{project_id}", imhttp.AppHandler(handler.UpdateProject)).Methods(http.MethodPatch)                        // internal
 	Router.Handle("/v1/api/internal/projects/{project_id}", middleware.RequireDM(imhttp.AppHandler(handler.DeleteProject))).Methods(http.MethodDelete) // internal
 	Router.Handle("/v1/api/internal/projects/filters", imhttp.AppHandler(handler.GetProjectFilters)).Methods(http.MethodGet)                           // internal
