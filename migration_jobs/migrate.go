@@ -113,7 +113,12 @@ func processBatch[T any](ctx context.Context, items []T, batchSize int, processo
 // Use ent schema modal to migrate data from legacy database to new database
 
 func MigrateProject(ctx context.Context, txn *ent.Tx) error {
-	projects, err := FetchhAllProject(ctx)
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	projects, err := loader.GetAllProjects()
 	if err != nil {
 		return err
 	}
@@ -132,7 +137,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 		for _, project := range batch {
 			id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(project.ID+1000, 10))))[:16]
 
-			projectRera, err := FetchReraByProjectID(ctx, project.ID)
+			projectRera, err := loader.GetRerasByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch project RERA for project ID %d", project.ID)
 				continue
@@ -165,7 +170,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				uspListNew = append(uspListNew, safeStr(&usp))
 			}
 
-			floorPlans, err := FetchFloorPlanByProjectID(ctx, project.ID)
+			floorPlans, err := loader.GetFloorPlansByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch floor plans for project ID %d", project.ID)
 				continue
@@ -200,6 +205,8 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					}
 				}
 
+				
+
 				floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
 					Title:        safeStr(floorPlan.Title),
 					FlatType:     safeStr(floorPlan.Title),
@@ -208,6 +215,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					BuildingArea: strconv.FormatInt(*floorPlan.Size, 10),
 					Image:        safeStr(floorPlan.ImgURL),
 				})
+
 				configurationProducts = append(configurationProducts, schema.ProductConfiguration{
 					ConfigurationName: safeStr(floorPlan.Title),
 					Size:              strconv.FormatInt(*floorPlan.Size, 10),
@@ -228,7 +236,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 
 			// Convert float prices to integers (calculated but not used in current migration)
 
-			amenities, err := FetchProjectAmenitiesByProjectID(ctx, project.ID)
+			amenities, err := loader.GetProjectAmenitiesByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch amenities for project ID %d", project.ID)
 				continue
@@ -242,7 +250,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				})
 			}
 
-			paymentPlans, err := FetchPaymentPlansByProjectID(ctx, project.ID)
+			paymentPlans, err := loader.GetPaymentPlansByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch payment plans for project ID %d", project.ID)
 				continue
@@ -261,19 +269,19 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				continue
 			}
 
-			developer, err := FetchDeveloperByID(ctx, *project.DeveloperID)
+			developer, err := loader.GetDeveloperByID(*project.DeveloperID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch developer for project ID %d", project.ID)
 				continue
 			}
 
-			faqs, err := FetchFaqsByProjectID(ctx, project.ID)
+			faqs, err := loader.GetFaqsByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch faqs for project ID %d", project.ID)
 				continue
 			}
 
-			projectImages, err := FetchProjectImagesByProjectID(ctx, project.ID)
+			projectImages, err := loader.GetProjectImagesByProjectID(project.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch project images for project ID %d", project.ID)
 				continue
@@ -300,6 +308,10 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				imageURLs[i] = img.ImageURL
 			}
 
+			// for i, j := 0, len(faqs)-1; i < j; i, j = i+1, j-1 {
+			// 	faqs[i], faqs[j] = faqs[j], faqs[i]
+			// }
+
 			faqsNew := []schema.FAQ{}
 			for _, faq := range faqs {
 				faqsNew = append(faqsNew, schema.FAQ{
@@ -321,7 +333,13 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				log.Error().Msgf("Locality ID mapping not found for project ID %d", project.ID)
 				continue
 			}
-			projectConfigurationType, err := FetchProjectConfigurationByID(ctx, *project.PropertyConfigTypeID)
+			projectConfiguration, err := loader.GetPropertyConfigurationByID(*project.PropertyConfigTypeID)
+			if err != nil {
+				log.Error().Err(err).Msgf("Failed to fetch project configuration for project ID %d", project.ID)
+				continue
+			}
+
+			projectConfigurationType, err := loader.GetPropertyConfigurationTypeByID(projectConfiguration.ID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch project configuration type for project ID %d", project.ID)
 				continue
@@ -350,6 +368,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				SetName(safeStr(project.ProjectName)).
 				SetMinPrice(strconv.FormatFloat(minPrice, 'f', -1, 64)).
 				SetMaxPrice(strconv.FormatFloat(maxPrice, 'f', -1, 64)).
+				SetSlug(safeStr(project.ProjectURL)).
 				SetDescription(safeStr(project.ProjectDescription)).
 				SetStatus(enums.ProjectStatus(*project.Status)).
 				SetTimelineInfo(schema.TimelineInfo{
@@ -360,7 +379,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Title:         safeStr(project.MetaTitle),
 					Description:   safeStr(project.MetaDescription),
 					Keywords:      safeStr(project.MetaKeywords),
-					Canonical:     safeStr(project.ProjectURL),
 					ProjectSchema: projectSchema,
 				}).
 				SetWebCards(schema.ProjectWebCards{
@@ -474,7 +492,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 							BookingLink    string `json:"booking_link,omitempty"`
 						}{
 							Name:           safeStr(developer.DeveloperName),
-							ProjectAddress: safeStr(developer.DeveloperAddress),
+							ProjectAddress: safeStr(project.ProjectAddress),
 							Phone:          safeStr(developer.Phone),
 							BookingLink:    safeStr(project.ProjectBrochure),
 						},
@@ -512,7 +530,13 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching developers")
-	developers, err := FetchAllDevelopers(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	developers, err := loader.GetAllDevelopers()
 	if err != nil {
 		return err
 	}
@@ -556,7 +580,13 @@ func MigrateDeveloper(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching localities")
-	localities, err := FetchAllLocality(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	localities, err := loader.GetAllLocalities()
 	if err != nil {
 		return err
 	}
@@ -564,7 +594,7 @@ func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 
 	processLocalityBatch := func(ctx context.Context, batch []LLocality) error {
 		for _, locality := range batch {
-			city, err := FetchCityByID(ctx, *locality.CityID)
+			city, err := loader.GetCityByID(*locality.CityID)
 			if err != nil {
 				log.Error().Err(err).Msgf("Failed to fetch city for locality ID %d", locality.ID)
 				continue
@@ -606,7 +636,13 @@ func MigrateLocality(ctx context.Context, txn *ent.Tx) error {
 
 func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 	log.Info().Msg("fetching properties --------->>>> success")
-	properties, err := fetchAllProperty(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	properties, err := loader.GetAllProperties()
 	if err != nil {
 		return err
 	}
@@ -623,7 +659,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 
 			var propertyConfiguration *LPropertyConfiguration
 			if property.ConfigurationID != nil {
-				propertyConfiguration, err = FetchPropertyConfigurationByID(ctx, *property.ConfigurationID)
+				propertyConfiguration, err = loader.GetPropertyConfigurationByID(*property.ConfigurationID)
 				if err != nil {
 					log.Error().Err(err).Msgf("Failed to fetch project configurations for property ID %d", property.ID)
 					continue
@@ -656,7 +692,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 
 			var propertyType *LPropertyConfigurationType
 			if propertyConfiguration != nil {
-				propertyType, err = FetchPropertyConfigurationTypeByID(ctx, propertyConfiguration.ID)
+				propertyType, err = loader.GetPropertyConfigurationTypeByID(propertyConfiguration.ID)
 				if err != nil {
 					log.Error().Err(err).Msgf("Failed to fetch property type for property ID %d", property.ID)
 					continue
@@ -777,6 +813,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				projectID, ok = getProjectIDMapping(*property.ProjectID)
 				if !ok {
 					log.Error().Msgf("Project ID mapping not found for property ID %d", property.ID)
+					continue
 					return fmt.Errorf("project ID mapping not found for property ID %d", property.ID)
 				}
 			}
@@ -786,6 +823,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				developerID, ok = getDeveloperIDMapping(*property.DeveloperID)
 				if !ok {
 					log.Error().Msgf("Developer ID mapping not found for property ID %d", property.ID)
+					continue
 					return fmt.Errorf("developer ID mapping not found for property ID %d", property.ID)
 				}
 			}
@@ -795,6 +833,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				localityID, ok = getLocalityIDMapping(*property.LocalityID)
 				if !ok {
 					log.Error().Msgf("Locality ID mapping not found for property ID %d", property.ID)
+					continue
 					return fmt.Errorf("locality ID mapping not found for property ID %d", property.ID)
 				}
 			}
@@ -803,6 +842,7 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				SetID(id).
 				SetName(*property.PropertyName).
 				SetPropertyImages(parsedImages).
+				SetProductSchema(safeStr(property.ProductSchema)).
 				SetPropertyType(safeStr(propertyType.PropertyType)).
 				SetWebCards(webCard).
 				SetPricingInfo(schema.PropertyPricingInfo{
@@ -820,7 +860,8 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				SetIsFeatured(property.IsFeatured).
 				SetIsDeleted(property.IsDeleted).
 				SetDeveloperID(*developerID).
-				SetLocationID(*localityID)
+				SetLocationID(*localityID).
+				SetSlug(*property.PropertyURL)
 
 			if projectID != nil {
 				entProperty = entProperty.SetProjectID(*projectID)
@@ -841,15 +882,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 
 	log.Info().Msg("Properties migrated successfully --------->>>> success")
 	return nil
-}
-
-func safeStrToInt(s *string) int {
-	if s != nil {
-		if n, err := strconv.Atoi(*s); err == nil {
-			return n
-		}
-	}
-	return 0
 }
 
 func strPtr(s string) *string {
@@ -895,7 +927,13 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 	}
 
 	log.Info().Msg("Fetching blogs")
-	blogs, err := FetchAllBlogs(ctx)
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	blogs, err := loader.GetAllBlogs()
 	if err != nil {
 		return err
 	}
@@ -924,9 +962,21 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				blogContent.ImageAlt = safeStr(blog.Alt)
 			}
 
+			blogSchema := []string{}
+			if blog.BlogSchema != nil {
+				blogSchemaText := strings.Trim(*blog.BlogSchema, "[]")
+				blogSchemaItems := strings.Split(blogSchemaText, "\",")
+				for _, item := range blogSchemaItems {
+					item = strings.Trim(item, "\" ")
+					if item != "" {
+						blogSchema = append(blogSchema, item)
+					}
+				}
+			}
+
 			// Create SEO meta info
 			seoMetaInfo := schema.SEOMetaInfo{
-				BlogSchema: blog.BlogSchema,
+				BlogSchema: blogSchema,
 				Canonical:  safeStr(blog.Canonical),
 				Title:      safeStr(blog.SubHeadings),
 				Keywords:   safeStr(blog.MetaKeywords),
@@ -935,12 +985,12 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 			// Create blog entry
 			if err := txn.Blogs.Create().
 				SetID(id).
-				SetBlogURL(safeStr(blog.BlogURL)).
+				SetSlug(safeStr(blog.BlogURL)).
 				SetBlogContent(blogContent).
 				SetSeoMetaInfo(seoMetaInfo).
 				SetIsPriority(blog.IsPriority).
 				SetCreatedAt(time.Unix(*blog.CreatedDate, 0)).
-				SetUpdatedAt(time.Unix(*blog.UpdatedDate, 0)).
+				SetUpdatedAt(time.Now()).
 				SetIsDeleted(blog.IsDeleted).
 				Exec(ctx); err != nil {
 				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)
@@ -955,5 +1005,45 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 	}
 
 	log.Info().Msg("Blogs migrated successfully --------->>>> success")
+	return nil
+}
+
+func MigrateGenericSearchData(ctx context.Context, txn *ent.Tx) error {
+	log.Info().Msg("fetching generic search data --------->>>> success")
+
+	loader := GetJSONDataLoader()
+	if loader == nil {
+		return fmt.Errorf("JSON data loader not initialized")
+	}
+
+	genericSearchData, err := loader.GetAllGenericSearchData()
+	if err != nil {
+		return err
+	}
+
+	for _, data := range genericSearchData {
+		if data.URL == nil {
+			continue
+		}
+
+		parsedURL := strings.Split(*data.URL, "?")
+		if len(parsedURL) != 2 {
+			continue
+		}
+
+		filters := make(map[string]string)
+		queryParams := strings.Split(parsedURL[1], "&")
+
+		for _, param := range queryParams {
+			keyValue := strings.Split(param, "=")
+			if len(keyValue) == 2 {
+				filters[keyValue[0]] = keyValue[1]
+			}
+		}
+		//TODO: use the filter to get the mapped IDs and search filters of legacy data to new data
+
+	}
+	log.Info().Msg("Fetched generic search data --------->>>> success")
+
 	return nil
 }

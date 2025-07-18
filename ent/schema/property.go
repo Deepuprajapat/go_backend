@@ -16,7 +16,9 @@ func (Property) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
 		field.String("name"),
+		field.String("slug").Unique(),
 		field.String("property_type").Optional(),
+		field.String("product_schema").Optional(),
 		field.JSON("property_images", []string{}).Optional(), // 0 index logo image
 		field.JSON("web_cards", WebCards{}),
 		field.JSON("pricing_info", PropertyPricingInfo{}),
@@ -28,6 +30,7 @@ func (Property) Fields() []ent.Field {
 		field.String("project_id").Optional(),
 		field.String("developer_id").Optional(),
 		field.String("location_id").Optional(),
+		field.String("created_by_user_id").Optional(),
 		field.Time("deleted_at").Optional().Nillable(),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
@@ -47,6 +50,10 @@ func (Property) Edges() []ent.Edge {
 		edge.To("location", Location.Type).
 			Unique().
 			Field("location_id"),
+		edge.From("created_by_user", User.Type).
+			Ref("created_properties").
+			Unique().
+			Field("created_by_user_id"),
 	}
 }
 
@@ -79,11 +86,6 @@ type PropertyFloorPlan struct {
 }
 
 // area details
-type PropertyAreaDetails struct {
-	CarpetArea       string `json:"carpet_area,omitempty"`         // in sq ft
-	BuiltUpArea      string `json:"built_up_area,omitempty"`       // in sq ft
-	SuperBuiltUpArea string `json:"super_built_up_area,omitempty"` // in sq ft
-}
 
 // pricing information
 type PropertyPricingInfo struct {

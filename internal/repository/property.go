@@ -3,14 +3,76 @@ package repository
 import (
 	"context"
 	"errors"
+	"regexp"
+	"strings"
 
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/location"
 	"github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/property"
+	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	"github.com/google/uuid"
 )
+
+// PropertyResult contains the result of adding a property
+type PropertyResult struct {
+	PropertyID string
+	Slug       string
+}
+
+// generateSlug creates a URL-friendly slug from property name and property ID
+func generateSlug(name, propertyID string) string {
+	// Normalize the name: lowercase, replace spaces and special characters with hyphens
+	normalized := strings.ToLower(name)
+	reg := regexp.MustCompile(`[^a-z0-9]+`)
+	normalized = reg.ReplaceAllString(normalized, "-")
+	normalized = strings.Trim(normalized, "-")
+
+	// Get last 6 characters of property ID
+	suffix := propertyID
+	if len(propertyID) > 6 {
+		suffix = propertyID[len(propertyID)-6:]
+	}
+
+	return normalized + "-" + suffix
+}
+
+// createDefaultWebCards creates default empty web cards structure
+func createDefaultWebCards() schema.WebCards {
+	return schema.WebCards{
+		PropertyDetails: schema.PropertyDetails{},
+		PropertyFloorPlan: schema.PropertyFloorPlan{
+			Title: "",
+			Plans: []map[string]string{},
+		},
+		KnowAbout: struct {
+			Description string `json:"description,omitempty"`
+		}{
+			Description: "",
+		},
+		WhyToChoose: struct {
+			UspList   []string `json:"usp_list,omitempty"`
+			ImageUrls []string `json:"image_urls,omitempty"`
+		}{
+			UspList:   []string{},
+			ImageUrls: []string{},
+		},
+		VideoPresentation: struct {
+			Urls []string `json:"urls,omitempty"`
+		}{
+			Urls: []string{},
+		},
+		LocationMap: struct {
+			Description   string `json:"description,omitempty"`
+			GoogleMapLink string `json:"google_map_link,omitempty"`
+		}{
+			Description:   "",
+			GoogleMapLink: "",
+		},
+	}
+}
 
 func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
 	property, err := r.db.Property.Query().
@@ -182,6 +244,10 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		property.SetProjectID(input.ProjectID)
 	}
 
+	if input.Slug != "" {
+		property.SetSlug(input.Slug)
+	}
+
 	updatedProperty, err := property.Save(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update property")
@@ -207,7 +273,7 @@ func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, 
 	return properties, nil
 }
 
-func (r *repository) AddProperty(input domain.Property) (string, error) {
+func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error) {
 	project, err := r.db.Project.Query().
 		Where(project.ID(input.ProjectID)).
 		WithDeveloper().
@@ -215,88 +281,138 @@ func (r *repository) AddProperty(input domain.Property) (string, error) {
 		First(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get project")
-		return "", err
+		return nil, err
+	}
+
+	// Validate user exists if CreatedByUserID is provided
+	if input.CreatedByUserID != nil {
+		userExists, err := r.CheckIfUserExistsByID(context.Background(), *input.CreatedByUserID)
+		if err != nil {
+			logger.Get().Error().Err(err).Msg("Failed to check if user exists")
+			return nil, err
+		}
+		if !userExists {
+			logger.Get().Error().Str("user_id", *input.CreatedByUserID).Msg("User does not exist")
+			return nil, errors.New("user does not exist")
+		}
 	}
 
 	propertyID := uuid.New().String()
+	slug := strings.ReplaceAll(strings.ToLower(input.Name), " ", "-") + "-" + strings.ToLower(propertyID[:4])
+
+	// Create default values for required JSON fields
+	defaultWebCards := createDefaultWebCards()
+	defaultPricingInfo := schema.PropertyPricingInfo{Price: ""}
+	defaultReraInfo := schema.PropertyReraInfo{ReraNumber: ""}
+
 	property := r.db.Property.Create().
 		SetID(propertyID).
 		SetProjectID(input.ProjectID).
 		SetName(input.Name).
-		SetPropertyType(input.PropertyType)
-	if project.Edges.Developer.ID != "" {
+		SetSlug(slug).
+		SetPropertyType(input.PropertyType).
+		SetWebCards(defaultWebCards).
+		SetSlug(slug).
+		SetPricingInfo(defaultPricingInfo).
+		SetPropertyReraInfo(defaultReraInfo)
+	if project.Edges.Developer != nil && project.Edges.Developer.ID != "" {
 		property.SetDeveloperID(project.Edges.Developer.ID)
 	}
-	if project.Edges.Location.ID != "" {
+	if project.Edges.Location != nil && project.Edges.Location.ID != "" {
 		property.SetLocationID(project.Edges.Location.ID)
+	}
+	if input.CreatedByUserID != nil {
+		property.SetCreatedByUserID(*input.CreatedByUserID)
 	}
 
 	if err = property.Exec(context.Background()); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to add property")
-		return "", err
+		return nil, err
 	}
-	return propertyID, nil
+	return &PropertyResult{
+		PropertyID: propertyID,
+		Slug:       slug,
+	}, nil
 }
 
 func (r *repository) GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error) {
 	ctx := context.Background()
 
-	// Start building the query
-	query := r.db.Property.Query().Where(property.IsDeletedEQ(false))
+	// Start building the base query
+	baseQuery := r.db.Property.Query().Where(property.IsDeletedEQ(false))
 
-	// Get all properties first
-	properties, err := query.
-		Order(ent.Desc(property.FieldID)).
-		WithDeveloper().
-		WithLocation().
-		All(ctx)
+	// Apply filters at query level
+	query := r.applyPropertyFilters(baseQuery, filters)
+
+	// Get total count with filters applied (but without pagination)
+	total, err := query.Count(ctx)
 	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to count filtered properties")
 		return nil, 0, err
 	}
 
-	// Apply filters in memory
-	filteredProperties := make([]*ent.Property, 0)
-	for _, p := range properties {
-		// Check if property matches all filters
-		matches := true
-
-		if propertyType, ok := filters["property_type"].(string); ok && propertyType != "" {
-			if p.WebCards.PropertyDetails.PropertyType.Value != propertyType {
-				matches = false
-			}
-		}
-
-		if configuration, ok := filters["configuration"].(string); ok && configuration != "" {
-			if p.WebCards.PropertyDetails.Configuration.Value != configuration {
-				matches = false
-			}
-		}
-
-		if city, ok := filters["city"].(string); ok && city != "" {
-			if p.Edges.Location.City != city {
-				matches = false
-			}
-		}
-
-		if matches {
-			filteredProperties = append(filteredProperties, p)
-		}
+	// Apply pagination and fetch results
+	properties, err := query.
+		Order(ent.Desc(property.FieldCreatedAt)).
+		WithDeveloper().
+		WithLocation().
+		WithProject().
+		Offset(offset).
+		Limit(limit).
+		All(ctx)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to fetch properties")
+		return nil, 0, err
 	}
 
-	// Calculate total after filtering
-	total := len(filteredProperties)
+	return properties, total, nil
+}
 
-	// Apply pagination in memory
-	start := offset
-	end := offset + limit
-	if start > total {
-		start = total
-	}
-	if end > total {
-		end = total
+// applyPropertyFilters applies filters to the property query
+func (r *repository) applyPropertyFilters(query *ent.PropertyQuery, filters map[string]interface{}) *ent.PropertyQuery {
+	// Filter by created_by_user_id
+	if createdByUserID, ok := filters["created_by_user_id"].(string); ok && createdByUserID != "" {
+		query = query.Where(property.CreatedByUserIDEQ(createdByUserID))
 	}
 
-	return filteredProperties[start:end], total, nil
+	// Filter by property_type - this requires JSON field filtering
+	if propertyType, ok := filters["property_type"].(string); ok && propertyType != "" {
+		// Note: This is a simplified approach. For complex JSON filtering,
+		// you might need raw SQL or restructure the schema
+		query = query.Where(property.PropertyTypeContains(propertyType))
+	}
+
+	// Filter by city through location relationship
+	if city, ok := filters["city"].(string); ok && city != "" {
+		query = query.Where(property.HasLocationWith(location.CityEQ(city)))
+	}
+
+	// Filter by developer_id
+	if developerID, ok := filters["developer_id"].(string); ok && developerID != "" {
+		query = query.Where(property.DeveloperIDEQ(developerID))
+	}
+
+	// Filter by location_id
+	if locationID, ok := filters["location_id"].(string); ok && locationID != "" {
+		query = query.Where(property.LocationIDEQ(locationID))
+	}
+
+	// Filter by project_id
+	if projectID, ok := filters["project_id"].(string); ok && projectID != "" {
+		query = query.Where(property.ProjectIDEQ(projectID))
+	}
+
+	// Filter by is_featured
+	if isFeatured, ok := filters["is_featured"].(bool); ok {
+		query = query.Where(property.IsFeaturedEQ(isFeatured))
+	}
+
+	// Filter by name (partial match)
+	if name, ok := filters["name"].(string); ok && name != "" {
+		query = query.Where(property.NameContainsFold(name))
+	}
+
+	return query
 }
 
 func (r *repository) DeleteProperty(id string, hardDelete bool) error {

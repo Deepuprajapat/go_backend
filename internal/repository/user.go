@@ -52,3 +52,14 @@ func (r *repository) CheckIfUserExistsByEmail(ctx context.Context, email string)
 	}
 	return exists, nil
 }
+
+func (r *repository) CheckIfUserExistsByID(ctx context.Context, userID string) (bool, error) {
+	if userID == "" {
+		return false, errors.New("user ID is required")
+	}
+	exists, err := r.db.User.Query().Where(user.ID(userID)).Exist(ctx)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

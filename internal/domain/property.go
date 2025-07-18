@@ -13,7 +13,9 @@ type Property struct {
 	MetaInfo         schema.PropertyMetaInfo
 	IsFeatured       bool
 	IsDeleted        bool
+	Slug             string
 	DeveloperID      string
 	LocationID       string
 	ProjectID        string
+	CreatedByUserID  *string
 }

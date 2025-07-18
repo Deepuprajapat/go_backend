@@ -7,8 +7,8 @@ import (
 
 type AddProjectRequest struct {
 	ProjectName string `json:"project_name" validate:"required"`
-	ProjectURL  string `json:"project_url" validate:"required"`
 	ProjectType string `json:"project_type" validate:"required"`
+	Slug        string `json:"slug" validate:"required"`
 	Locality    string `json:"locality" validate:"required"`
 	ProjectCity string `json:"project_city" validate:"required"`
 	DeveloperID string `json:"developer_id" validate:"required"`
@@ -38,6 +38,7 @@ type UpdatePropertyRequest struct {
 	PricingInfo      schema.PropertyPricingInfo `json:"pricing_info"`
 	PropertyReraInfo schema.PropertyReraInfo    `json:"property_rera_info"`
 	MetaInfo         schema.PropertyMetaInfo    `json:"meta_info"`
+	Slug             string                     `json:"slug"`
 	IsFeatured       bool                       `json:"is_featured"`
 	IsDeleted        bool                       `json:"is_deleted"`
 	DeveloperID      string                     `json:"developer_id"`
@@ -46,9 +47,10 @@ type UpdatePropertyRequest struct {
 }
 
 type AddPropertyRequest struct {
-	ProjectID    string `json:"project_id"`
-	Name         string `json:"name"`
-	PropertyType string `json:"property_type"`
+	ProjectID       string  `json:"project_id"`
+	Name            string  `json:"name"`
+	PropertyType    string  `json:"property_type"`
+	CreatedByUserID *string `json:"created_by_user_id,omitempty"`
 }
 
 type ProjectFilterRequest struct {

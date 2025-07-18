@@ -10,25 +10,28 @@ type SimpleDeveloper struct {
 	Name             string `json:"name"`
 	DeveloperLogo    string `json:"developer_logo"`
 	DeveloperAddress string `json:"developer_address"`
+	EstablishedYear	 int  `json:"establised_year"`
 }
 
 type Property struct {
-	ID             string                     `json:"id"`
-	Name           string                     `json:"name"`
-	PropertyImages []string                   `json:"property_images"`
-	WebCards       WebCards                   `json:"web_cards"`
-	PricingInfo    schema.PropertyPricingInfo `json:"pricing_info"`
-	PropertyRera   schema.PropertyReraInfo    `json:"property_rera_info"`
-	MetaInfo       schema.PropertyMetaInfo    `json:"meta_info"`
-	DeveloperID    string                     `json:"developer_id"`
-	LocationID     string                     `json:"location_id"`
-	ProjectID      string                     `json:"project_id,omitempty"`
-	Developer      *SimpleDeveloper           `json:"developer,omitempty"`
+	ID              string                     `json:"id"`
+	Name            string                     `json:"name"`
+	PropertyImages  []string                   `json:"property_images"`
+	WebCards        WebCards                   `json:"web_cards"`
+	PricingInfo     schema.PropertyPricingInfo `json:"pricing_info"`
+	PropertyRera    schema.PropertyReraInfo    `json:"property_rera_info"`
+	MetaInfo        schema.PropertyMetaInfo    `json:"meta_info"`
+	DeveloperID     string                     `json:"developer_id"`
+	LocationID      string                     `json:"location_id"`
+	ProjectID       string                     `json:"project_id,omitempty"`
+	CreatedByUserID string                     `json:"created_by_user_id,omitempty"`
+	Developer       *SimpleDeveloper           `json:"developer,omitempty"`
 }
 
 type WebCards struct {
 	PropertyDetails   schema.PropertyDetails   `json:"property_details,omitempty"`
 	PropertyFloorPlan schema.PropertyFloorPlan `json:"property_floor_plan,omitempty"`
+	WhyToChoose       schema.WhyToChoose       `json:"why_to_choose,omitempty"`
 	KnowAbout         schema.KnowAbout         `json:"know_about,omitempty"`
 	VideoPresentation schema.VideoPresentation `json:"video_presentation,omitempty"`
 	Amenities         schema.Amenities         `json:"amenities,omitempty"`
@@ -49,6 +52,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 			Name:             property.Edges.Developer.Name,
 			DeveloperLogo:    property.Edges.Developer.MediaContent.DeveloperLogo,
 			DeveloperAddress: developerAddress,
+			EstablishedYear: property.Edges.Developer.EstablishedYear,
 		}
 	}
 
@@ -62,6 +66,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	webCard := WebCards{
 		PropertyDetails:   property.WebCards.PropertyDetails,
 		PropertyFloorPlan: property.WebCards.PropertyFloorPlan,
+		WhyToChoose:       project.WebCards.WhyToChoose,
 		KnowAbout:         project.WebCards.KnowAbout,
 		VideoPresentation: project.WebCards.VideoPresentation,
 		Amenities:         project.WebCards.Amenities,
@@ -69,22 +74,24 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	}
 
 	return &Property{
-		ID:             property.ID,
-		Name:           property.Name,
-		PropertyImages: property.PropertyImages,
-		WebCards:       webCard,
-		PricingInfo:    property.PricingInfo,
-		PropertyRera:   property.PropertyReraInfo,
-		MetaInfo:       property.MetaInfo,
-		DeveloperID:    property.DeveloperID,
-		LocationID:     property.LocationID,
-		ProjectID:      property.ProjectID,
-		Developer:      developer,
+		ID:              property.ID,
+		Name:            property.Name,
+		PropertyImages:  property.PropertyImages,
+		WebCards:        webCard,
+		PricingInfo:     property.PricingInfo,
+		PropertyRera:    property.PropertyReraInfo,
+		MetaInfo:        property.MetaInfo,
+		DeveloperID:     property.DeveloperID,
+		LocationID:      property.LocationID,
+		ProjectID:       property.ProjectID,
+		CreatedByUserID: property.CreatedByUserID,
+		Developer:       developer,
 	}
 }
 
 type AddPropertyResponse struct {
 	PropertyID string `json:"property_id"`
+	Slug       string `json:"slug"`
 }
 
 type PropertyListResponse struct {
@@ -98,6 +105,7 @@ type PropertyListResponse struct {
 	Location         string   `json:"location"`
 	DeveloperName    string   `json:"developer_name"`
 	Configuration    string   `json:"configuration"`
+	Slug 			string    `json:"slug"`
 }
 
 func GetPropertyListResponse(property *ent.Property, developerName string, location string) *PropertyListResponse {
@@ -112,5 +120,6 @@ func GetPropertyListResponse(property *ent.Property, developerName string, locat
 		Configuration:    property.WebCards.PropertyDetails.Configuration.Value,
 		Location:         location,
 		DeveloperName:    developerName,
+		Slug: 			  property.Slug,
 	}
 }

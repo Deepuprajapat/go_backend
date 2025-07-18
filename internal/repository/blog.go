@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/blogs"
@@ -21,12 +22,34 @@ import (
 func (r *repository) GetAllBlogs() ([]*ent.Blogs, error) {
 	ctx := context.Background()
 
-	// Get all blogs
+	// Get all blogs that are not deleted
 	blogList, err := r.db.Blogs.Query().
+		Where(blogs.IsDeletedEQ(false)).
 		Order(ent.Desc(blogs.FieldID)).
 		All(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get blogs")
+		return nil, err
+	}
+
+	return blogList, nil
+}
+
+func (r *repository) GetAllBlogsWithFilter(isPublished *bool) ([]*ent.Blogs, error) {
+	ctx := context.Background()
+
+	query := r.db.Blogs.Query().
+		Where(blogs.IsDeletedEQ(false)). // ✅ Add this filter
+		Order(ent.Desc(blogs.FieldID))
+
+	// ✅ Add filter if isPublished is provided
+	if isPublished != nil {
+		query = query.Where(blogs.IsPublished(*isPublished))
+	}
+
+	blogList, err := query.All(ctx)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get blogs with filter")
 		return nil, err
 	}
 
@@ -47,13 +70,14 @@ func (r *repository) GetBlogByID(id string) (*ent.Blogs, error) {
 	return blog, nil
 }
 
-func (r *repository) CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error) {
+func (r *repository) CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority, isPublished bool) (*ent.Blogs, error) {
 	blog, err := r.db.Blogs.Create().
 		SetID(uuid.New().String()).
-		SetBlogURL(blogURL).
+		SetSlug(slug).
 		SetBlogContent(blogContent).
 		SetSeoMetaInfo(seoMetaInfo).
 		SetIsPriority(isPriority).
+		SetIsPublished(isPublished).
 		Save(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to create blog")
@@ -75,6 +99,7 @@ func (r *repository) DeleteBlog(ctx context.Context, id string) error {
 	// Soft delete by updating is_deleted flag
 	_, err = r.db.Blogs.UpdateOneID(id).
 		SetIsDeleted(true).
+		SetDeletedAt(time.Now()).
 		Save(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to delete blog")
@@ -97,7 +122,7 @@ func (r *repository) UpdateBlog(ctx context.Context, id string, blogURL *string,
 	update := r.db.Blogs.UpdateOneID(id)
 
 	if blogURL != nil {
-		update.SetBlogURL(*blogURL)
+		update.SetSlug(*blogURL)
 	}
 	if blogContent != nil {
 		update.SetBlogContent(*blogContent)

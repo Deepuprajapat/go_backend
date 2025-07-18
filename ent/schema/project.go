@@ -4,8 +4,10 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 )
 
@@ -17,8 +19,9 @@ func (Project) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").Unique(),
 		field.String("name"),
-		field.Text("description"),
+		field.Text("description").Optional(),
 		field.String("status").GoType(enums.ProjectStatus("")),
+		field.String("slug").Optional(),
 		field.String("min_price").Default("0").Optional(),
 		field.String("max_price").Default("0").Optional(),
 		field.JSON("timeline_info", TimelineInfo{}).Optional(),
@@ -42,6 +45,19 @@ func (Project) Edges() []ent.Edge {
 		edge.To("properties", Property.Type),
 		edge.From("location", Location.Type).Ref("projects").Unique(),
 		edge.From("developer", Developer.Type).Ref("projects").Unique(),
+	}
+}
+
+func (Project) Indexes() []ent.Index {
+	return []ent.Index{
+		// Index on id field
+		index.Fields("id"),
+		// Index on canonical field from meta_info JSON for efficient canonical lookups
+		index.Fields("meta_info").
+			StorageKey("idx_project_canonical").
+			Annotations(
+				entsql.IndexWhere("meta_info->>'canonical' IS NOT NULL"),
+			),
 	}
 }
 
@@ -202,7 +218,6 @@ type SEOMeta struct {
 	Title         string   `json:"title,omitempty"`
 	Description   string   `json:"description,omitempty"`
 	Keywords      string   `json:"keywords,omitempty"`
-	Canonical     string   `json:"canonical,omitempty"`
 	ProjectSchema []string `json:"project_schema,omitempty"` //[ "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org/\",\n  \"@type\": \"Product\",\n  \"name\": \"ACE Divino\",\n  \"image\": \"https://image.investmango.com/images/img/ace-divino/ace-divino-greater-noida-west.webp\",\n  \"description\": \"ACE Divino Sector 1, Noida Extension: Explore prices, floor plans, payment options, location, photos, videos, and more. Download the project brochure now!\",\n  \"brand\": {\n    \"@type\": \"Brand\",\n    \"name\": \"Ace Group of India\"\n  },\n  \"offers\": {\n    \"@type\": \"AggregateOffer\",\n    \"url\": \"https://www.investmango.com/ace-divino\",\n    \"priceCurrency\": \"INR\",\n    \"lowPrice\": \"18800000\",\n    \"highPrice\": \"22500000\"\n  }\n}\n</script>" ]
 }
 

@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"net/http"
@@ -49,9 +50,11 @@ func (c *application) AddProject(input request.AddProjectRequest) (*response.Add
 
 	project.ProjectID = fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(time.Now().Unix(), 10))))[:16]
 	project.ProjectName = input.ProjectName
-	project.ProjectURL = input.ProjectURL
 	project.ProjectType = input.ProjectType
+	project.Slug = input.Slug
 	project.DeveloperID = input.DeveloperID
+	project.Locality = input.Locality
+	project.ProjectCity = input.ProjectCity
 
 	projectID, err := c.repo.AddProject(project)
 	if err != nil {
@@ -119,6 +122,11 @@ func (c *application) DeleteProject(id string) *imhttp.CustomError {
 }
 
 func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError) {
+
+	if request.Filters == nil {
+		request.Filters = make(map[string]interface{})
+	}
+
 	projects, err := c.repo.GetAllProjects(request.Filters)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to list projects")
@@ -139,7 +147,7 @@ func (c *application) ListProjects(request *request.GetAllAPIRequest) ([]*respon
 				Configuration: fullProject.WebCards.Details.Configuration.Value,
 				MinPrice:      fullProject.MinPrice,
 				Sizes:         fullProject.WebCards.Details.Sizes.Value,
-				Canonical:     fullProject.MetaInfo.Canonical,
+				Slug:          fullProject.Slug,
 				// Add full project details
 				FullDetails: fullProject,
 			})
@@ -195,6 +203,11 @@ func (c *application) CompareProjects(projectIDs []string) (*response.ProjectCom
 		comparisonProjects = append(comparisonProjects, comparisonProject)
 	}
 
+	// Note: response.ProjectComparisonResponse does not have UniqueCities field.
+	// If you want to return uniqueCities, you need to add it to the struct.
+	// For now, just log or ignore it, or add a comment.
+	// logger.Get().Info().Strs("uniqueCities", uniqueCities).Msg("Unique cities in compared projects")
+
 	return &response.ProjectComparisonResponse{
 		Projects: comparisonProjects,
 	}, nil
@@ -208,4 +221,100 @@ func (c *application) GetProjectByURL(url string) (*ent.Project, *imhttp.CustomE
 	}
 
 	return project, nil
+}
+
+func (c *application) GetProjectFilters() (map[string]interface{}, *imhttp.CustomError) {
+
+	allLocations, err := c.repo.ListLocations(map[string]interface{}{})
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get locations")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get locations", err.Error())
+	}
+
+	if len(allLocations) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "No locations found", "No locations found")
+	}
+
+	cityWithLocations := make(map[string][]string)
+	for _, location := range allLocations {
+		cityWithLocations[location.City] = append(cityWithLocations[location.City], location.LocalityName)
+	}
+
+	if len(cityWithLocations) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "No locations found", "No locations found")
+	}
+
+	developers, err := c.repo.GetAllDevelopers()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get developers")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get developers", err.Error())
+	}
+
+	if len(developers) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "No developers found", "No developers found")
+	}
+
+	// Only return developer names
+	developerNames := make([]string, 0, len(developers))
+	for _, dev := range developers {
+		if dev != nil {
+			developerNames = append(developerNames, dev.Name)
+		}
+	}
+
+	return map[string]interface{}{
+		"developers": developerNames,
+		"locations":  cityWithLocations,
+		"types":      []string{"Residential", "Commercial"},
+		"isPremium":  []bool{true, false},
+		"isPriority": []bool{true, false},
+		"isFeatured": []bool{true, false},
+	}, nil
+}
+
+func (c *application) GetProjectBySlug(slug string) (*response.Project, *imhttp.CustomError) {
+	project, err := c.repo.GetProjectByCanonicalURL(context.Background(), slug)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project by slug")
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found", err.Error())
+	}
+
+	// Convert to response format
+	projectResponse := &response.Project{
+		ProjectID:    project.ID,
+		ProjectName:  project.Name,
+		Description:  project.Description,
+		Status:       project.Status, // enums.ProjectStatus type expected
+		Slug:         project.Slug,
+		MinPrice:     project.MinPrice,
+		MaxPrice:     project.MaxPrice,
+		TimelineInfo: project.TimelineInfo,
+		ProjectType:  string(project.ProjectType),
+		MetaInfo:     project.MetaInfo,
+		WebCards:     project.WebCards,
+		LocationInfo: project.LocationInfo,
+		IsFeatured:   project.IsFeatured,
+		IsPremium:    project.IsPremium,
+		IsPriority:   project.IsPriority,
+	}
+
+	return projectResponse, nil
+}
+
+func (c *application) GetProjectNamesOnly() ([]*response.ProjectNameResponse, *imhttp.CustomError) {
+	projects, err := c.repo.GetProjectNamesOnly()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project names")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project names", err.Error())
+	}
+
+	var projectNames []*response.ProjectNameResponse
+	for _, project := range projects {
+		projectNames = append(projectNames, &response.ProjectNameResponse{
+			ProjectID:   project.ID,
+			ProjectName: project.Name,
+		})
+	}
+
+	return projectNames, nil
 }

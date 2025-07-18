@@ -18,6 +18,7 @@ type (
 		JWTConfig
 		Logger
 		S3
+		CRM
 	}
 
 	Server struct {
@@ -25,9 +26,9 @@ type (
 		Host string `envconfig:"HOST"`
 	}
 	Database struct {
-		DB_Port    int    `envconfig:"DB_PORT"`
-		DB_HOST    string `envconfig:"DB_HOST"`
-		URL        string `envconfig:"DATABASE_URL"`
+		DB_Port int    `envconfig:"DB_PORT"`
+		DB_HOST string `envconfig:"DB_HOST"`
+		URL     string `envconfig:"DATABASE_URL"`
 	}
 	JWTConfig struct {
 		AuthSecret        string        `envconfig:"AUTH_JWT_SECRET"`
@@ -36,13 +37,21 @@ type (
 	}
 	Logger struct {
 		Level zerolog.Level `envconfig:"LOG_LEVEL" default:"1"`
+		Mode  string        `envconfig:"LOG_MODE" default:"simple"`
 	}
 
 	S3 struct {
-		Bucket      string `envconfig:"S3_BUCKET"`
-		Region      string `envconfig:"S3_REGION"`
-		AccessKeyID string `envconfig:"S3_ACCESS_KEY_ID"`
-		SecretKey   string `envconfig:"S3_SECRET_KEY"`
+		Bucket      string `envconfig:"AWS_BUCKET"`
+		Region      string `envconfig:"AWS_REGION"`
+		AccessKeyID string `envconfig:"AWS_ACCESS_KEY_ID"`
+		SecretKey   string `envconfig:"AWS_SECRET_KEY"`
+	}
+
+	CRM struct {
+		BaseURL    string        `envconfig:"CRM_BASE_URL" default:"http://148.66.133.154:8181/new-leads/from/open-source"`
+		Timeout    time.Duration `envconfig:"CRM_TIMEOUT" default:"30s"`
+		Enabled    bool          `envconfig:"CRM_ENABLED" default:"true"`
+		MaxRetries int           `envconfig:"CRM_MAX_RETRIES" default:"3"`
 	}
 )
 

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/VI-IM/im_backend_go/request"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
@@ -16,13 +17,28 @@ func (h *Handler) GenerateToken(r *http.Request) (*imhttp.Response, *imhttp.Cust
 	}
 	resp, err := h.app.GetAccessToken(req.Email, req.Password)
 	if err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusOK, "Invalid request", err.Error())
 	}
 
-	return &imhttp.Response{
+	response := &imhttp.Response{
 		Data:       resp,
 		StatusCode: http.StatusOK,
-	}, nil
+	}
+
+	if resp.AccessToken != "" {
+		authCookie := &http.Cookie{
+			Name:     "authToken",
+			Value:    resp.AccessToken,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
+			Expires:  time.Now().Add(24 * time.Hour),
+		}
+		response.Cookies = []*http.Cookie{authCookie}
+	}
+
+	return response, nil
 }
 
 // RefreshToken refreshes the access token

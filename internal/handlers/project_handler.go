@@ -33,7 +33,7 @@ func (h *Handler) AddProject(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
-	if input.ProjectName == "" || input.ProjectURL == "" || input.ProjectType == "" || input.Locality == "" || input.ProjectCity == "" || input.DeveloperID == "" {
+	if input.ProjectName == "" || input.ProjectType == "" || input.Slug == "" || input.Locality == "" || input.ProjectCity == "" || input.DeveloperID == "" {
 		logger.Get().Error().Msg("Invalid request body")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Project name, project URL, project type, locality, project city, and developer ID are required")
 	}
@@ -151,6 +151,52 @@ func (h *Handler) CompareProjects(r *http.Request) (*imhttp.Response, *imhttp.Cu
 	}
 
 	response, err := h.app.CompareProjects(input.ProjectIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *Handler) GetProjectNames(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	projectNames, err := h.app.GetProjectNamesOnly()
+	if err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		Data:       projectNames,
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *Handler) GetProjectFilters(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+
+	filters, err := h.app.GetProjectFilters()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get project filters")
+		return nil, err
+	}
+
+	if filters == nil {
+		logger.Get().Error().Msg("Failed to get project filters")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get project filters", "Failed to get project filters")
+	}
+
+	return &imhttp.Response{
+		Data:       filters,
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *Handler) GetProjectBySlug(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	response, err := h.app.GetProjectBySlug(slug)
 	if err != nil {
 		return nil, err
 	}

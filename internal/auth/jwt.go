@@ -9,18 +9,20 @@ import (
 )
 
 type Claims struct {
-	UserID  int    `json:"user_id"`
+	UserID  string `json:"user_id"`
 	IsAdmin bool   `json:"is_admin"`
+	Role    string `json:"role"`
 	Phone   string `json:"phone"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(userID int, isAdmin bool, phone string) (string, error) {
+func GenerateToken(userID string, isAdmin bool, role string, phone string) (string, error) {
 	expirationTime := time.Now().Add(time.Duration(config.GetConfig().ExpiresInDuration) * time.Hour)
 
 	claims := &Claims{
 		UserID:  userID,
 		IsAdmin: isAdmin,
+		Role:    role,
 		Phone:   phone,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
