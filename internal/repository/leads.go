@@ -190,6 +190,20 @@ func (r *repository) GetAllLeads(ctx context.Context, filters map[string]interfa
 		query = query.Where(leads.HasPropertyWith(property.ID(propertyID)))
 	}
 
+	// Handle multiple property IDs
+	if propertyIDs, ok := filters["property_ids"].([]string); ok && len(propertyIDs) > 0 {
+		// Filter out empty strings
+		var validPropertyIDs []string
+		for _, id := range propertyIDs {
+			if id != "" {
+				validPropertyIDs = append(validPropertyIDs, id)
+			}
+		}
+		if len(validPropertyIDs) > 0 {
+			query = query.Where(leads.HasPropertyWith(property.IDIn(validPropertyIDs...)))
+		}
+	}
+
 	if phone, ok := filters["phone"].(string); ok && phone != "" {
 		query = query.Where(leads.Phone(phone))
 	}

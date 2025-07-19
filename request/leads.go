@@ -19,11 +19,12 @@ type ResendOTPRequest struct {
 }
 
 type GetLeadsRequest struct {
-	ProjectID  string `json:"project_id"`
-	PropertyID string `json:"property_id"`
-	Phone      string `json:"phone"`
-	StartDate  string `json:"start_date"`
-	EndDate    string `json:"end_date"`
-	Date       string `json:"date"`
-	Source     string `json:"source"`
+	ProjectID   string   `json:"project_id"`
+	PropertyID  string   `json:"property_id"`
+	PropertyIDs []string `json:"property_ids"`
+	Phone       string   `json:"phone"`
+	StartDate   string   `json:"start_date"`
+	EndDate     string   `json:"end_date"`
+	Date        string   `json:"date"`
+	Source      string   `json:"source"`
 }

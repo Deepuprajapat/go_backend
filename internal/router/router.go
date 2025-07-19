@@ -143,9 +143,9 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/leads/validate-otp", imhttp.AppHandler(handler.ValidateOTP)).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/leads/resend-otp", imhttp.AppHandler(handler.ResendOTP)).Methods(http.MethodPatch)
 	
-	// Protected lead routes - only dm role can access lead data
-	Router.Handle("/v1/api/leads/get/by/{id}", middleware.RequireDM(imhttp.AppHandler(handler.GetLeadByID))).Methods(http.MethodGet)
-	Router.Handle("/v1/api/leads", middleware.RequireDM(imhttp.AppHandler(handler.GetAllLeads))).Methods(http.MethodGet)
+	// Protected lead routes - business partners, dm, and superadmin can access lead data
+	Router.Handle("/v1/api/leads/get/by/{id}", middleware.RequireLeadAccess(imhttp.AppHandler(handler.GetLeadByID))).Methods(http.MethodGet)
+	Router.Handle("/v1/api/leads", middleware.RequireLeadAccess(imhttp.AppHandler(handler.GetAllLeads))).Methods(http.MethodGet)
 
 	//content routes
 	Router.Handle("/v1/api/content/test/{url}", imhttp.AppHandler(handler.GetProjectSEOContent)).Methods(http.MethodGet)
