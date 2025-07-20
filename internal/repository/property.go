@@ -245,7 +245,8 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		property.SetWebCards(newWebCards)
 	}
 
-	if input.PricingInfo != (oldProperty.PricingInfo) {
+	// Only update PricingInfo if it contains actual data (non-empty Price field)
+	if input.PricingInfo.Price != "" && input.PricingInfo != (oldProperty.PricingInfo) {
 		property.SetPricingInfo(input.PricingInfo)
 	}
 	if input.PropertyReraInfo != (oldProperty.PropertyReraInfo) {
@@ -317,9 +318,7 @@ func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error)
 	slug := generateSlug(input.Name, propertyID)
 
 	// Create default values for required JSON fields
-	defaultWebCards := createDefaultWebCards()
 	defaultPricingInfo := schema.PropertyPricingInfo{Price: ""}
-	defaultReraInfo := schema.PropertyReraInfo{ReraNumber: ""}
 
 	property := r.db.Property.Create().
 		SetID(propertyID).
@@ -327,9 +326,9 @@ func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error)
 		SetName(input.Name).
 		SetSlug(slug).
 		SetPropertyType(input.PropertyType).
-		SetWebCards(defaultWebCards).
+		SetWebCards(input.WebCards).
 		SetPricingInfo(defaultPricingInfo).
-		SetPropertyReraInfo(defaultReraInfo)
+		SetPropertyReraInfo(input.PropertyReraInfo)
 	if project.Edges.Developer != nil && project.Edges.Developer.ID != "" {
 		property.SetDeveloperID(project.Edges.Developer.ID)
 	}
@@ -392,7 +391,7 @@ func (r *repository) applyPropertyFilters(query *ent.PropertyQuery, filters map[
 
 	// Filter by property_type - this requires JSON field filtering
 	if propertyType, ok := filters["property_type"].(string); ok && propertyType != "" {
-		// Note: This is a simplified approach. For complex JSON filtering, 
+		// Note: This is a simplified approach. For complex JSON filtering,
 		// you might need raw SQL or restructure the schema
 		query = query.Where(property.PropertyTypeContains(propertyType))
 	}
