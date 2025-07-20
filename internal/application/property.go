@@ -1,8 +1,10 @@
 package application
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
@@ -20,9 +22,17 @@ func (c *application) GetPropertyByID(id string) (*response.Property, *imhttp.Cu
 	return response.GetPropertyFromEnt(property), nil
 }
 
-func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError) {
-	var property domain.Property
+func (c *application) GetPropertyBySlug(ctx context.Context, slug string) (*response.Property, *imhttp.CustomError) {
+	property, err := c.repo.GetPropertyBySlug(ctx, slug)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get property by slug")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property", err.Error())
+	}
 
+	return response.GetPropertyFromEnt(property), nil
+}
+
+func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError) {
 	existingProperty, err := c.repo.GetPropertyByID(input.PropertyID)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get property")
@@ -43,18 +53,59 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 		}
 	}
 
-	property.PropertyID = input.PropertyID
-	property.Name = input.Name
-	property.PropertyImages = input.PropertyImages
-	property.WebCards = input.WebCards
-	property.PricingInfo = input.PricingInfo
-	property.PropertyReraInfo = input.PropertyReraInfo
-	property.MetaInfo = input.MetaInfo
+	// Start with existing property data to preserve current values
+	property := domain.Property{
+		PropertyID:       existingProperty.ID,
+		Name:             existingProperty.Name,
+		PropertyType:     existingProperty.PropertyType,
+		PropertyImages:   existingProperty.PropertyImages,
+		WebCards:         existingProperty.WebCards,
+		PricingInfo:      existingProperty.PricingInfo,
+		PropertyReraInfo: existingProperty.PropertyReraInfo,
+		MetaInfo:         existingProperty.MetaInfo,
+		IsFeatured:       existingProperty.IsFeatured,
+		IsDeleted:        existingProperty.IsDeleted,
+		DeveloperID:      existingProperty.DeveloperID,
+		LocationID:       existingProperty.LocationID,
+		ProjectID:        existingProperty.ProjectID,
+	}
+
+	// Selectively update only the fields that are provided and non-empty
+	if input.Name != "" {
+		property.Name = input.Name
+	}
+	if len(input.PropertyImages) > 0 {
+		property.PropertyImages = input.PropertyImages
+	}
+	// Only update PricingInfo if it contains actual data (non-empty Price field)
+	if input.PricingInfo.Price != "" {
+		property.PricingInfo = input.PricingInfo
+	}
+	// Only update WebCards if it's not empty (check if any field is provided)
+	if !isWebCardsEmpty(input.WebCards) {
+		property.WebCards = input.WebCards
+	}
+	// Only update PropertyReraInfo if it contains actual data
+	if input.PropertyReraInfo.ReraNumber != "" {
+		property.PropertyReraInfo = input.PropertyReraInfo
+	}
+	// Only update MetaInfo if it contains actual data
+	if !isMetaInfoEmpty(input.MetaInfo) {
+		property.MetaInfo = input.MetaInfo
+	}
+	if input.DeveloperID != "" {
+		property.DeveloperID = input.DeveloperID
+	}
+	if input.LocationID != "" {
+		property.LocationID = input.LocationID
+	}
+	if input.ProjectID != "" {
+		property.ProjectID = input.ProjectID
+	}
+	// Note: IsFeatured and IsDeleted are boolean fields that can be explicitly set to false,
+	// so we need a different approach. For now, we'll always update them as they might be intentional changes.
 	property.IsFeatured = input.IsFeatured
 	property.IsDeleted = input.IsDeleted
-	property.DeveloperID = input.DeveloperID
-	property.LocationID = input.LocationID
-	property.ProjectID = input.ProjectID
 
 	updatedProperty, err := c.repo.UpdateProperty(property)
 	if err != nil {
@@ -63,6 +114,40 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 	}
 
 	return response.GetPropertyFromEnt(updatedProperty), nil
+}
+
+// Helper function to check if WebCards contains any meaningful data
+func isWebCardsEmpty(webCards schema.WebCards) bool {
+	return webCards.PropertyDetails.BuiltUpArea.Value == "" &&
+		webCards.PropertyDetails.Sizes.Value == "" &&
+		webCards.PropertyDetails.FloorNumber.Value == "" &&
+		webCards.PropertyDetails.Configuration.Value == "" &&
+		webCards.PropertyDetails.PossessionStatus.Value == "" &&
+		webCards.PropertyDetails.Balconies.Value == "" &&
+		webCards.PropertyDetails.CoveredParking.Value == "" &&
+		webCards.PropertyDetails.Bedrooms.Value == "" &&
+		webCards.PropertyDetails.PropertyType.Value == "" &&
+		webCards.PropertyDetails.AgeOfProperty.Value == "" &&
+		webCards.PropertyDetails.FurnishingType.Value == "" &&
+		webCards.PropertyDetails.Facing.Value == "" &&
+		webCards.PropertyDetails.ReraNumber.Value == "" &&
+		webCards.PropertyDetails.Bathrooms.Value == "" &&
+		webCards.PropertyFloorPlan.Title == "" &&
+		len(webCards.PropertyFloorPlan.Plans) == 0 &&
+		webCards.KnowAbout.Description == "" &&
+		len(webCards.WhyToChoose.UspList) == 0 &&
+		len(webCards.WhyToChoose.ImageUrls) == 0 &&
+		len(webCards.VideoPresentation.Urls) == 0 &&
+		webCards.LocationMap.Description == "" &&
+		webCards.LocationMap.GoogleMapLink == ""
+}
+
+// Helper function to check if MetaInfo contains any meaningful data
+func isMetaInfoEmpty(metaInfo schema.PropertyMetaInfo) bool {
+	return metaInfo.Title == "" &&
+		metaInfo.Description == "" &&
+		metaInfo.Keywords == "" &&
+		metaInfo.Canonical == ""
 }
 
 func (c *application) GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError) {

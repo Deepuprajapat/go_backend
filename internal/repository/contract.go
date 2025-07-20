@@ -42,6 +42,7 @@ type AppRepository interface {
 
 	// Property
 	GetPropertyByID(id string) (*ent.Property, error)
+	GetPropertyBySlug(ctx context.Context, slug string) (*ent.Property, error)
 	UpdateProperty(input domain.Property) (*ent.Property, error)
 	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
 	AddProperty(input domain.Property) (*PropertyResult, error)

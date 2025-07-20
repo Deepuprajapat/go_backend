@@ -102,6 +102,7 @@ func Init(app application.ApplicationInterface) {
 	// property routes
 	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(handler.GetPropertiesOfProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/slug/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
 
 	// Protected property routes (require business_partner or superadmin role)

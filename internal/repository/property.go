@@ -84,7 +84,22 @@ func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("property not found")
 		}
+		logger.Get().Error().Err(err).Msg("Failed to get property")
+		return nil, err
+	}
+	return property, nil
+}
 
+func (r *repository) GetPropertyBySlug(ctx context.Context, slug string) (*ent.Property, error) {
+	property, err := r.db.Property.Query().
+		Where(property.Slug(slug)).
+		WithDeveloper().
+		WithProject().
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, errors.New("property not found")
+		}
 		logger.Get().Error().Err(err).Msg("Failed to get property")
 		return nil, err
 	}
@@ -103,6 +118,11 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 
 	if input.Name != "" {
 		property.SetName(input.Name)
+		// Regenerate slug when property name changes
+		if input.Name != oldProperty.Name {
+			newSlug := generateSlug(input.Name, input.PropertyID)
+			property.SetSlug(newSlug)
+		}
 	}
 	if len(input.PropertyImages) > 0 {
 		property.SetPropertyImages(input.PropertyImages)
