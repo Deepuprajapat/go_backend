@@ -186,11 +186,7 @@ func (r *repository) GetAllLeads(ctx context.Context, filters map[string]interfa
 		query = query.Where(leads.HasProjectWith(project.ID(projectID)))
 	}
 
-	if propertyID, ok := filters["property_id"].(string); ok && propertyID != "" {
-		query = query.Where(leads.HasPropertyWith(property.ID(propertyID)))
-	}
-
-	// Handle multiple property IDs
+	// Handle property filtering - prioritize property_ids over property_id
 	if propertyIDs, ok := filters["property_ids"].([]string); ok && len(propertyIDs) > 0 {
 		// Filter out empty strings
 		var validPropertyIDs []string
@@ -202,6 +198,8 @@ func (r *repository) GetAllLeads(ctx context.Context, filters map[string]interfa
 		if len(validPropertyIDs) > 0 {
 			query = query.Where(leads.HasPropertyWith(property.IDIn(validPropertyIDs...)))
 		}
+	} else if propertyID, ok := filters["property_id"].(string); ok && propertyID != "" {
+		query = query.Where(leads.HasPropertyWith(property.ID(propertyID)))
 	}
 
 	if phone, ok := filters["phone"].(string); ok && phone != "" {
