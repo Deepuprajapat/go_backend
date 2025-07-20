@@ -1,4 +1,4 @@
-.PHONY: build run test test-integration test-unit clean docker-up docker-down deps generate migrate migrate-status migrate-validate migrate-diff migrate-reset dev-setup db-reset test-setup
+.PHONY: build run test test-integration test-unit clean docker-up docker-down deps generate migrate migrate-status migrate-validate migrate-diff migrate-reset dev-setup db-reset test-setup reset
 
 # Build the application
 build:
@@ -7,7 +7,8 @@ build:
 
 # Seed testimonials into static_site_data
 seed-testimonials:
-	PGPASSWORD=password psql -h localhost -p 5434 -U im_db_dev -d mydb -f sql/seed_testimonials.sql
+	docker cp sql/seed_testimonials.sql im_postgres_db:/tmp/seed_testimonials.sql
+	docker exec im_postgres_db psql -U im_db_dev -d mydb -f /tmp/seed_testimonials.sql
 
 # Run the application
 build-run: build
@@ -60,6 +61,38 @@ docker-up:
 # Stop Docker services
 docker-down:
 	docker-compose down
+
+# Reset database with clean slate (removes all data and recreates)
+reset:
+	@echo "🔄 Resetting database with clean slate..."
+	@echo "⚠️  This will destroy ALL existing data!"
+	@sleep 3
+	@echo "📦 Stopping and removing containers and volumes..."
+	docker-compose down -v
+	@echo "🚀 Starting fresh database container..."
+	docker-compose up -d
+	@echo "⏳ Waiting for database to be ready..."
+	@timeout=60; \
+	while [ $$timeout -gt 0 ]; do \
+		if docker exec im_postgres_db pg_isready -U im_db_dev -d mydb >/dev/null 2>&1; then \
+			echo "✅ Database is ready!"; \
+			break; \
+		fi; \
+		echo "⏱️  Waiting for database... ($$timeout seconds remaining)"; \
+		sleep 2; \
+		timeout=$$((timeout-2)); \
+	done; \
+	if [ $$timeout -le 0 ]; then \
+		echo "❌ Database failed to start within 60 seconds"; \
+		exit 1; \
+	fi
+	@echo "🔧 Running migrations..."
+	make migrate
+	@echo "🌱 Seeding data..."
+	make seed-data
+	make seed-projects
+	make seed-testimonials
+	@echo "🎉 Database reset complete! Clean slate ready for development."
 
 # Reset database by dropping all tables
 db-reset: 

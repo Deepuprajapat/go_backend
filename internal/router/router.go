@@ -98,7 +98,7 @@ func Init(app application.ApplicationInterface) {
 
 	//internal routes
 	// Protected property internal routes (require business_partner or superadmin role)
-	Router.Handle("/v1/api/internal/properties", imhttp.AppHandler(handler.AddProperty)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/internal/properties", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.AddProperty))).Methods(http.MethodPost)
 	Router.Handle("/v1/api/internal/properties/{property_id}", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.UpdateProperty))).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/internal/properties/{property_id}", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.DeleteProperty))).Methods(http.MethodDelete)
 
