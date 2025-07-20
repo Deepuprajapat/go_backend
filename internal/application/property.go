@@ -107,6 +107,15 @@ func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*resp
 	// so we need a different approach. For now, we'll always update them as they might be intentional changes.
 	property.IsFeatured = input.IsFeatured
 	property.IsDeleted = input.IsDeleted
+<<<<<<< HEAD
+=======
+	property.DeveloperID = input.DeveloperID
+	property.LocationID = input.LocationID
+	property.ProjectID = input.ProjectID
+	if input.Slug != "" {
+		property.Slug = input.Slug
+	}
+>>>>>>> main
 
 	updatedProperty, err := c.repo.UpdateProperty(property)
 	if err != nil {

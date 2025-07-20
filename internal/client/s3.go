@@ -29,11 +29,14 @@ type S3ClientInterface interface {
 
 func NewS3Client(bucket string) (S3ClientInterface, error) {
 
+	// Get AWS region from environment variable
 	region := os.Getenv("AWS_REGION")
 	if region == "" {
-		return nil, fmt.Errorf("AWS_REGION environment variable is not set")
+		return nil, fmt.Errorf("AWS_REGION is not set in config")
 	}
-	cfg, err := config.LoadDefaultConfig(context.Background())
+
+	// Load AWS configuration with explicit region
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
 	if err != nil {
 		return nil, err
 	}
@@ -56,9 +59,8 @@ func NewS3Client(bucket string) (S3ClientInterface, error) {
 			o.BaseEndpoint = aws.String(endpointURL)
 			o.UsePathStyle = true // LocalStack requires path-style addressing
 		})
-		logger.Get().Info().Msgf("S3 client configured for LocalStack endpoint: %s", endpointURL)
 	} else {
-		// Use default AWS configuration
+		// Use default AWS configuration with explicit region
 		client = s3.NewFromConfig(cfg)
 	}
 

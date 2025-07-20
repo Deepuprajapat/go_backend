@@ -15,6 +15,7 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/domain"
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 	"github.com/VI-IM/im_backend_go/shared/logger"
+	"github.com/google/uuid"
 )
 
 func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
@@ -37,17 +38,35 @@ func (r *repository) GetProjectByID(id string) (*ent.Project, error) {
 }
 
 func (r *repository) AddProject(input domain.Project) (string, error) {
-	if err := r.db.Project.Create().
+	// Create location first if locality and project city are provided
+	var locationID string
+	if input.Locality != "" && input.ProjectCity != "" {
+		locationID = uuid.New().String()
+		err := r.db.Location.Create().
+			SetID(locationID).
+			SetCity(input.ProjectCity).
+			SetLocalityName(input.Locality).
+			Exec(context.Background())
+		if err != nil {
+			logger.Get().Error().Err(err).Msg("Failed to create location")
+			return "", err
+		}
+	}
+
+	// Create project
+	projectCreate := r.db.Project.Create().
 		SetID(input.ProjectID).
 		SetName(input.ProjectName).
 		SetStatus(enums.ProjectStatusNEWLAUNCH).
-		SetMetaInfo(schema.SEOMeta{
-			Canonical: input.ProjectURL,
-		}).
+		SetSlug(input.Slug).
 		SetProjectType(projectEnt.ProjectType(input.ProjectType)).
-		SetDescription("").
-		SetDeveloperID(input.DeveloperID).
-		Exec(context.Background()); err != nil {
+		SetDeveloperID(input.DeveloperID)
+
+	if locationID != "" {
+		projectCreate.SetLocationID(locationID)
+	}
+
+	if err := projectCreate.Exec(context.Background()); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to add project")
 		return "", err
 	}
@@ -95,14 +114,14 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 	defer tx.Rollback()
 
-	if input.MaxPrice != ""{
+	if input.MaxPrice != "" {
 		project.SetMaxPrice(input.MaxPrice)
 	}
 
-	if input.MinPrice != ""{
+	if input.MinPrice != "" {
 		project.SetMaxPrice(input.MinPrice)
 	}
-	
+
 	if input.ProjectName != "" {
 		project.SetName(input.ProjectName)
 	}
@@ -113,7 +132,6 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	if input.Description != "" {
 		project.SetDescription(input.Description)
 	}
-
 
 	// Handle TimelineInfo updates
 	if input.TimelineInfo != (schema.TimelineInfo{}) {
@@ -128,7 +146,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Handle MetaInfo updates
-	if input.MetaInfo.Title != "" || input.MetaInfo.Description != "" || input.MetaInfo.Keywords != "" || input.MetaInfo.Canonical != "" || len(input.MetaInfo.ProjectSchema) > 0 {
+	if input.MetaInfo.Title != "" || input.MetaInfo.Description != "" || input.MetaInfo.Keywords != ""  || len(input.MetaInfo.ProjectSchema) > 0 {
 		newMetaInfo := oldProject.MetaInfo
 		if input.MetaInfo.Title != "" {
 			newMetaInfo.Title = input.MetaInfo.Title
@@ -138,9 +156,6 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		}
 		if input.MetaInfo.Keywords != "" {
 			newMetaInfo.Keywords = input.MetaInfo.Keywords
-		}
-		if input.MetaInfo.Canonical != "" {
-			newMetaInfo.Canonical = input.MetaInfo.Canonical
 		}
 		if len(input.MetaInfo.ProjectSchema) > 0 {
 			newMetaInfo.ProjectSchema = input.MetaInfo.ProjectSchema

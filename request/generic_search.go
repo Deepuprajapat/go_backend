@@ -1,7 +1,6 @@
 package request
 
 type CustomSearchPage struct {
-	ID          string                 `json:"id"`
 	Title       string                 `json:"title"`
 	Description string                 `json:"description"`
 	Slug        string                 `json:"slug,omitempty"`

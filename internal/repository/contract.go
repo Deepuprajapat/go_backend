@@ -6,6 +6,7 @@ import (
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
+	"github.com/VI-IM/im_backend_go/response"
 )
 
 type repository struct {
@@ -38,7 +39,10 @@ type AppRepository interface {
 	// Location
 	ListLocations(filters map[string]interface{}) ([]*ent.Location, error)
 	GetLocationByID(id string) (*ent.Location, error)
+	AddLocation(localityName, city, state, phoneNumber, country, pincode string) (*ent.Location, error)
 	SoftDeleteLocation(id string) error
+	GetAllUniqueCities() ([]string, error)
+	GetAllUniqueLocations() ([]string, error)
 
 	// Property
 	GetPropertyByID(id string) (*ent.Property, error)
@@ -55,10 +59,14 @@ type AppRepository interface {
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
 	CheckCategoryExists(category string) (bool, error)
 
+	// Custom Search
+	CheckURLExists(ctx context.Context, url string) (*response.URLExistsResult, error)
+
 	// Blogs
 	GetAllBlogs() ([]*ent.Blogs, error)
+	GetAllBlogsWithFilter(isPublished *bool) ([]*ent.Blogs, error)  // ✅ Add this
 	GetBlogByID(id string) (*ent.Blogs, error)
-	CreateBlog(ctx context.Context, blogURL string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool) (*ent.Blogs, error)
+	CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool, isPublished bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error
 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
 

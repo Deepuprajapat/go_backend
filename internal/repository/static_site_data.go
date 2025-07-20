@@ -26,6 +26,7 @@ func (r *repository) GetStaticSiteData() (*ent.StaticSiteData, error) {
 func (r *repository) UpdateStaticSiteData(data *ent.StaticSiteData) error {
 	_, err := r.db.StaticSiteData.UpdateOneID(data.ID).
 		SetCategoriesWithAmenities(data.CategoriesWithAmenities).
+		SetTestimonials(data.Testimonials).
 		SetUpdatedAt(time.Now()).
 		Save(context.Background())
 	return err

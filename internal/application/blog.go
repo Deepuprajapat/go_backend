@@ -29,6 +29,25 @@ func (c *application) ListBlogs(pagination *request.GetAllAPIRequest) (*response
 	}, nil
 }
 
+func (c *application) ListBlogsWithFilter(isPublished *bool) (*response.BlogListResponse, *imhttp.CustomError) {
+	// ✅ Get blogs with filter from repository
+	blogs, err := c.repo.GetAllBlogsWithFilter(isPublished)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get blogs with filter")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get blogs", err.Error())
+	}
+
+	// Convert to response type
+	blogResponses := make([]*response.BlogListItem, len(blogs))
+	for i, blog := range blogs {
+		blogResponses[i] = response.GetBlogListItemFromEnt(blog)
+	}
+
+	return &response.BlogListResponse{
+		Blogs: blogResponses,
+	}, nil
+}
+
 func (c *application) GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError) {
 	blog, err := c.repo.GetBlogByID(id)
 	if err != nil {
@@ -48,7 +67,9 @@ func (c *application) GetBlogByID(id string) (*response.BlogResponse, *imhttp.Cu
 }
 
 func (c *application) CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError) {
-	blog, err := c.repo.CreateBlog(ctx, req.BlogURL, req.BlogContent, req.SEOMetaInfo, req.IsPriority)
+   
+
+	blog, err := c.repo.CreateBlog(ctx, req.Slug, req.BlogContent, req.SEOMetaInfo, req.IsPriority, req.IsPublished)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to create blog")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create blog", err.Error())

@@ -205,7 +205,7 @@ func seedAdmin(ctx context.Context) {
 		SetIsVerified(true).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
-		SetRole("admin").
+		SetRole("superadmin").
 		Save(ctx)
 
 	if err != nil {

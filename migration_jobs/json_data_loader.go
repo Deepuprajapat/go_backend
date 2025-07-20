@@ -452,7 +452,7 @@ func (j *JSONDataLoader) loadAmenities(data []map[string]interface{}) error {
 func (j *JSONDataLoader) loadProjectAmenities(data []map[string]interface{}) error {
 	for _, row := range data {
 		projectID := getInt64(row["project_id"])
-		amenityID := getInt64(row["amenity_id"])
+		amenityID := getInt64(row["amenities_id"])
 		projectAmenity := LProjectAmenity{
 			ProjectID: projectID,
 			AmenityID: amenityID,

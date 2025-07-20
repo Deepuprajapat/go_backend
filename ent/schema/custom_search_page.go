@@ -21,6 +21,7 @@ func (CustomSearchPage) Fields() []ent.Field {
 		field.JSON("filters", map[string]interface{}{}).Optional(),
 		field.String("search_term"),
 		field.JSON("meta_info", MetaInfo{}).Optional(),
+		field.Bool("is_deleted").Default(false),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

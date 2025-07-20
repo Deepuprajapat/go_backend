@@ -32,6 +32,7 @@ type ApplicationInterface interface {
 	ListProjects(request *request.GetAllAPIRequest) ([]*response.ProjectListResponse, *imhttp.CustomError)
 	CompareProjects(projectIDs []string) (*response.ProjectComparisonResponse, *imhttp.CustomError)
 	GetProjectByURL(url string) (*ent.Project, *imhttp.CustomError)
+	GetProjectFilters() (map[string]interface{}, *imhttp.CustomError)
 	GetProjectNamesOnly() ([]*response.ProjectNameResponse, *imhttp.CustomError)
 
 	// Developer
@@ -42,6 +43,7 @@ type ApplicationInterface interface {
 	// Location
 	GetAllLocations(filters map[string]interface{}) ([]*response.Location, *imhttp.CustomError)
 	GetLocationByID(id string) (*response.Location, *imhttp.CustomError)
+	AddLocation(input request.AddLocationRequest) (*response.Location, *imhttp.CustomError)
 	DeleteLocation(id string) *imhttp.CustomError
 
 	// Property
@@ -63,13 +65,14 @@ type ApplicationInterface interface {
 	// DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
 	// DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
 	// UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
-	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
+	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) (*response.StaticSiteDataResponse, *imhttp.CustomError)
 
 	// Upload File
 	UploadFile(request request.UploadFileRequest) (string, string, *imhttp.CustomError)
 
 	// Blogs
 	ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError)
+	ListBlogsWithFilter(isPublished *bool) (*response.BlogListResponse, *imhttp.CustomError)
 	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
@@ -79,13 +82,17 @@ type ApplicationInterface interface {
 	GetProjectByCanonicalURL(ctx context.Context, url string) (*ent.Project, *imhttp.CustomError)
 	GetPropertyByCanonicalURL(ctx context.Context, url string) (*ent.Property, *imhttp.CustomError)
 	GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, *imhttp.CustomError)
+	GetProjectBySlug(slug string) (*response.Project, *imhttp.CustomError)
+
+	// Generic URL checking
+	CheckURLExists(ctx context.Context, url string) (*response.CheckURLExistsResponse, *imhttp.CustomError)
 
 	// Generic Search
 	GetCustomSearchPage(ctx context.Context, slug string) (*response.CustomSearchPage, *imhttp.CustomError)
 	GetLinks(ctx context.Context) ([]*response.Link, *imhttp.CustomError)
 	GetAllCustomSearchPages(ctx context.Context) ([]*response.CustomSearchPage, *imhttp.CustomError)
 	AddCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
-	UpdateCustomSearchPage(ctx context.Context, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
+	UpdateCustomSearchPage(ctx context.Context, id string, customSearchPage *request.CustomSearchPage) (*response.CustomSearchPage, *imhttp.CustomError)
 	DeleteCustomSearchPage(ctx context.Context, id string) *imhttp.CustomError
 
 	// Leads

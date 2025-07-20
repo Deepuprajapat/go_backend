@@ -9,10 +9,11 @@ import (
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
+	"github.com/gorilla/mux"
 )
 
 func (h *Handler) GetCustomSearchPage(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	slug := r.URL.Query().Get("slug")
+	slug := mux.Vars(r)["slug"]
 
 	if slug == "" {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Slug is required", "Slug is required")
@@ -131,15 +132,11 @@ func (h *Handler) AddCustomSearchPage(r *http.Request) (*imhttp.Response, *imhtt
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
 	}
-
-	if customSearchPage.Title == "" || customSearchPage.Description == "" || customSearchPage.Filters == nil {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
-	}
-
 	customSearchPageResponse, err := h.app.AddCustomSearchPage(ctx, customSearchPage)
-	if err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Custom search page not found", "Custom search page not found")
-	}
+
+	// if err == nil {
+	// 	return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Failed to add custom search page", err.Error())
+	// }
 
 	return &imhttp.Response{
 		Data:       customSearchPageResponse,
@@ -151,12 +148,19 @@ func (h *Handler) UpdateCustomSearchPage(r *http.Request) (*imhttp.Response, *im
 
 	ctx := r.Context()
 
+
+	vars := mux.Vars(r)
+    id := vars["id"]
+    if id == "" {
+        return nil, imhttp.NewCustomErr(http.StatusBadRequest, "ID is required", "ID is required")
+    }
+    
 	var customSearchPage *request.CustomSearchPage
 	err := json.NewDecoder(r.Body).Decode(&customSearchPage)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", "Invalid request body")
 	}
-	customSearchPageResponse, err := h.app.UpdateCustomSearchPage(ctx, customSearchPage)
+	customSearchPageResponse, err := h.app.UpdateCustomSearchPage(ctx, id, customSearchPage)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Custom search page not found", "Custom search page not found")
 	}
@@ -170,7 +174,8 @@ func (h *Handler) UpdateCustomSearchPage(r *http.Request) (*imhttp.Response, *im
 func (h *Handler) DeleteCustomSearchPage(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 
 	ctx := r.Context()
-	id := r.URL.Query().Get("id")
+	vars := mux.Vars(r)
+	id := vars["id"]
 	if id == "" {
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "ID is required", "ID is required")
 	}

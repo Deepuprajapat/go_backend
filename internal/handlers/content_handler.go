@@ -338,7 +338,7 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 		logger.Get().Info().Msgf("Canonical------------------ %s", canonical)
 
 		parts := strings.Split(canonical, "/")
-		// logger.Get().Info().Msgf(" Part Canonical------------------ %s", parts)	
+		// logger.Get().Info().Msgf(" Part Canonical------------------ %s", parts)
 		if len(parts) > 0 {
 			canonical = parts[0]
 		}

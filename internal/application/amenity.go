@@ -1,12 +1,13 @@
 package application
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
-	"net/http"
-	"strings"
 )
 
 func (c *application) GetAllCategoriesWithAmenities() (*response.AmenityResponse, *imhttp.CustomError) {
@@ -85,17 +86,17 @@ func (c *application) AddCategoryWithAmenities(req *request.CreateAmenityRequest
 	return nil
 }
 
-func (c *application) UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError {
+func (c *application) UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) (*response.StaticSiteDataResponse, *imhttp.CustomError) {
 	// Get current static site data
 	staticData, err := c.repo.GetStaticSiteData()
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get static site data")
-		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get static site data", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get static site data", err.Error())
 	}
 
 	// Check if static site data is active
 	if !staticData.IsActive {
-		return imhttp.NewCustomErr(http.StatusForbidden, "Cannot update inactive static site data", "Static site data must be active to update")
+		return nil, imhttp.NewCustomErr(http.StatusForbidden, "Cannot update inactive static site data", "Static site data must be active to update")
 	}
 
 	// Update fields if provided
@@ -111,10 +112,17 @@ func (c *application) UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequ
 	err = c.repo.UpdateStaticSiteData(staticData)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update static site data")
-		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update static site data", err.Error())
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to update static site data", err.Error())
 	}
 
-	return nil
+	// Get the updated data and return it
+	updatedData, err := c.repo.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get updated static site data")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get updated static site data", err.Error())
+	}
+
+	return response.GetStaticSiteDataFromEnt(updatedData), nil
 }
 
 // patch update static site data which is active
