@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"github.com/VI-IM/im_backend_go/internal/auth"
 	"github.com/VI-IM/im_backend_go/request"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/VI-IM/im_backend_go/shared/logger"
@@ -77,10 +79,54 @@ func (h *Handler) GetLeadByID(r *http.Request) (*imhttp.Response, *imhttp.Custom
 		return nil, customErr
 	}
 
+	// Validate property ownership for business partners
+	claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+	if ok && claims.Role == "business_partner" {
+		// If lead has a property, validate ownership
+		if result.PropertyID != "" {
+			if err := h.validatePropertyOwnership(r, []string{result.PropertyID}); err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	return &imhttp.Response{
 		StatusCode: http.StatusOK,
 		Data:       result,
 	}, nil
+}
+
+// validatePropertyOwnership validates if a business partner can access leads for the given property IDs
+func (h *Handler) validatePropertyOwnership(r *http.Request, propertyIDs []string) *imhttp.CustomError {
+	claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+	if !ok {
+		return imhttp.NewCustomErr(http.StatusUnauthorized, "Invalid user context", "Invalid user context")
+	}
+
+	// Superadmin and dm can access all leads
+	if claims.Role == "superadmin" || claims.Role == "dm" {
+		return nil
+	}
+
+	// Business partner can only access leads for properties they created
+	if claims.Role == "business_partner" {
+		for _, propertyID := range propertyIDs {
+			if propertyID == "" {
+				continue
+			}
+			property, err := h.app.GetPropertyByID(propertyID)
+			if err != nil {
+				logger.Get().Error().Err(err).Str("property_id", propertyID).Msg("Failed to get property for ownership check")
+				return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to verify property ownership", err.Error())
+			}
+			// Check if the property was created by this user
+			if property.CreatedByUserID == "" || property.CreatedByUserID != claims.UserID {
+				return imhttp.NewCustomErr(http.StatusForbidden, "Access denied: you can only access leads for properties you created", "Property ownership check failed")
+			}
+		}
+	}
+
+	return nil
 }
 
 func (h *Handler) GetAllLeads(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
@@ -94,6 +140,27 @@ func (h *Handler) GetAllLeads(r *http.Request) (*imhttp.Response, *imhttp.Custom
 	req.EndDate = queryParams.Get("end_date")
 	req.Date = queryParams.Get("date")
 	req.Source = queryParams.Get("source")
+
+	// Handle multiple property IDs from query parameter
+	if propertyIDsParam := queryParams.Get("property_ids"); propertyIDsParam != "" {
+		req.PropertyIDs = strings.Split(propertyIDsParam, ",")
+		// Trim whitespace from each property ID
+		for i, id := range req.PropertyIDs {
+			req.PropertyIDs[i] = strings.TrimSpace(id)
+		}
+	}
+
+	// If single property_id is provided, add it to the PropertyIDs slice
+	if req.PropertyID != "" {
+		req.PropertyIDs = append(req.PropertyIDs, req.PropertyID)
+	}
+
+	// Validate property ownership for business partners
+	if len(req.PropertyIDs) > 0 {
+		if err := h.validatePropertyOwnership(r, req.PropertyIDs); err != nil {
+			return nil, err
+		}
+	}
 
 	result, customErr := h.app.GetAllLeads(r.Context(), &req)
 	if customErr != nil {

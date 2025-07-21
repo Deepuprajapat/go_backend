@@ -170,6 +170,9 @@ func (a *application) getLeadsByDateGrouped(ctx context.Context, req *request.Ge
 	if req.PropertyID != "" {
 		filters["property_id"] = req.PropertyID
 	}
+	if len(req.PropertyIDs) > 0 {
+		filters["property_ids"] = req.PropertyIDs
+	}
 	if req.Phone != "" {
 		filters["phone"] = req.Phone
 	}

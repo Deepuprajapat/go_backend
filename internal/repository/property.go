@@ -84,7 +84,22 @@ func (r *repository) GetPropertyByID(id string) (*ent.Property, error) {
 		if ent.IsNotFound(err) {
 			return nil, errors.New("property not found")
 		}
+		logger.Get().Error().Err(err).Msg("Failed to get property")
+		return nil, err
+	}
+	return property, nil
+}
 
+func (r *repository) GetPropertyBySlug(ctx context.Context, slug string) (*ent.Property, error) {
+	property, err := r.db.Property.Query().
+		Where(property.Slug(slug)).
+		WithDeveloper().
+		WithProject().
+		Only(ctx)
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, errors.New("property not found")
+		}
 		logger.Get().Error().Err(err).Msg("Failed to get property")
 		return nil, err
 	}
@@ -103,6 +118,11 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 
 	if input.Name != "" {
 		property.SetName(input.Name)
+		// Regenerate slug when property name changes
+		if input.Name != oldProperty.Name {
+			newSlug := generateSlug(input.Name, input.PropertyID)
+			property.SetSlug(newSlug)
+		}
 	}
 	if len(input.PropertyImages) > 0 {
 		property.SetPropertyImages(input.PropertyImages)
@@ -225,7 +245,8 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		property.SetWebCards(newWebCards)
 	}
 
-	if input.PricingInfo != (oldProperty.PricingInfo) {
+	// Only update PricingInfo if it contains actual data (non-empty Price field)
+	if input.PricingInfo.Price != "" && input.PricingInfo != (oldProperty.PricingInfo) {
 		property.SetPricingInfo(input.PricingInfo)
 	}
 	if input.PropertyReraInfo != (oldProperty.PropertyReraInfo) {
@@ -242,10 +263,6 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 	}
 	if input.ProjectID != "" {
 		property.SetProjectID(input.ProjectID)
-	}
-
-	if input.Slug != "" {
-		property.SetSlug(input.Slug)
 	}
 
 	updatedProperty, err := property.Save(context.Background())
@@ -298,12 +315,10 @@ func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error)
 	}
 
 	propertyID := uuid.New().String()
-	slug := strings.ReplaceAll(strings.ToLower(input.Name), " ", "-") + "-" + strings.ToLower(propertyID[:4])
+	slug := generateSlug(input.Name, propertyID)
 
 	// Create default values for required JSON fields
-	defaultWebCards := createDefaultWebCards()
 	defaultPricingInfo := schema.PropertyPricingInfo{Price: ""}
-	defaultReraInfo := schema.PropertyReraInfo{ReraNumber: ""}
 
 	property := r.db.Property.Create().
 		SetID(propertyID).
@@ -311,10 +326,9 @@ func (r *repository) AddProperty(input domain.Property) (*PropertyResult, error)
 		SetName(input.Name).
 		SetSlug(slug).
 		SetPropertyType(input.PropertyType).
-		SetWebCards(defaultWebCards).
-		SetSlug(slug).
+		SetWebCards(input.WebCards).
 		SetPricingInfo(defaultPricingInfo).
-		SetPropertyReraInfo(defaultReraInfo)
+		SetPropertyReraInfo(input.PropertyReraInfo)
 	if project.Edges.Developer != nil && project.Edges.Developer.ID != "" {
 		property.SetDeveloperID(project.Edges.Developer.ID)
 	}

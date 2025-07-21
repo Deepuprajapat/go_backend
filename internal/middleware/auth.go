@@ -101,3 +101,21 @@ func RequireDM(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	}))
 }
+
+// RequireLeadAccess ensures only business_partner, dm, or superadmin can access leads
+func RequireLeadAccess(next http.Handler) http.Handler {
+	return Auth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		claims, ok := r.Context().Value("user_claims").(*auth.Claims)
+		if !ok {
+			http.Error(w, "Invalid user context", http.StatusUnauthorized)
+			return
+		}
+
+		if claims.Role != "business_partner" && claims.Role != "dm" && claims.Role != "superadmin" {
+			http.Error(w, "Access denied: requires business_partner, dm, or superadmin role", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}))
+}
