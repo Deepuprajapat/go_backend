@@ -23,16 +23,6 @@ func (c *application) GetPropertyByID(id string) (*response.Property, *imhttp.Cu
 	return response.GetPropertyFromEnt(property), nil
 }
 
-func (c *application) GetPropertyBySlug(ctx context.Context, slug string) (*response.Property, *imhttp.CustomError) {
-	property, err := c.repo.GetPropertyBySlug(ctx, slug)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get property by slug")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property", err.Error())
-	}
-
-	return response.GetPropertyFromEnt(property), nil
-}
-
 func (c *application) UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError) {
 	existingProperty, err := c.repo.GetPropertyByID(input.PropertyID)
 	if err != nil {
@@ -321,14 +311,14 @@ func (c *application) DeleteProperty(id string) *imhttp.CustomError {
 	return nil
 }
 
-func (c *application) GetPropertyBySlug(slug string) (*response.Property, *imhttp.CustomError) {
+func (c *application) GetPropertyBySlug(ctx context.Context, slug string) (*response.Property, *imhttp.CustomError) {
 
 	if slug == "" {
 		logger.Get().Error().Msg("Slug is required")
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Slug is required", "Slug is required")
 	}
 
-	property, err := c.repo.GetPropertyBySlug(slug)
+	property, err := c.repo.GetPropertyBySlug(ctx, slug)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get property by slug")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property by slug", err.Error())

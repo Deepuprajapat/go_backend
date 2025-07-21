@@ -54,7 +54,6 @@ type ApplicationInterface interface {
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
 	ListProperties(pagination *request.GetAllAPIRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
 	DeleteProperty(id string) *imhttp.CustomError
-	GetPropertyBySlug(slug string) (*response.Property, *imhttp.CustomError)
 	// Amenity
 	GetAllCategoriesWithAmenities() (*response.AmenityResponse, *imhttp.CustomError)
 	// GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)
@@ -66,6 +65,10 @@ type ApplicationInterface interface {
 	// DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
 	// UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
 	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) (*response.StaticSiteDataResponse, *imhttp.CustomError)
+	AddCategory(categoryName string) *imhttp.CustomError
+	AddAmenityToCategory(req *request.AddAmenityToCategoryRequest) *imhttp.CustomError
+	DeleteAmenityFromCategory(req *request.DeleteAmenityFromCategoryRequest) *imhttp.CustomError
+	DeleteCategoryWithAmenities(categoryName string) *imhttp.CustomError
 
 	// Upload File
 	UploadFile(request request.UploadFileRequest) (string, string, *imhttp.CustomError)

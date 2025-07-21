@@ -80,7 +80,6 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
 
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
-	
 
 	// project internal routes
 	Router.Handle("/v1/api/internal/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)                                         // internal
@@ -96,7 +95,6 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/slug/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
-	
 
 	//internal routes
 	// Protected property internal routes (require business_partner or superadmin role)
@@ -123,6 +121,11 @@ func Init(app application.ApplicationInterface) {
 
 	// internal amenity routes
 	Router.Handle("/v1/api/internal/amenities", imhttp.AppHandler(handler.GetAllCategoriesWithAmenities)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/internal/category", imhttp.AppHandler(handler.AddCategory)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/internal/category/{category_name}/amenities", imhttp.AppHandler(handler.AddAmenityToCategory)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/internal/category/{category_name}/amenities/{amenity_name}", imhttp.AppHandler(handler.DeleteAmenityFromCategory)).Methods(http.MethodDelete)
+	Router.Handle("/v1/api/internal/category/{category_name}", imhttp.AppHandler(handler.DeleteCategoryWithAmenities)).Methods(http.MethodDelete)
+
 	Router.Handle("/v1/api/internal/static-site-data", imhttp.AppHandler(handler.UpdateStaticSiteData)).Methods(http.MethodPatch)
 
 	// blog routes

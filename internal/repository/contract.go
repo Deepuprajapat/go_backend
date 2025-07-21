@@ -6,6 +6,7 @@ import (
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/schema"
 	"github.com/VI-IM/im_backend_go/internal/domain"
+	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/response"
 )
 
@@ -46,19 +47,21 @@ type AppRepository interface {
 
 	// Property
 	GetPropertyByID(id string) (*ent.Property, error)
-	GetPropertyBySlug(ctx context.Context, slug string) (*ent.Property, error)
 	UpdateProperty(input domain.Property) (*ent.Property, error)
 	GetPropertiesOfProject(projectID string) ([]*ent.Property, error)
 	AddProperty(input domain.Property) (*PropertyResult, error)
 	GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error)
 	DeleteProperty(id string, hardDelete bool) error
 	IsPropertyDeleted(id string) (bool, error)
-	GetPropertyBySlug(slug string) (*ent.Property, error)
+	GetPropertyBySlug(ctx context.Context, slug string) (*ent.Property, error)
 	// Static Site Data
 	GetStaticSiteData() (*ent.StaticSiteData, error)
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
 	CheckCategoryExists(category string) (bool, error)
-
+	AddCategory(categoryName string) error
+	AddAmenityToCategory(req *request.AddAmenityToCategoryRequest) error
+	DeleteAmenityFromCategory(req *request.DeleteAmenityFromCategoryRequest) error
+	DeleteCategoryWithAmenities(categoryName string) error
 	// Custom Search
 	CheckURLExists(ctx context.Context, url string) (*response.URLExistsResult, error)
 

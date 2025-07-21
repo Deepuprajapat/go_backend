@@ -126,3 +126,105 @@ func (c *application) UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequ
 }
 
 // patch update static site data which is active
+
+func (c *application) AddCategory(categoryName string) *imhttp.CustomError {
+
+	// Check if the category already exists
+	exist, err := c.repo.CheckCategoryExists(categoryName)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get amenity")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
+	}
+	if exist {
+		return imhttp.NewCustomErr(http.StatusConflict, "Amenity already exists", "Amenity already exists")
+	}
+
+	if err := c.repo.AddCategory(categoryName); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to add category")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add category", err.Error())
+	}
+
+	return nil
+}
+
+func (c *application) AddAmenityToCategory(req *request.AddAmenityToCategoryRequest) *imhttp.CustomError {
+
+	// Check if the category already exists
+	exist, err := c.repo.CheckCategoryExists(req.CategoryName)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get amenity")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
+	}
+
+	if !exist {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Category not found", "Category not found")
+	}
+
+	if err := c.repo.AddAmenityToCategory(req); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to add amenity to category")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to add amenity to category", err.Error())
+	}
+
+	return nil
+}
+
+func (c *application) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCategoryRequest) *imhttp.CustomError {
+
+	// Check if the category already exists
+	exist, err := c.repo.CheckCategoryExists(req.CategoryName)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get amenity")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
+	}
+
+	if !exist {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Category not found", "Category not found")
+	}
+
+	amenityExists := false
+	staticData, err := c.repo.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
+	}
+
+	for _, amenity := range staticData.CategoriesWithAmenities.Categories[req.CategoryName] {
+
+		if amenity.Value == req.Amenities[0].Value {
+			amenityExists = true
+			break
+		}
+	}
+
+	if !amenityExists {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Amenity not found", "Amenity not found")
+	}
+
+	if err := c.repo.DeleteAmenityFromCategory(req); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete amenity from category")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete amenity from category", err.Error())
+	}
+
+	return nil
+}
+
+func (c *application) DeleteCategoryWithAmenities(categoryName string) *imhttp.CustomError {
+
+	// Check if the category already exists
+	exist, err := c.repo.CheckCategoryExists(categoryName)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get amenity")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to create amenity", err.Error())
+	}
+
+	if !exist {
+		return imhttp.NewCustomErr(http.StatusNotFound, "Category not found", "Category not found")
+	}
+
+	if err := c.repo.DeleteCategoryWithAmenities(categoryName); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to delete category with amenities")
+		return imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to delete category with amenities", err.Error())
+	}
+
+	return nil
+}

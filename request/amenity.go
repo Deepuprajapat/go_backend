@@ -32,7 +32,7 @@ type DeleteAmenitiesFromCategoryRequest struct {
 	Values   []string `json:"values" validate:"required"`
 }
 
-type DeleteCategoryRequest struct {
+type DeleteCategoryWithAmenitiesRequest struct {
 	Category string `json:"category" validate:"required"`
 }
 
@@ -46,4 +46,20 @@ type UpdateStaticSiteDataRequest struct {
 		} `json:"categories,omitempty"`
 	} `json:"categories_with_amenities,omitempty"`
 	IsActive bool `json:"is_active,omitempty"`
+}
+
+type AddAmenityToCategoryRequest struct {
+	CategoryName string `json:"category_name"`
+	Amenities    []struct {
+		Icon  string `json:"icon"`
+		Value string `json:"value"`
+	} `json:"amenities"`
+}
+
+type DeleteAmenityFromCategoryRequest struct {
+	CategoryName string `json:"category_name"`
+	Amenities    []struct {
+		Icon  string `json:"icon"`
+		Value string `json:"value"`
+	} `json:"amenities"`
 }

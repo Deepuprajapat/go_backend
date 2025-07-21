@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
 	"github.com/VI-IM/im_backend_go/ent/staticsitedata"
+	"github.com/VI-IM/im_backend_go/request"
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
@@ -54,4 +56,92 @@ func (r *repository) CheckCategoryExists(category string) (bool, error) {
 func (r *repository) AddCategoryWithAmenities(data *ent.StaticSiteData) error {
 
 	return r.UpdateStaticSiteData(data)
+}
+
+func (r *repository) AddCategory(categoryName string) error {
+	ssd, err := r.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return err
+	}
+
+	for category, _ := range ssd.CategoriesWithAmenities.Categories {
+		if category == categoryName {
+			return errors.New("category already exists")
+		}
+	}
+
+	ssd.CategoriesWithAmenities.Categories[categoryName] = []struct {
+		Icon  string `json:"icon"`
+		Value string `json:"value"`
+	}{}
+
+	if err := r.UpdateStaticSiteData(ssd); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) AddAmenityToCategory(req *request.AddAmenityToCategoryRequest) error {
+
+	ssd, err := r.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return err
+	}
+
+	ssd.CategoriesWithAmenities.Categories[req.CategoryName] = append(ssd.CategoriesWithAmenities.Categories[req.CategoryName], req.Amenities...)
+
+	if err := r.UpdateStaticSiteData(ssd); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCategoryRequest) error {
+
+	ssd, err := r.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return err
+	}
+
+	for _, amenity := range ssd.CategoriesWithAmenities.Categories[req.CategoryName] {
+		if amenity.Value == req.Amenities[0].Value {
+			ssd.CategoriesWithAmenities.Categories[req.CategoryName] = append(ssd.CategoriesWithAmenities.Categories[req.CategoryName], req.Amenities...)
+		}
+	}
+
+	if err := r.UpdateStaticSiteData(ssd); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return err
+	}
+
+	return nil
+}
+
+func (r *repository) DeleteCategoryWithAmenities(categoryName string) error {
+
+	ssd, err := r.GetStaticSiteData()
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get static site data")
+		return err
+	}
+
+	for category, amenities := range ssd.CategoriesWithAmenities.Categories {
+		if category == categoryName {
+			ssd.CategoriesWithAmenities.Categories[category] = amenities
+		}
+	}
+
+	if err := r.UpdateStaticSiteData(ssd); err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to update static site data")
+		return err
+	}
+
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/VI-IM/im_backend_go/request"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
+	"github.com/gorilla/mux"
 )
 
 func (h *Handler) GetAllCategoriesWithAmenities(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
@@ -71,5 +72,111 @@ func (h *Handler) UpdateStaticSiteData(r *http.Request) (*imhttp.Response, *imht
 		Data:       staticSiteData,
 		StatusCode: http.StatusOK,
 		Message:    "Static site data updated successfully",
+	}, nil
+}
+
+func (h *Handler) AddCategory(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	var req struct {
+		CategoryName string `json:"category_name"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	if req.CategoryName == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category name is required", "Category name field cannot be empty")
+	}
+
+	if err := h.app.AddCategory(req.CategoryName); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		StatusCode: http.StatusCreated,
+		Message:    "Category created successfully",
+	}, nil
+}
+
+func (h *Handler) AddAmenityToCategory(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+
+	var req request.AddAmenityToCategoryRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	categoryName := mux.Vars(r)["category_name"]
+
+	if categoryName == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category name is required", "Category name field cannot be empty")
+	}
+
+	req.CategoryName = categoryName
+
+	if len(req.Amenities) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Amenities are required", "Amenities field cannot be empty")
+	}
+
+	if err := h.app.AddAmenityToCategory(&req); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		StatusCode: http.StatusCreated,
+		Message:    "Amenity added to category successfully",
+	}, nil
+}
+
+func (h *Handler) DeleteAmenityFromCategory(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	var req request.DeleteAmenityFromCategoryRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	categoryName := mux.Vars(r)["category_name"]
+
+	if categoryName == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category name is required", "Category name field cannot be empty")
+	}
+
+	req.CategoryName = categoryName
+
+	if len(req.Amenities) == 0 {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Amenities are required", "Amenities field cannot be empty")
+	}
+
+	if err := h.app.DeleteAmenityFromCategory(&req); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		StatusCode: http.StatusOK,
+		Message:    "Amenity deleted from category successfully",
+	}, nil
+}
+
+func (h *Handler) DeleteCategoryWithAmenities(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	var req struct {
+		CategoryName string `json:"category_name"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
+	}
+
+	categoryName := mux.Vars(r)["category_name"]
+
+	if categoryName == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category name is required", "Category name field cannot be empty")
+	}
+
+	if err := h.app.DeleteCategoryWithAmenities(req.CategoryName); err != nil {
+		return nil, err
+	}
+
+	return &imhttp.Response{
+		StatusCode: http.StatusOK,
+		Message:    "Category deleted successfully",
 	}, nil
 }

@@ -59,22 +59,6 @@ func (h *Handler) GetProperty(r *http.Request) (*imhttp.Response, *imhttp.Custom
 	}, nil
 }
 
-func (h *Handler) GetPropertyBySlug(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	vars := mux.Vars(r)
-	slug := vars["slug"]
-
-	response, err := h.app.GetPropertyBySlug(r.Context(), slug)
-	if err != nil {
-		logger.Get().Error().Err(err).Msg("Failed to get property by slug")
-		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property", err.Error())
-	}
-
-	return &imhttp.Response{
-		Data:       response,
-		StatusCode: http.StatusOK,
-	}, nil
-}
-
 func (h *Handler) UpdateProperty(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	vars := mux.Vars(r)
 	propertyID := vars["property_id"]
@@ -303,6 +287,7 @@ func (h *Handler) AdminListProperties(r *http.Request) (*imhttp.Response, *imhtt
 }
 
 func (h *Handler) GetPropertyBySlug(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	ctx := r.Context()
 	vars := mux.Vars(r)
 	slug := vars["slug"]
 	if slug == "" {
@@ -310,7 +295,7 @@ func (h *Handler) GetPropertyBySlug(r *http.Request) (*imhttp.Response, *imhttp.
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Slug is required", "Slug is required")
 	}
 
-	response, err := h.app.GetPropertyBySlug(slug)
+	response, err := h.app.GetPropertyBySlug(ctx, slug)
 	if err != nil {
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property by slug", err.Error())
 	}
