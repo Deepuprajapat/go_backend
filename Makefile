@@ -9,6 +9,10 @@ build:
 seed-testimonials:
 	PGPASSWORD=password psql -h localhost -p 5434 -U im_db_dev -d mydb -f sql/seed_testimonials.sql
 
+# Seed amenities into static_site_data
+seed-amenities:
+	PGPASSWORD=password psql -h localhost -p 5434 -U im_db_dev -d mydb -f sql/seed_amenities.sql
+
 # Run the application
 build-run: build
 	./bin/server
@@ -97,6 +101,7 @@ run:
 run-migration:
 	go run cmd/server/main.go run-migration ./migration_jobs/database_export
 	make seed-testimonials
+	make seed-amenities
 	
 
 

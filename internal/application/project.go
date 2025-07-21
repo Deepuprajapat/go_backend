@@ -281,7 +281,6 @@ func (c *application) GetProjectBySlug(slug string) (*response.Project, *imhttp.
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found", err.Error())
 	}
 
-
 	// resp := response.GetProjectFromEnt(project)
 
 	// Convert to response format
@@ -302,9 +301,9 @@ func (c *application) GetProjectBySlug(slug string) (*response.Project, *imhttp.
 	// 	IsPremium:    project.IsPremium,
 	// 	IsPriority:   project.IsPriority,
 	// 	City: project.Edges.Location.City,
-		
+
 	// }
-	return response.GetProjectFromEnt(project),nil
+	return response.GetProjectFromEnt(project), nil
 
 	// return projectResponse, nil
 

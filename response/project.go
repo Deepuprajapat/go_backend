@@ -77,7 +77,7 @@ type ProjectListResponse struct {
 	ProjectName   string   `json:"project_name"`
 	ShortAddress  string   `json:"short_address"`
 	City          string   `json:"city"`
-	Slug     string   `json:"slug"`
+	Slug          string   `json:"slug"`
 	Images        []string `json:"images"`
 	Configuration string   `json:"configuration"`
 	MinPrice      string   `json:"min_price"`

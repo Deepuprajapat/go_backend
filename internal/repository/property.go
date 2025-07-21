@@ -460,9 +460,6 @@ func (r *repository) IsPropertyDeleted(id string) (bool, error) {
 func (r *repository) GetPropertyBySlug(slug string) (*ent.Property, error) {
 	property, err := r.db.Property.Query().
 		Where(property.Slug(slug)).
-		WithDeveloper().
-		WithLocation().
-		WithProject().
 		Only(context.Background())
 	if err != nil {
 		return nil, err

@@ -146,7 +146,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	// Handle MetaInfo updates
-	if input.MetaInfo.Title != "" || input.MetaInfo.Description != "" || input.MetaInfo.Keywords != ""  || len(input.MetaInfo.ProjectSchema) > 0 {
+	if input.MetaInfo.Title != "" || input.MetaInfo.Description != "" || input.MetaInfo.Keywords != "" || len(input.MetaInfo.ProjectSchema) > 0 {
 		newMetaInfo := oldProject.MetaInfo
 		if input.MetaInfo.Title != "" {
 			newMetaInfo.Title = input.MetaInfo.Title
@@ -200,6 +200,9 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		}
 		if input.WebCards.Details.TotalFloor.Value != "" {
 			newWebCards.Details.TotalFloor.Value = input.WebCards.Details.TotalFloor.Value
+		}
+		if input.WebCards.Details.ReraNumber.Value != "" {
+			newWebCards.Details.ReraNumber.Value = input.WebCards.Details.ReraNumber.Value
 		}
 		if input.WebCards.Details.TotalTowers.Value != "" {
 			newWebCards.Details.TotalTowers.Value = input.WebCards.Details.TotalTowers.Value
