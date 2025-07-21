@@ -10,7 +10,7 @@ type SimpleDeveloper struct {
 	Name             string `json:"name"`
 	DeveloperLogo    string `json:"developer_logo"`
 	DeveloperAddress string `json:"developer_address"`
-	EstablishedYear	 int  `json:"establised_year"`
+	EstablishedYear  int    `json:"establised_year"`
 }
 
 type Property struct {
@@ -53,13 +53,13 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 			Name:             property.Edges.Developer.Name,
 			DeveloperLogo:    property.Edges.Developer.MediaContent.DeveloperLogo,
 			DeveloperAddress: developerAddress,
-			EstablishedYear: property.Edges.Developer.EstablishedYear,
+			EstablishedYear:  property.Edges.Developer.EstablishedYear,
 		}
 	}
 
 	var project *ent.Project
 	if property.Edges.Project != nil {
-		project = property.Edges.Project
+		project = property.Edges.Project 	
 	} else {
 		project = &ent.Project{}
 	}
@@ -107,7 +107,7 @@ type PropertyListResponse struct {
 	Location         string   `json:"location"`
 	DeveloperName    string   `json:"developer_name"`
 	Configuration    string   `json:"configuration"`
-	Slug 			string    `json:"slug"`
+	Slug             string   `json:"slug"`
 }
 
 func GetPropertyListResponse(property *ent.Property, developerName string, location string) *PropertyListResponse {
@@ -122,6 +122,6 @@ func GetPropertyListResponse(property *ent.Property, developerName string, locat
 		Configuration:    property.WebCards.PropertyDetails.Configuration.Value,
 		Location:         location,
 		DeveloperName:    developerName,
-		Slug: 			  property.Slug,
+		Slug:             property.Slug,
 	}
 }

@@ -63,7 +63,7 @@ func (Project) Indexes() []ent.Index {
 
 // web cards
 type ProjectWebCards struct {
-	Images            []string          `json:"images,omitempty"`
+	Images            []string          `json:"images"`
 	ReraInfo          ReraInfo          `json:"rera_info,omitempty"`
 	Details           ProjectDetails    `json:"project_details,omitempty"`
 	WhyToChoose       WhyToChoose       `json:"why_to_choose,omitempty"`
@@ -89,7 +89,7 @@ type ProjectWebCards struct {
 			BookingLink    string `json:"booking_link,omitempty"`
 		} `json:"contact_details,omitempty"`
 	} `json:"about,omitempty"`
-	Faqs []FAQ `json:"faqs,omitempty"`
+	Faqs []FAQ `json:"faqs"`
 }
 
 type FAQ struct {
@@ -153,7 +153,7 @@ type WhyToChoose struct {
 // know about
 type KnowAbout struct {
 	Description  string `json:"description,omitempty"`
-	DownloadLink string `json:"download_link,omitempty"`
+	DownloadLink string `json:"download_link"`
 }
 
 // floor plan
@@ -228,7 +228,8 @@ type LocationInfo struct {
 	ShortAddress  string `json:"short_address,omitempty"`
 	Longitude     string `json:"longitude,omitempty"`
 	Latitude      string `json:"latitude,omitempty"`
-	GoogleMapLink string `json:"google_map_link,omitempty"`
+	GoogleMapLink string `json:"google_map_link"`
+	LocationPara string `json:"location_para"`
 }
 
 type Configurations struct {

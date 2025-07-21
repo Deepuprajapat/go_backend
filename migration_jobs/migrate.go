@@ -10,7 +10,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 	"github.com/VI-IM/im_backend_go/ent"
 	entproject "github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/schema"
@@ -527,6 +526,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					Latitude:      "",
 					Longitude:     "",
 					GoogleMapLink: safeStr(project.ProjectLocationURL),
+					LocationPara:  safeStr(project.LocationPara),
 				}).
 				SetProjectType(entproject.ProjectType(*projectConfigurationType.PropertyType)).
 				SetIsFeatured(project.IsFeatured).
@@ -539,6 +539,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				log.Error().Err(err).Msgf("Failed to insert project ID %d", project.ID)
 				continue
 			}
+
 		}
 		return nil
 	}

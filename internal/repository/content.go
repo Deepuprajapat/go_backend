@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 
-	"entgo.io/ent/dialect/sql"
 	"github.com/VI-IM/im_backend_go/ent"
+	"github.com/VI-IM/im_backend_go/ent/blogs"
 	"github.com/VI-IM/im_backend_go/ent/project"
 	"github.com/VI-IM/im_backend_go/ent/property"
 )
@@ -32,9 +32,8 @@ func (r *repository) GetPropertyByCanonicalURL(ctx context.Context, url string) 
 func (r *repository) GetBlogByCanonicalURL(ctx context.Context, url string) (*ent.Blogs, error) {
 	return r.db.Blogs.Query().
 		Where(
-			func(s *sql.Selector) {
-				s.Where(sql.ExprP("blog_url = $1", url))
-			},
+			// Search by slug field instead of blog_url
+			blogs.Slug(url),
 		).
 		Only(ctx)
 }
