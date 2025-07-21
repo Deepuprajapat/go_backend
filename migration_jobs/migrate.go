@@ -359,6 +359,28 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				}
 			}
 
+			var keywords string
+			if project.MetaKeywords != nil {
+				kw := strings.TrimSpace(*project.MetaKeywords)
+				if kw != "" && kw != "[\"\"]" {
+					// Remove wrapping brackets and quotes if present
+					kw = strings.Trim(kw, "[]\"")
+					if kw != "" {
+						// Split by comma and clean up each keyword
+						keywordList := strings.Split(kw, "\",")
+						var cleanKeywords []string
+						for _, k := range keywordList {
+							k = strings.Trim(k, "\" ")
+							if k != "" {
+								cleanKeywords = append(cleanKeywords, k)
+							}
+						}
+						// Join back into a comma-separated string
+						keywords = strings.Join(cleanKeywords, ", ")
+					}
+				}
+			}
+
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
@@ -374,7 +396,7 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				SetMetaInfo(schema.SEOMeta{
 					Title:         safeStr(project.MetaTitle),
 					Description:   safeStr(project.MetaDescription),
-					Keywords:      safeStr(project.MetaKeywords),
+					Keywords:      keywords,
 					ProjectSchema: projectSchema,
 				}).
 				SetWebCards(schema.ProjectWebCards{

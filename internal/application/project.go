@@ -82,6 +82,8 @@ func (c *application) UpdateProject(input request.UpdateProjectRequest) (*respon
 	project.ProjectID = input.ProjectID
 	project.ProjectName = input.ProjectName
 	project.Status = input.Status
+	project.MinPrice = input.MinPrice
+	project.MaxPrice = input.MaxPrice
 	project.PriceUnit = input.PriceUnit
 	project.TimelineInfo = input.TimelineInfo
 	project.MetaInfo = input.MetaInfo

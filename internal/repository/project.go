@@ -119,7 +119,7 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 	}
 
 	if input.MinPrice != "" {
-		project.SetMaxPrice(input.MinPrice)
+		project.SetMinPrice(input.MinPrice)
 	}
 
 	if input.ProjectName != "" {
