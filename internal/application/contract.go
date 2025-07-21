@@ -48,6 +48,7 @@ type ApplicationInterface interface {
 
 	// Property
 	GetPropertyByID(id string) (*response.Property, *imhttp.CustomError)
+	GetPropertyBySlug(ctx context.Context, slug string) (*response.Property, *imhttp.CustomError)
 	UpdateProperty(input request.UpdatePropertyRequest) (*response.Property, *imhttp.CustomError)
 	GetPropertiesOfProject(projectID string) ([]*response.Property, *imhttp.CustomError)
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)

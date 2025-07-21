@@ -16,6 +16,7 @@ type SimpleDeveloper struct {
 type Property struct {
 	ID              string                     `json:"id"`
 	Name            string                     `json:"name"`
+	Slug            string                     `json:"slug"`
 	PropertyImages  []string                   `json:"property_images"`
 	WebCards        WebCards                   `json:"web_cards"`
 	PricingInfo     schema.PropertyPricingInfo `json:"pricing_info"`
@@ -76,6 +77,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 	return &Property{
 		ID:              property.ID,
 		Name:            property.Name,
+		Slug:            property.Slug,
 		PropertyImages:  property.PropertyImages,
 		WebCards:        webCard,
 		PricingInfo:     property.PricingInfo,

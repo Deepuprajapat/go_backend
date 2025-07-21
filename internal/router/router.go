@@ -94,12 +94,13 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(handler.GetPropertiesOfProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/s/properties/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/slug/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
 	
 
 	//internal routes
 	// Protected property internal routes (require business_partner or superadmin role)
-	Router.Handle("/v1/api/internal/properties", imhttp.AppHandler(handler.AddProperty)).Methods(http.MethodPost)
+	Router.Handle("/v1/api/internal/properties", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.AddProperty))).Methods(http.MethodPost)
 	Router.Handle("/v1/api/internal/properties/{property_id}", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.UpdateProperty))).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/internal/properties/{property_id}", middleware.RequireBusinessPartner(imhttp.AppHandler(handler.DeleteProperty))).Methods(http.MethodDelete)
 
@@ -142,9 +143,9 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/leads/validate-otp", imhttp.AppHandler(handler.ValidateOTP)).Methods(http.MethodPatch)
 	Router.Handle("/v1/api/leads/resend-otp", imhttp.AppHandler(handler.ResendOTP)).Methods(http.MethodPatch)
 
-	// Protected lead routes - only dm role can access lead data
-	Router.Handle("/v1/api/leads/get/by/{id}", middleware.RequireDM(imhttp.AppHandler(handler.GetLeadByID))).Methods(http.MethodGet)
-	Router.Handle("/v1/api/leads", middleware.RequireDM(imhttp.AppHandler(handler.GetAllLeads))).Methods(http.MethodGet)
+	// Protected lead routes - business partners, dm, and superadmin can access lead data
+	Router.Handle("/v1/api/leads/get/by/{id}", middleware.RequireLeadAccess(imhttp.AppHandler(handler.GetLeadByID))).Methods(http.MethodGet)
+	Router.Handle("/v1/api/leads", middleware.RequireLeadAccess(imhttp.AppHandler(handler.GetAllLeads))).Methods(http.MethodGet)
 
 	//content routes
 	Router.Handle("/v1/api/content/test/{url}", imhttp.AppHandler(handler.GetProjectSEOContent)).Methods(http.MethodGet)

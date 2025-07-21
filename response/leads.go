@@ -20,6 +20,7 @@ type Lead struct {
 	PropertyID           string    `json:"property_id,omitempty"`
 	ProjectID            string    `json:"project_id,omitempty"`
 	ProjectName          string    `json:"project_name,omitempty"`
+	PropertyName         string    `json:"property_name,omitempty"`
 	CreatedAt            time.Time `json:"created_at"`
 	UpdatedAt            time.Time `json:"updated_at"`
 }
@@ -72,6 +73,7 @@ func ToLeadResponse(lead *ent.Leads) *Lead {
 
 	if lead.Edges.Property != nil {
 		response.PropertyID = lead.Edges.Property.ID
+		response.PropertyName = lead.Edges.Property.Name
 	}
 
 	if lead.Edges.Project != nil {

@@ -78,6 +78,7 @@ type WebCards struct {
 		Description   string `json:"description,omitempty"`
 		GoogleMapLink string `json:"google_map_link,omitempty"`
 	} `json:"location_map,omitempty"`
+	Amenities Amenities `json:"amenities,omitempty"`
 }
 
 type PropertyFloorPlan struct {
