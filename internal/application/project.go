@@ -82,6 +82,8 @@ func (c *application) UpdateProject(input request.UpdateProjectRequest) (*respon
 	project.ProjectID = input.ProjectID
 	project.ProjectName = input.ProjectName
 	project.Status = input.Status
+	project.MinPrice = input.MinPrice
+	project.MaxPrice = input.MaxPrice
 	project.PriceUnit = input.PriceUnit
 	project.TimelineInfo = input.TimelineInfo
 	project.MetaInfo = input.MetaInfo
@@ -279,26 +281,33 @@ func (c *application) GetProjectBySlug(slug string) (*response.Project, *imhttp.
 		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Project not found", err.Error())
 	}
 
-	// Convert to response format
-	projectResponse := &response.Project{
-		ProjectID:    project.ID,
-		ProjectName:  project.Name,
-		Description:  project.Description,
-		Status:       project.Status, // enums.ProjectStatus type expected
-		Slug:         project.Slug,
-		MinPrice:     project.MinPrice,
-		MaxPrice:     project.MaxPrice,
-		TimelineInfo: project.TimelineInfo,
-		ProjectType:  string(project.ProjectType),
-		MetaInfo:     project.MetaInfo,
-		WebCards:     project.WebCards,
-		LocationInfo: project.LocationInfo,
-		IsFeatured:   project.IsFeatured,
-		IsPremium:    project.IsPremium,
-		IsPriority:   project.IsPriority,
-	}
+	// resp := response.GetProjectFromEnt(project)
 
-	return projectResponse, nil
+	// Convert to response format
+	// projectResponse := &response.Project{
+	// 	ProjectID:    project.ID,
+	// 	ProjectName:  project.Name,
+	// 	Description:  project.Description,
+	// 	Status:       project.Status, // enums.ProjectStatus type expected
+	// 	Slug:         project.Slug,
+	// 	MinPrice:     project.MinPrice,
+	// 	MaxPrice:     project.MaxPrice,
+	// 	TimelineInfo: project.TimelineInfo,
+	// 	ProjectType:  string(project.ProjectType),
+	// 	MetaInfo:     project.MetaInfo,
+	// 	WebCards:     project.WebCards,
+	// 	LocationInfo: project.LocationInfo,
+	// 	IsFeatured:   project.IsFeatured,
+	// 	IsPremium:    project.IsPremium,
+	// 	IsPriority:   project.IsPriority,
+	// 	City: project.Edges.Location.City,
+
+	// }
+	return response.GetProjectFromEnt(project), nil
+
+	// return projectResponse, nil
+
+	// return resp, nil
 }
 
 func (c *application) GetProjectNamesOnly() ([]*response.ProjectNameResponse, *imhttp.CustomError) {

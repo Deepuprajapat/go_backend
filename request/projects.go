@@ -15,19 +15,21 @@ type AddProjectRequest struct {
 }
 
 type UpdateProjectRequest struct {
-	ProjectID    string                 `json:"project_id" validate:"required"`
-	ProjectName  string                 `json:"project_name,omitempty"`
-	Description  string                 `json:"description,omitempty"`
-	Status       enums.ProjectStatus    `json:"status,omitempty"`
-	PriceUnit    string                 `json:"price_unit,omitempty"`
-	TimelineInfo schema.TimelineInfo    `json:"timeline_info,omitempty"`
-	MetaInfo     schema.SEOMeta         `json:"meta_info,omitempty"`
-	WebCards     schema.ProjectWebCards `json:"web_cards,omitempty"`
-	LocationInfo schema.LocationInfo    `json:"location_info,omitempty"`
-	IsFeatured   bool                   `json:"is_featured,omitempty"`
-	IsPremium    bool                   `json:"is_premium,omitempty"`
-	IsPriority   bool                   `json:"is_priority,omitempty"`
-	IsDeleted    bool                   `json:"is_deleted,omitempty"`
+	ProjectID     string                 `json:"project_id" validate:"required"`
+	ProjectName   string                 `json:"project_name,omitempty"`
+	Description   string                 `json:"description,omitempty"`
+	MinPrice      string                 `json:"min_price,omitempty"`
+	MaxPrice      string                 `json:"max_price,omitempty"`
+	Status        enums.ProjectStatus    `json:"status,omitempty"`
+	PriceUnit     string                 `json:"price_unit,omitempty"`
+	TimelineInfo  schema.TimelineInfo    `json:"timeline_info,omitempty"`
+	MetaInfo      schema.SEOMeta         `json:"meta_info,omitempty"`
+	WebCards      schema.ProjectWebCards `json:"web_cards,omitempty"`
+	LocationInfo  schema.LocationInfo    `json:"location_info,omitempty"`
+	IsFeatured    bool                   `json:"is_featured,omitempty"`
+	IsPremium     bool                   `json:"is_premium,omitempty"`
+	IsPriority    bool                   `json:"is_priority,omitempty"`
+	IsDeleted     bool                   `json:"is_deleted,omitempty"`
 }
 
 type UpdatePropertyRequest struct {

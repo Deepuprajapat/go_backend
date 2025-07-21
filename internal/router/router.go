@@ -76,10 +76,11 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
 	Router.Handle("/v1/api/projects/names", middleware.Auth(imhttp.AppHandler(handler.GetProjectNames))).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects/{project_id}", imhttp.AppHandler(handler.GetProject)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/s/projects/{slug}", imhttp.AppHandler(handler.GetProjectBySlug)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/projects", imhttp.AppHandler(handler.ListProjects)).Methods(http.MethodGet)
 
 	Router.Handle("/v1/api/projects/compare", imhttp.AppHandler(handler.CompareProjects)).Methods(http.MethodPost)
-	Router.Handle("/v1/api/projects/{slug}", imhttp.AppHandler(handler.GetProjectBySlug)).Methods(http.MethodGet)
+	
 
 	// project internal routes
 	Router.Handle("/v1/api/internal/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)                                         // internal
@@ -89,12 +90,12 @@ func Init(app application.ApplicationInterface) {
 
 	// upload file routes
 	Router.Handle("/v1/api/upload", imhttp.AppHandler(handler.UploadFile)).Methods(http.MethodPost)
-
 	// property routes
 	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(handler.GetPropertiesOfProject)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/s/properties/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
-	Router.Handle("/v1/api/properties/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
+	
 
 	//internal routes
 	// Protected property internal routes (require business_partner or superadmin role)
