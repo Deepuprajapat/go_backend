@@ -58,8 +58,5 @@ type AddAmenityToCategoryRequest struct {
 
 type DeleteAmenityFromCategoryRequest struct {
 	CategoryName string `json:"category_name"`
-	Amenities    []struct {
-		Icon  string `json:"icon"`
-		Value string `json:"value"`
-	} `json:"amenities"`
+	AmenityName  string `json:"amenity_name"`
 }

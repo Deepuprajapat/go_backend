@@ -140,10 +140,17 @@ func (h *Handler) DeleteAmenityFromCategory(r *http.Request) (*imhttp.Response, 
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category name is required", "Category name field cannot be empty")
 	}
 
-	req.CategoryName = categoryName
+	amenityName := mux.Vars(r)["amenity_name"]
 
-	if len(req.Amenities) == 0 {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Amenities are required", "Amenities field cannot be empty")
+	if amenityName == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Amenity name is required", "Amenity name field cannot be empty")
+	}
+
+	req.CategoryName = categoryName
+	req.AmenityName = amenityName
+
+	if req.AmenityName == "" {
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Amenity name is required", "Amenity name field cannot be empty")
 	}
 
 	if err := h.app.DeleteAmenityFromCategory(&req); err != nil {

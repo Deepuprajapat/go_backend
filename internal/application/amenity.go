@@ -190,7 +190,7 @@ func (c *application) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCa
 
 	for _, amenity := range staticData.CategoriesWithAmenities.Categories[req.CategoryName] {
 
-		if amenity.Value == req.Amenities[0].Value {
+		if amenity.Value == req.AmenityName {
 			amenityExists = true
 			break
 		}

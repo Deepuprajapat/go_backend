@@ -109,12 +109,17 @@ func (r *repository) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCat
 		logger.Get().Error().Err(err).Msg("Failed to get static site data")
 		return err
 	}
-
+	var amenities []struct {
+		Icon  string `json:"icon"`
+		Value string `json:"value"`
+	}
 	for _, amenity := range ssd.CategoriesWithAmenities.Categories[req.CategoryName] {
-		if amenity.Value == req.Amenities[0].Value {
-			ssd.CategoriesWithAmenities.Categories[req.CategoryName] = append(ssd.CategoriesWithAmenities.Categories[req.CategoryName], req.Amenities...)
+		if amenity.Value != req.AmenityName {
+			amenities = append(amenities, amenity)
 		}
 	}
+
+	ssd.CategoriesWithAmenities.Categories[req.CategoryName] = amenities
 
 	if err := r.UpdateStaticSiteData(ssd); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update static site data")
@@ -132,11 +137,7 @@ func (r *repository) DeleteCategoryWithAmenities(categoryName string) error {
 		return err
 	}
 
-	for category, amenities := range ssd.CategoriesWithAmenities.Categories {
-		if category == categoryName {
-			ssd.CategoriesWithAmenities.Categories[category] = amenities
-		}
-	}
+	delete(ssd.CategoriesWithAmenities.Categories, categoryName)
 
 	if err := r.UpdateStaticSiteData(ssd); err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update static site data")
