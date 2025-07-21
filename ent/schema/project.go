@@ -123,6 +123,9 @@ type ProjectDetails struct {
 	PossessionDate struct {
 		Value string `json:"value,omitempty"`
 	} `json:"possession_date,omitempty"`
+	ReraNumber struct {
+		Value string `json:"value,omitempty"`
+	} `json:"rera_number,omitempty"`
 	Type struct {
 		Value string `json:"value,omitempty"`
 	} `json:"type,omitempty"`

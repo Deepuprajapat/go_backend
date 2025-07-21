@@ -10,9 +10,9 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 )
 
-func (c *application) ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError) {
+func (c *application) ListBlogs(req *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError) {
 	// Get blogs from repository
-	blogs, err := c.repo.GetAllBlogs()
+	blogs, err := c.repo.GetAllBlogs(req.Filters, req.Page, req.PageSize)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get blogs")
 		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get blogs", err.Error())
@@ -67,7 +67,6 @@ func (c *application) GetBlogByID(id string) (*response.BlogResponse, *imhttp.Cu
 }
 
 func (c *application) CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError) {
-   
 
 	blog, err := c.repo.CreateBlog(ctx, req.Slug, req.BlogContent, req.SEOMetaInfo, req.IsPriority, req.IsPublished)
 	if err != nil {

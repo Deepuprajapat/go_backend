@@ -285,3 +285,22 @@ func (h *Handler) AdminListProperties(r *http.Request) (*imhttp.Response, *imhtt
 		StatusCode: http.StatusOK,
 	}, nil
 }
+
+func (h *Handler) GetPropertyBySlug(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+	if slug == "" {
+		logger.Get().Error().Msg("Slug is required")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Slug is required", "Slug is required")
+	}
+
+	response, err := h.app.GetPropertyBySlug(slug)
+	if err != nil {
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property by slug", err.Error())
+	}
+
+	return &imhttp.Response{
+		Data:       response,
+		StatusCode: http.StatusOK,
+	}, nil
+}

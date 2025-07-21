@@ -65,7 +65,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Use(corsMiddleware(Router))
 
 	// Public routes
-	Router.HandleFunc("/health", handlers.HealthCheck).Methods(http.MethodGet)
+	Router.HandleFunc("/v1/api/health", handlers.HealthCheck).Methods(http.MethodGet)
 
 	// auth routes
 	Router.Handle("/v1/api/auth/generate-token", imhttp.AppHandler(handler.GenerateToken)).Methods(http.MethodPost)
@@ -82,7 +82,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{slug}", imhttp.AppHandler(handler.GetProjectBySlug)).Methods(http.MethodGet)
 
 	// project internal routes
-	Router.Handle("/v1/api/internal/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)                   // internal
+	Router.Handle("/v1/api/internal/projects", imhttp.AppHandler(handler.AddProject)).Methods(http.MethodPost)                                         // internal
 	Router.Handle("/v1/api/internal/projects/{project_id}", imhttp.AppHandler(handler.UpdateProject)).Methods(http.MethodPatch)                        // internal
 	Router.Handle("/v1/api/internal/projects/{project_id}", middleware.RequireDM(imhttp.AppHandler(handler.DeleteProject))).Methods(http.MethodDelete) // internal
 	Router.Handle("/v1/api/internal/projects/filters", imhttp.AppHandler(handler.GetProjectFilters)).Methods(http.MethodGet)                           // internal
@@ -94,6 +94,7 @@ func Init(app application.ApplicationInterface) {
 	Router.Handle("/v1/api/projects/{project_id}/properties", imhttp.AppHandler(handler.GetPropertiesOfProject)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties/{property_id}", imhttp.AppHandler(handler.GetProperty)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/properties", imhttp.AppHandler(handler.ListProperties)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/properties/{slug}", imhttp.AppHandler(handler.GetPropertyBySlug)).Methods(http.MethodGet)
 
 	//internal routes
 	// Protected property internal routes (require business_partner or superadmin role)

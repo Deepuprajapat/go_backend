@@ -141,3 +141,19 @@ func (c *application) DeleteProperty(id string) *imhttp.CustomError {
 
 	return nil
 }
+
+func (c *application) GetPropertyBySlug(slug string) (*response.Property, *imhttp.CustomError) {
+
+	if slug == "" {
+		logger.Get().Error().Msg("Slug is required")
+		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Slug is required", "Slug is required")
+	}
+
+	property, err := c.repo.GetPropertyBySlug(slug)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get property by slug")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get property by slug", err.Error())
+	}
+
+	return response.GetPropertyFromEnt(property), nil
+}

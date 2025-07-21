@@ -19,14 +19,24 @@ import (
 // 	UpdateBlog(ctx context.Context, id string, blogURL *string, blogContent *schema.BlogContent, seoMetaInfo *schema.SEOMetaInfo, isPriority *bool) (*ent.Blogs, error)
 // }
 
-func (r *repository) GetAllBlogs() ([]*ent.Blogs, error) {
+func (r *repository) GetAllBlogs(filters map[string]interface{}, page int, pageSize int) ([]*ent.Blogs, error) {
 	ctx := context.Background()
 
-	// Get all blogs that are not deleted
-	blogList, err := r.db.Blogs.Query().
+	query := r.db.Blogs.Query().
 		Where(blogs.IsDeletedEQ(false)).
-		Order(ent.Desc(blogs.FieldID)).
-		All(ctx)
+		Order(ent.Desc(blogs.FieldID))
+
+	if filters["is_published"] == true {
+		query = query.Where(blogs.IsPublished(true))
+	}
+
+	if filters["recent_blogs"] == true {
+		query = query.Order(ent.Desc(blogs.FieldCreatedAt))
+	}
+
+	query = query.Offset(page).Limit(pageSize)
+
+	blogList, err := query.All(ctx)
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get blogs")
 		return nil, err

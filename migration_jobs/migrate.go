@@ -205,8 +205,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 					}
 				}
 
-				
-
 				floorPlanItems = append(floorPlanItems, schema.FloorPlanItem{
 					Title:        safeStr(floorPlan.Title),
 					FlatType:     safeStr(floorPlan.Title),
@@ -361,8 +359,6 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 				}
 			}
 
-			log.Info().Msgf("projectSchema: -------------   %v", projectSchema)
-
 			if err := txn.Project.Create().
 				SetID(id).
 				SetName(safeStr(project.ProjectName)).
@@ -432,6 +428,11 @@ func MigrateProject(ctx context.Context, txn *ent.Tx) error {
 							Value string `json:"value,omitempty"`
 						}{
 							Value: safeStr(projectConfigurationType.PropertyType),
+						},
+						ReraNumber: struct {
+							Value string `json:"value,omitempty"`
+						}{
+							Value: safeStr(project.ProjectRERA),
 						},
 					},
 					WhyToChoose: schema.WhyToChoose{
@@ -814,7 +815,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				if !ok {
 					log.Error().Msgf("Project ID mapping not found for property ID %d", property.ID)
 					continue
-					return fmt.Errorf("project ID mapping not found for property ID %d", property.ID)
 				}
 			}
 
@@ -824,7 +824,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				if !ok {
 					log.Error().Msgf("Developer ID mapping not found for property ID %d", property.ID)
 					continue
-					return fmt.Errorf("developer ID mapping not found for property ID %d", property.ID)
 				}
 			}
 
@@ -834,7 +833,6 @@ func MigrateProperty(ctx context.Context, txn *ent.Tx) error {
 				if !ok {
 					log.Error().Msgf("Locality ID mapping not found for property ID %d", property.ID)
 					continue
-					return fmt.Errorf("locality ID mapping not found for property ID %d", property.ID)
 				}
 			}
 
@@ -991,6 +989,7 @@ func MigrateBlogs(ctx context.Context, txn *ent.Tx) error {
 				SetIsPriority(blog.IsPriority).
 				SetCreatedAt(time.Unix(*blog.CreatedDate, 0)).
 				SetUpdatedAt(time.Now()).
+				SetIsPublished(true).
 				SetIsDeleted(blog.IsDeleted).
 				Exec(ctx); err != nil {
 				log.Error().Err(err).Msgf("Failed to insert blog ID %d", blog.ID)

@@ -3,42 +3,47 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/VI-IM/im_backend_go/request"
-	"github.com/VI-IM/im_backend_go/response"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
 
 func (h *Handler) ListBlogs(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	// ✅ Check for is_published query parameter
+	var req request.GetAllAPIRequest
+	req.Filters = make(map[string]interface{})
+
 	isPublishedParam := r.URL.Query().Get("is_published")
+	isRecentBlogsParam := r.URL.Query().Get("recent_blogs")
+	page := r.URL.Query().Get("page")
+	pageSize := r.URL.Query().Get("page_size")
 
-	var isPublished *bool
 	if isPublishedParam != "" {
-		// Parse the boolean value
-		switch isPublishedParam {
-		case "true":
-			value := true
-			isPublished = &value
-		case "false":
-			value := false
-			isPublished = &value
-		}
-		// If it's neither "true" nor "false", isPublished remains nil (no filter)
+		req.Filters["is_published"] = isPublishedParam == "true"
 	}
 
-	var response *response.BlogListResponse
-	var err *imhttp.CustomError
+	if isRecentBlogsParam != "" {
+		req.Filters["recent_blogs"] = isRecentBlogsParam == "true"
+	}
 
-	if isPublished != nil {
-		// ✅ Use filtered method
-		response, err = h.app.ListBlogsWithFilter(isPublished)
+	if isPublishedParam == "" && isRecentBlogsParam == "" {
+		req.Filters["recent_blogs"] = true
+	}
+
+	if page != "" {
+		req.Page, _ = strconv.Atoi(page)
 	} else {
-		// ✅ Use original method (no filter)
-		response, err = h.app.ListBlogs(nil)
+		req.Page = 1
+	}
+	if pageSize != "" {
+		req.PageSize, _ = strconv.Atoi(pageSize)
+	} else {
+		req.PageSize = 10000
 	}
 
+	response, err := h.app.ListBlogs(&req)
 	if err != nil {
 		return nil, err
 	}

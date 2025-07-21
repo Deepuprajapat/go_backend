@@ -53,7 +53,7 @@ type ApplicationInterface interface {
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
 	ListProperties(pagination *request.GetAllAPIRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
 	DeleteProperty(id string) *imhttp.CustomError
-
+	GetPropertyBySlug(slug string) (*response.Property, *imhttp.CustomError)
 	// Amenity
 	GetAllCategoriesWithAmenities() (*response.AmenityResponse, *imhttp.CustomError)
 	// GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)

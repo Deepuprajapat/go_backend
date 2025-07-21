@@ -52,7 +52,7 @@ type AppRepository interface {
 	GetAllProperties(offset, limit int, filters map[string]interface{}) ([]*ent.Property, int, error)
 	DeleteProperty(id string, hardDelete bool) error
 	IsPropertyDeleted(id string) (bool, error)
-
+	GetPropertyBySlug(slug string) (*ent.Property, error)
 	// Static Site Data
 	GetStaticSiteData() (*ent.StaticSiteData, error)
 	UpdateStaticSiteData(data *ent.StaticSiteData) error
@@ -62,8 +62,8 @@ type AppRepository interface {
 	CheckURLExists(ctx context.Context, url string) (*response.URLExistsResult, error)
 
 	// Blogs
-	GetAllBlogs() ([]*ent.Blogs, error)
-	GetAllBlogsWithFilter(isPublished *bool) ([]*ent.Blogs, error)  // ✅ Add this
+	GetAllBlogs(filters map[string]interface{}, page int, pageSize int) ([]*ent.Blogs, error)
+	GetAllBlogsWithFilter(isPublished *bool) ([]*ent.Blogs, error) // ✅ Add this
 	GetBlogByID(id string) (*ent.Blogs, error)
 	CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority bool, isPublished bool) (*ent.Blogs, error)
 	DeleteBlog(ctx context.Context, id string) error

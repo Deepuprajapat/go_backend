@@ -456,3 +456,13 @@ func (r *repository) IsPropertyDeleted(id string) (bool, error) {
 	}
 	return property.IsDeleted, nil
 }
+
+func (r *repository) GetPropertyBySlug(slug string) (*ent.Property, error) {
+	property, err := r.db.Property.Query().
+		Where(property.Slug(slug)).
+		Only(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return property, nil
+}
