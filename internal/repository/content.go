@@ -15,6 +15,8 @@ func (r *repository) GetProjectByCanonicalURL(ctx context.Context, url string) (
 			project.IsDeletedEQ(false),
 			project.SlugEQ(url),
 		).
+		WithLocation().
+		WithDeveloper().
 		Only(ctx)
 }
 
