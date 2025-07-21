@@ -19,11 +19,23 @@ type (
 		Logger
 		S3
 		CRM
+		TLS
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT"`
-		Host string `envconfig:"HOST"`
+		Port    int    `envconfig:"PORT"`
+		Host    string `envconfig:"HOST"`
+		BaseURL string `envconfig:"BASE_URL" default:"https://investmango.com"`
+	}
+	
+	TLS struct {
+		Enabled      bool   `envconfig:"TLS_ENABLED" default:"false"`
+		CertPath     string `envconfig:"TLS_CERT_PATH"`
+		KeyPath      string `envconfig:"TLS_KEY_PATH"`
+		Port         int    `envconfig:"TLS_PORT" default:"8443"`
+		HTTPSOnly    bool   `envconfig:"HTTPS_ONLY" default:"false"`
+		AutoCert     bool   `envconfig:"TLS_AUTO_CERT" default:"false"`
+		AutoCertHost string `envconfig:"TLS_AUTO_CERT_HOST"`
 	}
 	Database struct {
 		DB_Port int    `envconfig:"DB_PORT"`

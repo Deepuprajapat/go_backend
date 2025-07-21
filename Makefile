@@ -160,3 +160,26 @@ initialize-json-loader:
 seed-projects:
 	go run cmd/server/main.go seed-projects
 
+# TLS certificate generation commands
+cert-self-signed:
+	@echo "Generating self-signed certificate for development..."
+	@mkdir -p certs
+	@openssl genrsa -out certs/server.key 2048
+	@openssl req -new -x509 -sha256 -key certs/server.key -out certs/server.crt -days 365 -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
+	@echo "Self-signed certificate generated in certs/ directory"
+
+cert-mkcert:
+	@echo "Generating locally-trusted certificate with mkcert..."
+	@mkdir -p certs
+	@which mkcert > /dev/null || (echo "mkcert not found. Install with: brew install mkcert" && exit 1)
+	@mkcert -key-file certs/server.key -cert-file certs/server.crt localhost 127.0.0.1 ::1
+	@echo "Locally-trusted certificate generated in certs/ directory"
+
+# Run HTTPS server with self-signed cert for development
+run-https: cert-self-signed
+	@echo "Starting HTTPS server..."
+	@export TLS_ENABLED=true && \
+	export TLS_CERT_PATH=./certs/server.crt && \
+	export TLS_KEY_PATH=./certs/server.key && \
+	go run cmd/server/main.go
+

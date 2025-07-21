@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -25,6 +27,7 @@ import (
 	"github.com/VI-IM/im_backend_go/shared/logger"
 	_ "github.com/go-sql-driver/mysql" // Import MySQL driver
 	"github.com/google/uuid"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var (
@@ -90,9 +93,121 @@ func main() {
 	router.Init(app)
 
 	// Start server
-	logger.Get().Info().Msgf("Server starting on port %d", cfg.Port)
-	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), router.Router); err != nil {
-		logger.Get().Fatal().Err(err).Msg("Failed to start server")
+	if cfg.TLS.Enabled {
+		startHTTPSServer(cfg)
+	} else {
+		logger.Get().Info().Msgf("Server starting on port %d", cfg.Server.Port)
+		if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Server.Port), router.Router); err != nil {
+			logger.Get().Fatal().Err(err).Msg("Failed to start server")
+		}
+	}
+}
+
+func startHTTPSServer(cfg config.Config) {
+	// If HTTPSOnly is enabled, start HTTP server that redirects to HTTPS
+	if cfg.TLS.HTTPSOnly {
+		go func() {
+			logger.Get().Info().Msgf("Starting HTTP redirect server on port %d", cfg.Server.Port)
+			redirectHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				httpsURL := "https://" + r.Host + r.URL.String()
+				http.Redirect(w, r, httpsURL, http.StatusMovedPermanently)
+			})
+			if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Server.Port), redirectHandler); err != nil {
+				logger.Get().Fatal().Err(err).Msg("Failed to start HTTP redirect server")
+			}
+		}()
+	} else {
+		// Run HTTP server alongside HTTPS
+		go func() {
+			logger.Get().Info().Msgf("Starting HTTP server on port %d", cfg.Server.Port)
+			if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Server.Port), router.Router); err != nil {
+				logger.Get().Fatal().Err(err).Msg("Failed to start HTTP server")
+			}
+		}()
+	}
+
+	// Configure HTTPS server
+	if cfg.TLS.AutoCert && cfg.TLS.AutoCertHost != "" {
+		// Use Let's Encrypt automatic certificates
+		startAutoTLSServer(cfg)
+	} else {
+		// Use provided certificates
+		startManualTLSServer(cfg)
+	}
+}
+
+func startAutoTLSServer(cfg config.Config) {
+	logger.Get().Info().Msgf("Starting HTTPS server with automatic certificates on port %d", cfg.TLS.Port)
+	
+	// Create cache directory for certificates
+	cacheDir := filepath.Join(".", "certs", "autocert-cache")
+	if err := os.MkdirAll(cacheDir, 0700); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to create autocert cache directory")
+	}
+
+	// Configure autocert manager
+	m := &autocert.Manager{
+		Cache:      autocert.DirCache(cacheDir),
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist(cfg.TLS.AutoCertHost),
+	}
+
+	// Configure TLS server
+	server := &http.Server{
+		Addr:      ":" + strconv.Itoa(cfg.TLS.Port),
+		Handler:   router.Router,
+		TLSConfig: m.TLSConfig(),
+	}
+
+	// Start HTTPS server
+	logger.Get().Info().Msgf("Obtaining Let's Encrypt certificate for %s", cfg.TLS.AutoCertHost)
+	if err := server.ListenAndServeTLS("", ""); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to start auto-TLS HTTPS server")
+	}
+}
+
+func startManualTLSServer(cfg config.Config) {
+	logger.Get().Info().Msgf("Starting HTTPS server on port %d", cfg.TLS.Port)
+	
+	// Validate certificate paths
+	if cfg.TLS.CertPath == "" || cfg.TLS.KeyPath == "" {
+		logger.Get().Fatal().Msg("TLS certificate and key paths must be provided when TLS is enabled")
+	}
+
+	// Check if certificate files exist
+	if _, err := os.Stat(cfg.TLS.CertPath); os.IsNotExist(err) {
+		logger.Get().Fatal().Msgf("TLS certificate file not found: %s", cfg.TLS.CertPath)
+	}
+	if _, err := os.Stat(cfg.TLS.KeyPath); os.IsNotExist(err) {
+		logger.Get().Fatal().Msgf("TLS key file not found: %s", cfg.TLS.KeyPath)
+	}
+
+	// Configure TLS
+	tlsConfig := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+		},
+	}
+
+	// Configure HTTPS server
+	server := &http.Server{
+		Addr:         ":" + strconv.Itoa(cfg.TLS.Port),
+		Handler:      router.Router,
+		TLSConfig:    tlsConfig,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	// Start HTTPS server
+	logger.Get().Info().Msgf("Using TLS certificate: %s", cfg.TLS.CertPath)
+	logger.Get().Info().Msgf("Using TLS key: %s", cfg.TLS.KeyPath)
+	if err := server.ListenAndServeTLS(cfg.TLS.CertPath, cfg.TLS.KeyPath); err != nil {
+		logger.Get().Fatal().Err(err).Msg("Failed to start HTTPS server")
 	}
 }
 
