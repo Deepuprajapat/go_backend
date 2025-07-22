@@ -71,6 +71,7 @@ type ApplicationInterface interface {
 	ListBlogs(pagination *request.GetAllAPIRequest) (*response.BlogListResponse, *imhttp.CustomError)
 	ListBlogsWithFilter(isPublished *bool) (*response.BlogListResponse, *imhttp.CustomError)
 	GetBlogByID(id string) (*response.BlogResponse, *imhttp.CustomError)
+	GetBlogBySlug(slug string) (*response.BlogResponse, *imhttp.CustomError)
 	CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)
 	DeleteBlog(ctx context.Context, id string) *imhttp.CustomError
 	UpdateBlog(ctx context.Context, id string, req *request.UpdateBlogRequest) (*response.BlogResponse, *imhttp.CustomError)

@@ -127,3 +127,4 @@ func (h *Handler) UpdateBlog(r *http.Request) (*imhttp.Response, *imhttp.CustomE
 		StatusCode: http.StatusOK,
 	}, nil
 }
+

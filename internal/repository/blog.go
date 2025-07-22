@@ -80,6 +80,21 @@ func (r *repository) GetBlogByID(id string) (*ent.Blogs, error) {
 	return blog, nil
 }
 
+func (r *repository) GetBlogBySlug(slug string) (*ent.Blogs, error) {
+	blog, err := r.db.Blogs.Query().
+		Where(blogs.SlugEQ(slug)).
+		Where(blogs.IsDeletedEQ(false)).
+		Only(context.Background())
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, nil
+		}
+		logger.Get().Error().Err(err).Msg("Failed to get blog by slug")
+		return nil, err
+	}
+	return blog, nil
+}
+
 func (r *repository) CreateBlog(ctx context.Context, slug string, blogContent schema.BlogContent, seoMetaInfo schema.SEOMetaInfo, isPriority, isPublished bool) (*ent.Blogs, error) {
 	blog, err := r.db.Blogs.Create().
 		SetID(uuid.New().String()).

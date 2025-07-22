@@ -175,10 +175,13 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 
 	case url == "sitemap":
 		htmlResponse = fmt.Sprintf(`<!DOCTYPE html><html><head>
-            <title>About Us – Know About Invest Mango</title>
-            <meta property="og:title" content="About Us – Know About Invest Mango">
-            <meta property="og:description" content="Invest Mango | Reputed Investment and Real Estate Portfolio Management Organisation. We provide Real Estate Consulting services in Delhi NCR.">
+            <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+            <title>Sitemap - Invest Mango</title>
+            <meta name="description" content="Sitemap for InvestMango - Real Estate Portfolio and Strategic Management Company. Find all pages and content on our website.">
+            <meta property="og:title" content="Sitemap - Invest Mango">
+            <meta property="og:description" content="Sitemap for InvestMango - Real Estate Portfolio and Strategic Management Company. Find all pages and content on our website.">
             <meta property="og:url" content="%s">
+            <meta name="robots" content="index, follow">
             <link rel="canonical" href="https://www.investmango.com/sitemap">
             </head></html>`, url)
 
@@ -414,6 +417,89 @@ func (h *Handler) GetHTMLContent(r *http.Request) (*imhttp.Response, *imhttp.Cus
 			"</body></html>"
 
 	}
+
+	return &imhttp.Response{
+		Data:       htmlResponse,
+		StatusCode: http.StatusOK,
+	}, nil
+}
+
+func (h *Handler) GetBlogSEOContent(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	// Get blog by slug
+	blog, err := h.app.GetBlogBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+
+	if blog == nil {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found", "")
+	}
+
+	// Generate canonical URL
+	canonicalURL := fmt.Sprintf("https://investmango.com/blogs/%s", slug)
+	
+	// Update canonical URL if not set
+	if blog.SEOMetaInfo.Canonical == "" {
+		blog.SEOMetaInfo.Canonical = canonicalURL
+	}
+
+	// Generate HTML response
+	seoMeta := blog.SEOMetaInfo
+	blogContent := blog.BlogContent
+
+	htmlResponse := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+	<head>
+		<title>%s</title>
+		<meta name="description" content="%s">
+		<meta name="keywords" content="%s">
+		<link rel="canonical" href="%s">
+		<meta name="robots" content="index, follow">
+		
+		<!-- Open Graph tags -->
+		<meta property="og:title" content="%s">
+		<meta property="og:description" content="%s">
+		<meta property="og:type" content="article">
+		<meta property="og:url" content="%s">
+		<meta property="og:image" content="%s">
+		
+		<!-- Twitter Card tags -->
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:title" content="%s">
+		<meta name="twitter:description" content="%s">
+		<meta name="twitter:image" content="%s">
+	</head>
+	<body>
+		<article>
+			<h1>%s</h1>
+			<img src="%s" alt="%s">
+			<p>%s</p>
+			<p><strong>Keywords:</strong> %s</p>
+			<p><strong>Canonical URL:</strong> %s</p>
+		</article>
+	</body>
+</html>`,
+		seoMeta.Title,
+		seoMeta.Description,
+		seoMeta.Keywords,
+		blog.SEOMetaInfo.Canonical,
+		seoMeta.Title,
+		seoMeta.Description,
+		blog.SEOMetaInfo.Canonical,
+		blogContent.Image,
+		seoMeta.Title,
+		seoMeta.Description,
+		blogContent.Image,
+		blogContent.Title,
+		blogContent.Image,
+		blogContent.ImageAlt,
+		strings.ReplaceAll(blogContent.Description, "\n", "<br>"),
+		seoMeta.Keywords,
+		blog.SEOMetaInfo.Canonical,
+	)
 
 	return &imhttp.Response{
 		Data:       htmlResponse,

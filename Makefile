@@ -12,7 +12,8 @@ seed-testimonials:
 
 # Seed amenities into static_site_data
 seed-amenities:
-	PGPASSWORD=password psql -h localhost -p 5434 -U im_db_dev -d mydb -f sql/seed_amenities_from_json.sql
+	docker cp sql/seed_amenities_from_json.sql im_postgres_db:/tmp/seed_amenities_from_json.sql
+	docker exec im_postgres_db psql -U im_db_dev -d mydb -f /tmp/seed_amenities_from_json.sql
 
 # Run the application
 build-run: build

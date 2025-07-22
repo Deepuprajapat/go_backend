@@ -22,8 +22,9 @@ type (
 	}
 
 	Server struct {
-		Port int    `envconfig:"PORT"`
-		Host string `envconfig:"HOST"`
+		BaseURL string `envconfig:"BASE_URL" default:"http://localhost:9999"`
+		Port    int    `envconfig:"PORT"`
+		Host    string `envconfig:"HOST"`
 	}
 	Database struct {
 		DB_Port int    `envconfig:"DB_PORT"`

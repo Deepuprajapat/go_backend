@@ -17,6 +17,8 @@ import (
 var (
 	// Router is the shared router instance
 	Router = mux.NewRouter()
+	// app holds the application instance for SEO handlers
+	app application.ApplicationInterface
 )
 
 func corsMiddleware(_ *mux.Router) mux.MiddlewareFunc {
@@ -38,6 +40,15 @@ func serveStaticFiles(w http.ResponseWriter, r *http.Request) {
 	// Check if file exists in build directory
 	filePath := filepath.Join(buildDir, r.URL.Path)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// Check if this is a bot request and serve SEO-optimized content
+		if isBotUserAgent(r.UserAgent()) {
+			// Handle SEO routes for bots with pre-rendered HTML content
+			// Supports: /<project_slug>, /blogs/<blog_slug>, /propertyforsale/<property_slug>
+			if handleSEORoute(w, r, app) {
+				return
+			}
+		}
+
 		// If file doesn't exist, serve index.html for client-side routing
 		filePath = filepath.Join(buildDir, "index.html")
 	}
@@ -47,6 +58,14 @@ func serveStaticFiles(w http.ResponseWriter, r *http.Request) {
 
 func serveReactApp(w http.ResponseWriter, r *http.Request) {
 	// create a proxy for the frontend
+	if isBotUserAgent(r.UserAgent()) {
+		// Handle SEO routes for bots with pre-rendered HTML content
+		// Supports: /<project_slug>, /blogs/<blog_slug>, /propertyforsale/<property_slug>
+		if handleSEORoute(w, r, app) {
+			return
+		}
+	}
+
 	frontendProxy := httputil.NewSingleHostReverseProxy(&url.URL{
 		Scheme: "http",
 		Host:   "localhost:3000",
@@ -56,13 +75,22 @@ func serveReactApp(w http.ResponseWriter, r *http.Request) {
 }
 
 // Init initializes the router with all routes and middleware
-func Init(app application.ApplicationInterface) {
+func Init(appInstance application.ApplicationInterface) {
+	// Store app instance for SEO handlers
+	app = appInstance
+
+	// Initialize SEO templates
+	if err := initSEOTemplates(); err != nil {
+		panic(err)
+	}
+
 	// Initialize handlers with controller
 	handler := handlers.NewHandler(app)
 
 	// Add middleware
 	Router.Use(middleware.LoggingMiddleware)
 	Router.Use(corsMiddleware(Router))
+	//Router.Use(middleware.SecurityHeadersMiddleware(config.GetConfig()))
 
 	// Public routes
 	Router.HandleFunc("/v1/api/health", handlers.HealthCheck).Methods(http.MethodGet)
@@ -153,6 +181,7 @@ func Init(app application.ApplicationInterface) {
 	//content routes
 	Router.Handle("/v1/api/content/test/{url}", imhttp.AppHandler(handler.GetProjectSEOContent)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/content/text", imhttp.AppHandler(handler.GetPropertySEOContent)).Methods(http.MethodGet)
+	Router.Handle("/v1/api/content/blog/{slug}", imhttp.AppHandler(handler.GetBlogSEOContent)).Methods(http.MethodGet)
 	Router.Handle("/v1/api/content/text/html", imhttp.AppHandler(handler.GetHTMLContent)).Methods(http.MethodGet)
 
 	// generic search routes

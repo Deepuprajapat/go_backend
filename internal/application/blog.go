@@ -66,6 +66,24 @@ func (c *application) GetBlogByID(id string) (*response.BlogResponse, *imhttp.Cu
 	return response.GetBlogFromEnt(blog), nil
 }
 
+func (c *application) GetBlogBySlug(slug string) (*response.BlogResponse, *imhttp.CustomError) {
+	blog, err := c.repo.GetBlogBySlug(slug)
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get blog by slug")
+		return nil, imhttp.NewCustomErr(http.StatusInternalServerError, "Failed to get blog", err.Error())
+	}
+
+	if blog == nil {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog not found", "Blog not found")
+	}
+
+	if blog.IsDeleted {
+		return nil, imhttp.NewCustomErr(http.StatusNotFound, "Blog has been deleted", "Blog has been deleted")
+	}
+
+	return response.GetBlogFromEnt(blog), nil
+}
+
 func (c *application) CreateBlog(ctx context.Context, req *request.CreateBlogRequest) (*response.BlogResponse, *imhttp.CustomError) {
 
 	blog, err := c.repo.CreateBlog(ctx, req.Slug, req.BlogContent, req.SEOMetaInfo, req.IsPriority, req.IsPublished)
