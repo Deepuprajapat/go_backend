@@ -90,7 +90,7 @@ func main() {
 	router.Init(app)
 
 	// Start server
-	logger.Get().Info().Msgf("Server starting on port %d", cfg.Port)
+	logger.Get().Info().Msgf("Server starting on port this %d", cfg.Port)
 	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), router.Router); err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to start server")
 	}
