@@ -19,14 +19,14 @@ func (c *application) GetAllCategoriesWithAmenities() (*response.AmenityResponse
 
 	cwa := make(map[string][]response.Amenity)
 	for category, amenities := range staticData.CategoriesWithAmenities.Categories {
-		amenities := make([]response.Amenity, len(amenities))
+		responseAmenities := make([]response.Amenity, len(amenities))
 		for i, amenity := range amenities {
-			amenities[i] = response.Amenity{
+			responseAmenities[i] = response.Amenity{
 				Icon:  amenity.Icon,
 				Value: amenity.Value,
 			}
 		}
-		cwa[category] = amenities
+		cwa[category] = responseAmenities
 	}
 
 	return &response.AmenityResponse{
