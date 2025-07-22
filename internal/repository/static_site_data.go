@@ -42,11 +42,13 @@ func (r *repository) CheckCategoryExists(category string) (bool, error) {
 		return false, err
 	}
 
+	parsedCategory := strings.ReplaceAll(category, " ", "-")
 	var isExist bool
 
 	isExist = false
 	for existedCategory := range staticSiteData[0].CategoriesWithAmenities.Categories {
-		if existedCategory == category {
+		logger.Get().Info().Msg(existedCategory + " " + parsedCategory)
+		if strings.EqualFold(strings.ReplaceAll(existedCategory, " ", "-"), parsedCategory) {
 			isExist = true
 		}
 	}
@@ -115,9 +117,9 @@ func (r *repository) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCat
 		Value string `json:"value"`
 	}
 	for _, amenity := range ssd.CategoriesWithAmenities.Categories[req.CategoryName] {
-		parsedAmenity := strings.ToLower(strings.ReplaceAll(amenity.Value, " ", "-"))
+		parsedAmenity := strings.ReplaceAll(amenity.Value, " ", "-")
 		logger.Get().Info().Msg(parsedAmenity + " " + req.AmenityName)
-		if parsedAmenity != req.AmenityName {
+		if !strings.EqualFold(parsedAmenity, req.AmenityName) {
 			amenities = append(amenities, amenity)
 		}
 	}
@@ -138,6 +140,12 @@ func (r *repository) DeleteCategoryWithAmenities(categoryName string) error {
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to get static site data")
 		return err
+	}
+
+	for category := range ssd.CategoriesWithAmenities.Categories {
+		if strings.EqualFold(strings.ReplaceAll(category, " ", "-"), strings.ReplaceAll(categoryName, " ", "-")) {
+			delete(ssd.CategoriesWithAmenities.Categories, category)
+		}
 	}
 
 	delete(ssd.CategoriesWithAmenities.Categories, categoryName)

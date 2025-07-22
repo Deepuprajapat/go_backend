@@ -39,7 +39,7 @@ func (c *application) AddCategoryWithAmenities(req *request.CreateAmenityRequest
 	// Check if the amenity already exists
 	var categoryName string
 	for category := range req.Category {
-		categoryName = strings.ToLower(category)
+		categoryName = category
 	}
 
 	exist, err := c.repo.CheckCategoryExists(categoryName)
@@ -190,8 +190,8 @@ func (c *application) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCa
 
 	for _, amenity := range staticData.CategoriesWithAmenities.Categories[req.CategoryName] {
 
-		parsedAmenity := strings.ToLower(strings.ReplaceAll(amenity.Value, " ", "-"))
-		if parsedAmenity == req.AmenityName {
+		parsedAmenity := strings.ReplaceAll(amenity.Value, " ", "-")
+		if strings.EqualFold(parsedAmenity, req.AmenityName) {
 			amenityExists = true
 			break
 		}

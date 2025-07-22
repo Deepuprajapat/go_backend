@@ -93,6 +93,7 @@ func (h *Handler) AddCategory(r *http.Request) (*imhttp.Response, *imhttp.Custom
 	}
 
 	return &imhttp.Response{
+		Data:       "Category created successfully",
 		StatusCode: http.StatusCreated,
 		Message:    "Category created successfully",
 	}, nil
@@ -123,6 +124,7 @@ func (h *Handler) AddAmenityToCategory(r *http.Request) (*imhttp.Response, *imht
 	}
 
 	return &imhttp.Response{
+		Data:       "Amenity added to category successfully",
 		StatusCode: http.StatusCreated,
 		Message:    "Amenity added to category successfully",
 	}, nil
@@ -155,16 +157,13 @@ func (h *Handler) DeleteAmenityFromCategory(r *http.Request) (*imhttp.Response, 
 	}
 
 	return &imhttp.Response{
+		Data:       "Amenity deleted from category successfully",
 		StatusCode: http.StatusOK,
 		Message:    "Amenity deleted from category successfully",
 	}, nil
 }
 
 func (h *Handler) DeleteCategoryWithAmenities(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
-	var req struct {
-		CategoryName string `json:"category_name"`
-	}
-
 
 	categoryName := mux.Vars(r)["category_name"]
 
@@ -172,11 +171,12 @@ func (h *Handler) DeleteCategoryWithAmenities(r *http.Request) (*imhttp.Response
 		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Category name is required", "Category name field cannot be empty")
 	}
 
-	if err := h.app.DeleteCategoryWithAmenities(req.CategoryName); err != nil {
+	if err := h.app.DeleteCategoryWithAmenities(categoryName); err != nil {
 		return nil, err
 	}
 
 	return &imhttp.Response{
+		Data:       "Category deleted successfully",
 		StatusCode: http.StatusOK,
 		Message:    "Category deleted successfully",
 	}, nil
