@@ -22,9 +22,11 @@ type (
 	}
 
 	Server struct {
-		Port    int    `envconfig:"PORT"`
-		Host    string `envconfig:"HOST"`
-		BaseURL string `envconfig:"BASE_URL" default:"https://investmango.com"`
+		Port             int    `envconfig:"PORT"`
+		Host             string `envconfig:"HOST"`
+		BaseURL          string `envconfig:"BASE_URL" default:"https://investmango.com"`
+		StaticAssetsURL  string `envconfig:"STATIC_ASSETS_URL"`
+		FrontendProxyURL string `envconfig:"FRONTEND_PROXY_URL"`
 	}
 	Database struct {
 		DB_Port int    `envconfig:"DB_PORT"`

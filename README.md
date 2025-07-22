@@ -1,140 +1,148 @@
 # IM Backend Service
 
-A modern Go backend service with JWT authentication, OTP-based admin login, and MySQL database integration.
-
-## Features
-
-- 🚀 Built with Go and Gorilla Mux
-- 🔐 JWT-based authentication
-- 📱 Phone OTP for admin login
-- 🗄️ MySQL database with Ent ORM
-- 🧪 Comprehensive test suite
-- 🐳 Docker support for local development
-- 🔄 Database migrations with Atlas
-
-## Prerequisites
-
-- Go 1.21 or later
-- Docker and Docker Compose
-- Make (optional, but recommended)
+A real estate platform backend API with property listings, project management, and user authentication. Serves both API endpoints and your React frontend.
 
 ## Quick Start
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/im_backend_go.git
-cd im_backend_go
-```
+1. **Clone and start the database:**
+   ```bash
+   git clone <your-repo-url>
+   cd IM-backend-GO
+   make docker-up
+   ```
 
-2. Start the MySQL database:
-```bash
-make docker-up
-```
+2. **Set up the database:**
+   ```bash
+   make migrate      # Creates database tables
+   make seed-data    # Adds admin users and test data
+   ```
 
-3. Run database migrations:
-```bash
-make migrate
-```
+3. **Run the server:**
+   ```bash
+   make run
+   ```
 
-4. Start the server:
-```bash
-make run
-```
+4. **Verify it's working:**
+   - Visit `http://localhost:8080/v1/api/health` - should return "OK"
+   - API is available at `http://localhost:8080/v1/api/`
 
-The server will start on `http://localhost:8080`.
+That's it! The server is running with a properly set up database.
 
-## Development
+## Frontend Serving Modes
 
-### Project Structure
+The backend can serve your React app in different ways:
 
-```
-.
-├── cmd/
-│   └── server/          # Application entry point
-├── internal/
-│   ├── auth/           # Authentication logic
-│   ├── config/         # Configuration management
-│   ├── database/       # Database connection and setup
-│   ├── handlers/       # HTTP request handlers
-│   ├── middleware/     # HTTP middleware
-│   ├── router/         # Route definitions
-│   └── testutil/       # Test utilities
-├── ent/                # Ent ORM schema and generated code
-├── migrations/         # Database migrations
-└── Makefile           # Build and development commands
-```
-
-### Available Commands
+### 🔄 Development Mode (Recommended for development)
+Proxies to your React dev server with hot reload:
 
 ```bash
-# Start the application
-make run
-
-# Run tests
-make test
-
-# Build the application
-make build
-
-# Start Docker services
-make docker-up
-
-# Stop Docker services
-make docker-down
-
-# Run database migrations
-make migrate
-
-# Clean build artifacts
-make clean
+# Start your React app (usually npm start)
+FRONTEND_PROXY_URL=http://localhost:3000 make run
 ```
 
-### Environment Variables
+### ⚡ Production Mode (Fast serving from memory)
+Downloads and serves your app from a zip file:
 
-Create a `.env` file in the project root:
+```bash
+STATIC_ASSETS_URL=https://example.com/your-app.zip make run
+```
+
+### 📁 Basic Mode (Serves from build folder)
+Serves files from the `build/` directory:
+
+```bash
+make run  # Default mode, no config needed. Another way to say, API Only
+```
+
+## Configuration
+
+Create a `.env` file for custom settings:
 
 ```env
-DB_DSN=root:password@tcp(localhost:3306)/im_db
+# Database (optional - uses Docker by default)
+DATABASE_URL=root:password@tcp(localhost:3306)/mydb
+
+# Server
 PORT=8080
-JWT_SECRET=your-secret-key
+
+# Authentication (required for login features)
+AUTH_JWT_SECRET=your-secret-key-here
+
+# AWS S3 (required for file uploads)
+AWS_BUCKET=your-bucket-name
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_KEY=your-secret-key
+
+# Frontend serving (optional)
+FRONTEND_PROXY_URL=http://localhost:3000
+STATIC_ASSETS_URL=https://example.com/app.zip
 ```
 
-## API Endpoints
-
-### Public Endpoints
-
-- `GET /health` - Health check endpoint
-- `POST /auth/token` - Generate JWT token (requires phone and OTP)
-
-### Protected Endpoints (Admin Only)
-
-- `POST /admin/users` - Create a new user
-- `GET /admin/users` - List all users
-- `GET /admin/users/{id}` - Get user details
-- `PUT /admin/users/{id}` - Update user
-- `DELETE /admin/users/{id}` - Delete user
-
-## Testing
-
-Run the test suite:
+## Common Commands
 
 ```bash
-make test
+# Start the server
+make run
+
+# Database setup
+make migrate       # Create database tables
+make seed-data     # Add admin users (admin/admin123, business_partner/bp123, etc.)
+make seed-projects # Add sample properties and projects
+
+# Reset database (clean start with all data)
+make reset
+
+# Stop database
+make docker-down
 ```
 
-The test suite includes:
-- Integration tests with a test database
-- API endpoint tests
-- Authentication tests
+## Test Users (After running seed-data)
 
-## Contributing
+The seeding creates these test users for development:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```
+Superadmin:
+- Username: admin
+- Password: admin123
 
-## License
+Business Partner:
+- Username: business_partner  
+- Password: bp123
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+Digital Marketing:
+- Username: digital_marketing
+- Password: dm123
+```
+
+Use these credentials to test authentication and different user roles.
+
+## Troubleshooting
+
+**Server won't start:**
+- Make sure Docker is running
+- Run `make docker-up` to start the database
+- Check if port 8080 is available
+
+**Frontend not loading:**
+- For development: make sure your React app is running on localhost:3000
+- For production: verify your zip URL is accessible
+- For basic mode: you'll get 404 errors if no `build/` directory exists
+
+**Database connection issues:**
+- Run `make reset` to recreate the database with fresh data
+- Make sure you ran `make migrate` after starting the database
+- Check your `DATABASE_URL` if using custom database
+
+**Empty database or missing tables:**
+- Run `make migrate` to create database tables
+- Run `make seed-data` to add test users
+- Run `make seed-projects` to add sample data
+
+## Need Help?
+
+- Check the logs when running `make run`
+- Verify your `.env` file configuration
+
+---
+
+*For detailed technical documentation, see CLAUDE.md*

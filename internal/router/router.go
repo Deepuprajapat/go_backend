@@ -6,10 +6,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/VI-IM/im_backend_go/internal/application"
+	"github.com/VI-IM/im_backend_go/internal/config"
 	"github.com/VI-IM/im_backend_go/internal/handlers"
 	"github.com/VI-IM/im_backend_go/internal/middleware"
+	"github.com/VI-IM/im_backend_go/internal/static"
 	imhttp "github.com/VI-IM/im_backend_go/shared"
 	"github.com/gorilla/mux"
 )
@@ -32,8 +35,58 @@ func corsMiddleware(_ *mux.Router) mux.MiddlewareFunc {
 	}
 }
 
-// serveStaticFiles serves the React application static files from build directory
+// serveStaticFiles serves the React application static files with priority: proxy > memory > filesystem
 func serveStaticFiles(w http.ResponseWriter, r *http.Request) {
+	cfg := config.GetConfig()
+	
+	// Priority 1: Proxy to frontend development server if configured
+	if cfg.FrontendProxyURL != "" {
+		serveFromProxy(w, r, cfg.FrontendProxyURL)
+		return
+	}
+	
+	// Priority 2: Serve from memory if static assets are loaded
+	memfs := static.GetGlobalMemoryFileSystem()
+	
+	// Clean up the requested path
+	path := r.URL.Path
+	if path == "" || path == "/" {
+		path = "/index.html"
+	}
+	
+	// Try to get the file from memory
+	file, exists := memfs.GetFile(path)
+	if !exists {
+		// Check if this is a bot request and serve SEO-optimized content
+		if isBotUserAgent(r.UserAgent()) {
+			// Handle SEO routes for bots with pre-rendered HTML content
+			// Supports: /<project_slug>, /blogs/<blog_slug>, /propertyforsale/<property_slug>
+			if handleSEORoute(w, r, app) {
+				return
+			}
+		}
+		
+		// If file doesn't exist, try to serve index.html for SPA routing
+		indexFile, indexExists := memfs.GetFile("/index.html")
+		if !indexExists {
+			// Fallback to filesystem if memory filesystem is empty
+			serveFromFilesystem(w, r)
+			return
+		}
+		file = indexFile
+		path = "/index.html"
+	}
+	
+	// Set appropriate cache headers
+	w.Header().Set("Cache-Control", static.GetCacheControl(path))
+	w.Header().Set("Content-Type", file.ContentType)
+	
+	// Serve the file content
+	http.ServeContent(w, r, filepath.Base(path), file.ModTime, strings.NewReader(string(file.Content)))
+}
+
+// serveFromFilesystem serves files from disk (fallback when memory filesystem is empty)
+func serveFromFilesystem(w http.ResponseWriter, r *http.Request) {
 	// Path to React build directory
 	buildDir := "./build"
 
@@ -43,7 +96,6 @@ func serveStaticFiles(w http.ResponseWriter, r *http.Request) {
 		// Check if this is a bot request and serve SEO-optimized content
 		if isBotUserAgent(r.UserAgent()) {
 			// Handle SEO routes for bots with pre-rendered HTML content
-			// Supports: /<project_slug>, /blogs/<blog_slug>, /propertyforsale/<property_slug>
 			if handleSEORoute(w, r, app) {
 				return
 			}
@@ -53,7 +105,44 @@ func serveStaticFiles(w http.ResponseWriter, r *http.Request) {
 		filePath = filepath.Join(buildDir, "index.html")
 	}
 
+	// Set cache headers for filesystem serving too
+	w.Header().Set("Cache-Control", static.GetCacheControl(r.URL.Path))
 	http.ServeFile(w, r, filePath)
+}
+
+// serveFromProxy proxies requests to the frontend development server
+func serveFromProxy(w http.ResponseWriter, r *http.Request, proxyURL string) {
+	// Parse the proxy URL
+	target, err := url.Parse(proxyURL)
+	if err != nil {
+		http.Error(w, "Invalid proxy URL configured", http.StatusInternalServerError)
+		return
+	}
+	
+	// Check if this is a bot request and serve SEO-optimized content
+	if isBotUserAgent(r.UserAgent()) {
+		// Handle SEO routes for bots with pre-rendered HTML content
+		if handleSEORoute(w, r, app) {
+			return
+		}
+	}
+	
+	// Create and configure the reverse proxy
+	proxy := httputil.NewSingleHostReverseProxy(target)
+	
+	// Customize the proxy to handle errors gracefully
+	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		// Log the error but fallback to filesystem serving
+		if app != nil {
+			// Try to serve from filesystem as fallback
+			serveFromFilesystem(w, r)
+		} else {
+			http.Error(w, "Frontend service unavailable", http.StatusBadGateway)
+		}
+	}
+	
+	// Proxy the request
+	proxy.ServeHTTP(w, r)
 }
 
 func serveReactApp(w http.ResponseWriter, r *http.Request) {
@@ -195,6 +284,6 @@ func Init(appInstance application.ApplicationInterface) {
 	Router.Handle("/v1/api/internal/custom-search-page/{id}", imhttp.AppHandler(handler.DeleteCustomSearchPage)).Methods(http.MethodDelete)
 
 	// Catch-all route for React app - must be last to handle all non-API routes
-	Router.PathPrefix("/").HandlerFunc(serveReactApp) // Proxy to local dev server
-	//Router.PathPrefix("/").HandlerFunc(serveStaticFiles) // Serve static build files
+	//Router.PathPrefix("/").HandlerFunc(serveReactApp) // Proxy to local dev server
+	Router.PathPrefix("/").HandlerFunc(serveStaticFiles) // Serve static files from memory or build directory
 }

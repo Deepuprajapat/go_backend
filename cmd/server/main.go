@@ -20,6 +20,7 @@ import (
 	"github.com/VI-IM/im_backend_go/internal/domain/enums"
 	"github.com/VI-IM/im_backend_go/internal/repository"
 	"github.com/VI-IM/im_backend_go/internal/router"
+	"github.com/VI-IM/im_backend_go/internal/static"
 	"github.com/VI-IM/im_backend_go/internal/utils"
 	"github.com/VI-IM/im_backend_go/migration_jobs"
 	"github.com/VI-IM/im_backend_go/shared/logger"
@@ -86,12 +87,23 @@ func main() {
 	repo := repository.NewRepository(client)
 	app := application.NewApplication(repo, s3Client, smsClient, crmClient)
 
+	// Initialize static assets loader
+	if cfg.StaticAssetsURL != "" {
+		logger.Get().Info().Msg("Initializing static assets from ZIP URL...")
+		if err := static.InitializeStaticLoader(cfg.StaticAssetsURL); err != nil {
+			logger.Get().Warn().Err(err).Msg("Failed to load static assets from URL, falling back to filesystem")
+		} else {
+			logger.Get().Info().Msg("Static assets loaded successfully into memory")
+		}
+	} else {
+		logger.Get().Info().Msg("No static assets URL configured, will serve from build directory")
+	}
+
 	// Initialize router
 	router.Init(app)
 
 	// Start server
-
-	logger.Get().Info().Msgf("Server starting on port this %d", cfg.Port)
+	logger.Get().Info().Msgf("Server starting on port %d", cfg.Port)
 	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), router.Router); err != nil {
 		logger.Get().Fatal().Err(err).Msg("Failed to start server")
 	}
