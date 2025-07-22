@@ -85,7 +85,7 @@ func (h *Handler) DeleteProject(r *http.Request) (*imhttp.Response, *imhttp.Cust
 	}
 
 	return &imhttp.Response{
-		Data:       nil,
+		Data:       "Project deleted successfully",
 		StatusCode: http.StatusOK,
 		Message:    "Project deleted successfully",
 	}, nil

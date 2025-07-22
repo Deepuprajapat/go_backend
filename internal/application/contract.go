@@ -54,16 +54,10 @@ type ApplicationInterface interface {
 	AddProperty(input request.AddPropertyRequest) (*response.AddPropertyResponse, *imhttp.CustomError)
 	ListProperties(pagination *request.GetAllAPIRequest) ([]*response.PropertyListResponse, int, *imhttp.CustomError)
 	DeleteProperty(id string) *imhttp.CustomError
+	
 	// Amenity
 	GetAllCategoriesWithAmenities() (*response.AmenityResponse, *imhttp.CustomError)
-	// GetAmenities() (*response.AmenityResponse, *imhttp.CustomError)
-	// GetAmenityByName(name string) (*response.SingleAmenityResponse, *imhttp.CustomError)
 	AddCategoryWithAmenities(req *request.CreateAmenityRequest) *imhttp.CustomError
-	// UpdateAmenity(id string, req *request.UpdateAmenityRequest) *imhttp.CustomError
-	// AddAmenitiesToCategory(req *request.AddAmenitiesToCategoryRequest) *imhttp.CustomError
-	// DeleteAmenitiesFromCategory(req *request.DeleteAmenitiesFromCategoryRequest) *imhttp.CustomError
-	// DeleteCategory(req *request.DeleteCategoryRequest) *imhttp.CustomError
-	// UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) *imhttp.CustomError
 	UpdateStaticSiteData(req *request.UpdateStaticSiteDataRequest) (*response.StaticSiteDataResponse, *imhttp.CustomError)
 	AddCategory(categoryName string) *imhttp.CustomError
 	AddAmenityToCategory(req *request.AddAmenityToCategoryRequest) *imhttp.CustomError
