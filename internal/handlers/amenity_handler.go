@@ -130,9 +130,6 @@ func (h *Handler) AddAmenityToCategory(r *http.Request) (*imhttp.Response, *imht
 
 func (h *Handler) DeleteAmenityFromCategory(r *http.Request) (*imhttp.Response, *imhttp.CustomError) {
 	var req request.DeleteAmenityFromCategoryRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
-	}
 
 	categoryName := mux.Vars(r)["category_name"]
 
@@ -168,9 +165,6 @@ func (h *Handler) DeleteCategoryWithAmenities(r *http.Request) (*imhttp.Response
 		CategoryName string `json:"category_name"`
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, imhttp.NewCustomErr(http.StatusBadRequest, "Invalid request body", err.Error())
-	}
 
 	categoryName := mux.Vars(r)["category_name"]
 

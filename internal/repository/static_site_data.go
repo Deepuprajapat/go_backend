@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/VI-IM/im_backend_go/ent"
@@ -114,7 +115,9 @@ func (r *repository) DeleteAmenityFromCategory(req *request.DeleteAmenityFromCat
 		Value string `json:"value"`
 	}
 	for _, amenity := range ssd.CategoriesWithAmenities.Categories[req.CategoryName] {
-		if amenity.Value != req.AmenityName {
+		parsedAmenity := strings.ToLower(strings.ReplaceAll(amenity.Value, " ", "-"))
+		logger.Get().Info().Msg(parsedAmenity + " " + req.AmenityName)
+		if parsedAmenity != req.AmenityName {
 			amenities = append(amenities, amenity)
 		}
 	}

@@ -96,6 +96,7 @@ reset:
 	make seed-data
 	make seed-projects
 	make seed-testimonials
+	make seed-amenities
 	@echo "🎉 Database reset complete! Clean slate ready for development."
 
 # Reset database by dropping all tables
