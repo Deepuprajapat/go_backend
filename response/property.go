@@ -59,7 +59,7 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 
 	var project *ent.Project
 	if property.Edges.Project != nil {
-		project = property.Edges.Project 	
+		project = property.Edges.Project
 	} else {
 		project = &ent.Project{}
 	}
@@ -68,7 +68,9 @@ func GetPropertyFromEnt(property *ent.Property) *Property {
 		PropertyDetails:   property.WebCards.PropertyDetails,
 		PropertyFloorPlan: property.WebCards.PropertyFloorPlan,
 		WhyToChoose:       project.WebCards.WhyToChoose,
-		KnowAbout:         project.WebCards.KnowAbout,
+		KnowAbout: schema.KnowAbout{
+			Description: property.WebCards.KnowAbout.Description,
+		},
 		VideoPresentation: project.WebCards.VideoPresentation,
 		Amenities:         project.WebCards.Amenities,
 		LocationMap:       property.WebCards.LocationMap,

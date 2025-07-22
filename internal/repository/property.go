@@ -115,18 +115,18 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 		return nil, err
 	}
 
-	property := r.db.Property.UpdateOneID(input.PropertyID)
+	propertyUpdate := r.db.Property.UpdateOneID(input.PropertyID)
 
 	if input.Name != "" {
-		property.SetName(input.Name)
+		propertyUpdate.SetName(input.Name)
 		// Regenerate slug when property name changes
 		if input.Name != oldProperty.Name {
 			newSlug := generateSlug(input.Name, input.PropertyID)
-			property.SetSlug(newSlug)
+			propertyUpdate.SetSlug(newSlug)
 		}
 	}
 	if len(input.PropertyImages) > 0 {
-		property.SetPropertyImages(input.PropertyImages)
+		propertyUpdate.SetPropertyImages(input.PropertyImages)
 	}
 
 	newWebCards := oldProperty.WebCards
@@ -204,10 +204,10 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 	// }
 
 	// // know about
-	// if input.WebCards.KnowAbout.Description != "" {
-	// 	newWebCards.KnowAbout.Description = input.WebCards.KnowAbout.Description
-	// 	hasWebCardChanges = true
-	// }
+	if input.WebCards.KnowAbout.Description != "" {
+		newWebCards.KnowAbout.Description = input.WebCards.KnowAbout.Description
+		hasWebCardChanges = true
+	}
 
 	// // video presentation
 	// if input.WebCards.VideoPresentation.Title != "" || input.WebCards.VideoPresentation.VideoUrl != "" {
@@ -243,35 +243,46 @@ func (r *repository) UpdateProperty(input domain.Property) (*ent.Property, error
 	}
 
 	if hasWebCardChanges {
-		property.SetWebCards(newWebCards)
+		propertyUpdate.SetWebCards(newWebCards)
 	}
 
 	// Only update PricingInfo if it contains actual data (non-empty Price field)
 	if input.PricingInfo.Price != "" && input.PricingInfo != (oldProperty.PricingInfo) {
-		property.SetPricingInfo(input.PricingInfo)
+		propertyUpdate.SetPricingInfo(input.PricingInfo)
 	}
 	if input.PropertyReraInfo != (oldProperty.PropertyReraInfo) {
-		property.SetPropertyReraInfo(input.PropertyReraInfo)
+		propertyUpdate.SetPropertyReraInfo(input.PropertyReraInfo)
 	}
 	if input.MetaInfo != (oldProperty.MetaInfo) {
-		property.SetMetaInfo(input.MetaInfo)
+		propertyUpdate.SetMetaInfo(input.MetaInfo)
 	}
 	if input.DeveloperID != "" {
-		property.SetDeveloperID(input.DeveloperID)
+		propertyUpdate.SetDeveloperID(input.DeveloperID)
 	}
 	if input.LocationID != "" {
-		property.SetLocationID(input.LocationID)
+		propertyUpdate.SetLocationID(input.LocationID)
 	}
 	if input.ProjectID != "" {
-		property.SetProjectID(input.ProjectID)
+		propertyUpdate.SetProjectID(input.ProjectID)
 	}
 
-	updatedProperty, err := property.Save(context.Background())
+	updatedProperty, err := propertyUpdate.Save(context.Background())
 	if err != nil {
 		logger.Get().Error().Err(err).Msg("Failed to update property")
 		return nil, err
 	}
-	return updatedProperty, nil
+	propertyWithRelations, err := r.db.Property.Query().
+		Where(property.ID(updatedProperty.ID)).
+		WithDeveloper().
+		WithProject().
+		WithLocation().
+		Only(context.Background())
+	if err != nil {
+		logger.Get().Error().Err(err).Msg("Failed to get updated property with relations")
+		return nil, err
+	}
+
+	return propertyWithRelations, nil
 }
 
 func (r *repository) GetPropertiesOfProject(projectID string) ([]*ent.Property, error) {
