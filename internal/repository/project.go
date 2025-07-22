@@ -343,6 +343,17 @@ func (r *repository) UpdateProject(input domain.Project) (*ent.Project, error) {
 		hasWebCardChanges = true
 	}
 
+	// Update Amenities if provided
+	if input.WebCards.Amenities.Description != "" || len(input.WebCards.Amenities.CategoriesWithAmenities) > 0 {
+		if input.WebCards.Amenities.Description != "" {
+			newWebCards.Amenities.Description = input.WebCards.Amenities.Description
+		}
+		if len(input.WebCards.Amenities.CategoriesWithAmenities) > 0 {
+			newWebCards.Amenities.CategoriesWithAmenities = input.WebCards.Amenities.CategoriesWithAmenities
+		}
+		hasWebCardChanges = true
+	}
+
 	if hasWebCardChanges {
 		project.SetWebCards(newWebCards)
 	}
