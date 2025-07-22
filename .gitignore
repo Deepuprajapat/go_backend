@@ -100,3 +100,7 @@ test.json
 
 
 migration_jobs/database_export
+
+# TLS certificates
+certs/
+!certs/README.md

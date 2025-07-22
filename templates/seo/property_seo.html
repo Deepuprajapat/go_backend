@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+    
+    <!-- Primary Meta Tags -->
+    <title>{{.MetaInfo.Title}}</title>
+    <meta name="description" content="{{.MetaInfo.Description}}">
+    <meta name="keywords" content="{{.MetaInfo.Keywords}}">
+    <meta name="author" content="InvestMango">
+    <meta name="language" content="en">
+    <meta name="theme-color" content="#ff6b35">
+    <link rel="canonical" href="{{.BaseURL}}/propertyforsale/{{.Property.Slug}}">
+    
+    <!-- Performance Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="{{.BaseURL}}">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="{{.MetaInfo.Title}}">
+    <meta property="og:description" content="{{.MetaInfo.Description}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{.BaseURL}}/propertyforsale/{{.Property.Slug}}">
+    <meta property="og:image" content="{{.PropertyImage}}">
+    <meta property="og:image:alt" content="{{.Property.Name}} - Real Estate Property">
+    <meta property="og:site_name" content="InvestMango">
+    <meta property="og:locale" content="en_IN">
+    
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@investmango">
+    <meta name="twitter:creator" content="@investmango">
+    <meta name="twitter:title" content="{{.MetaInfo.Title}}">
+    <meta name="twitter:description" content="{{.MetaInfo.Description}}">
+    <meta name="twitter:image" content="{{.PropertyImage}}">
+    <meta name="twitter:image:alt" content="{{.Property.Name}} - Real Estate Property">
+    
+    <meta name="robots" content="index, follow">
+    
+    <!-- Property Structured Data -->
+    {{if .Property.ProductSchema}}
+    {{.Property.ProductSchema}}
+    {{else}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "name": "{{.Property.Name}}",
+        "description": "{{.MetaInfo.Description}}",
+        "image": "{{.PropertyImage}}",
+        "url": "{{.BaseURL}}/propertyforsale/{{.Property.Slug}}",
+        "offers": {
+            "@type": "Offer",
+            "price": "{{.Property.PricingInfo.Price}}",
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+                "@type": "Organization",
+                "name": "InvestMango"
+            }
+        },
+        {{if .Property.Developer}}
+        "provider": {
+            "@type": "Organization",
+            "name": "{{.Property.Developer.Name}}"
+        },
+        {{end}}
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{.BaseURL}}/propertyforsale/{{.Property.Slug}}"
+        }
+    }
+    </script>
+    {{end}}
+</head>
+<body>
+    <h1>{{.Property.Name}}</h1>
+    {{if .Property.Developer}}
+    <p><strong>Developer:</strong> {{.Property.Developer.Name}}</p>
+    {{end}}
+    <p><strong>Price:</strong> {{.Property.PricingInfo.Price}}</p>
+    
+    <h2>Property Details</h2>
+    <ul>
+        {{if .Property.WebCards.PropertyDetails.BuiltUpArea.Value}}
+        <li>Built-up Area: {{.Property.WebCards.PropertyDetails.BuiltUpArea.Value}}</li>
+        {{end}}
+        {{if .Property.WebCards.PropertyDetails.Configuration.Value}}
+        <li>Configuration: {{.Property.WebCards.PropertyDetails.Configuration.Value}}</li>
+        {{end}}
+        {{if .Property.WebCards.PropertyDetails.Facing.Value}}
+        <li>Facing: {{.Property.WebCards.PropertyDetails.Facing.Value}}</li>
+        {{end}}
+        {{if .Property.WebCards.PropertyDetails.FloorNumber.Value}}
+        <li>Floor Number: {{.Property.WebCards.PropertyDetails.FloorNumber.Value}}</li>
+        {{end}}
+        {{if .Property.WebCards.PropertyDetails.PossessionStatus.Value}}
+        <li>Possession Status: {{.Property.WebCards.PropertyDetails.PossessionStatus.Value}}</li>
+        {{end}}
+    </ul>
+    
+    <h2>About the Property</h2>
+    <p>{{.MetaInfo.Description}}</p>
+    
+    {{if .Property.PropertyRera.ReraNumber}}
+    <h2>RERA Information</h2>
+    <p>RERA ID: {{.Property.PropertyRera.ReraNumber}}</p>
+    {{end}}
+    
+    <h2>Investment Opportunity</h2>
+    <p>This property represents an excellent investment opportunity in the real estate market. Contact us for more details about pricing, availability, and investment potential.</p>
+</body>
+</html>

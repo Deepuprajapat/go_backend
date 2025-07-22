@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+    
+    <!-- Primary Meta Tags -->
+    <title>{{.SEOMetaInfo.Title}}</title>
+    <meta name="description" content="{{.SEOMetaInfo.Description}}">
+    <meta name="keywords" content="{{.SEOMetaInfo.Keywords}}">
+    <meta name="author" content="InvestMango">
+    <meta name="language" content="en">
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="article:published_time" content="{{.CreatedAt}}">
+    <meta name="article:modified_time" content="{{.UpdatedAt}}">
+    <link rel="canonical" href="{{.CanonicalURL}}">
+    
+    <!-- Performance Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="{{.BaseURL}}">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="{{.SEOMetaInfo.Title}}">
+    <meta property="og:description" content="{{.SEOMetaInfo.Description}}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{.CanonicalURL}}">
+    <meta property="og:image" content="{{.BlogContent.Image}}">
+    <meta property="og:image:alt" content="{{.BlogContent.ImageAlt}}">
+    <meta property="og:site_name" content="InvestMango">
+    <meta property="og:locale" content="en_IN">
+    <meta property="article:published_time" content="{{.CreatedAt}}">
+    <meta property="article:modified_time" content="{{.UpdatedAt}}">
+    <meta property="article:author" content="InvestMango">
+    <meta property="article:section" content="Real Estate">
+    
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@investmango">
+    <meta name="twitter:creator" content="@investmango">
+    <meta name="twitter:title" content="{{.SEOMetaInfo.Title}}">
+    <meta name="twitter:description" content="{{.SEOMetaInfo.Description}}">
+    <meta name="twitter:image" content="{{.BlogContent.Image}}">
+    <meta name="twitter:image:alt" content="{{.BlogContent.ImageAlt}}">
+    
+    <meta name="robots" content="index, follow">
+    
+    <!-- Blog Structured Data from Database -->
+    {{range .SEOMetaInfo.BlogSchema}}
+    {{.}}
+    {{end}}
+    
+    <!-- Default Article structured data if no blog_schema -->
+    {{if not .SEOMetaInfo.BlogSchema}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "{{.BlogContent.Title}}",
+        "description": "{{.SEOMetaInfo.Description}}",
+        "image": {
+            "@type": "ImageObject",
+            "url": "{{.BlogContent.Image}}",
+            "width": 1200,
+            "height": 630
+        },
+        "datePublished": "{{.CreatedAt}}",
+        "dateModified": "{{.UpdatedAt}}",
+        "author": {
+            "@type": "Organization",
+            "name": "InvestMango",
+            "url": "https://investmango.com"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "InvestMango",
+            "url": "https://investmango.com",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://investmango.com/logo.png",
+                "width": 200,
+                "height": 60
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{.CanonicalURL}}"
+        },
+        "keywords": "{{.SEOMetaInfo.Keywords}}",
+        "articleSection": "Real Estate",
+        "inLanguage": "en-IN"
+    }
+    </script>
+    {{end}}
+</head>
+<body>
+    <article>
+        <h1>{{.BlogContent.Title}}</h1>
+        {{if .BlogContent.Image}}
+        <img src="{{.BlogContent.Image}}" alt="{{.BlogContent.ImageAlt}}" title="{{.BlogContent.ImageCaption}}">
+        {{end}}
+        
+        <div class="content">
+            <p>{{.BlogContent.Description}}</p>
+            
+            <!-- Blog content would typically be rendered here -->
+            {{if .BlogContent.Content}}
+            <div>
+                {{.BlogContent.Content}}
+            </div>
+            {{end}}
+        </div>
+        
+        <div class="meta-info">
+            <p><strong>Published:</strong> {{.CreatedAt}}</p>
+            {{if ne .CreatedAt .UpdatedAt}}
+            <p><strong>Updated:</strong> {{.UpdatedAt}}</p>
+            {{end}}
+        </div>
+        
+        <div class="tags">
+            {{if .SEOMetaInfo.Keywords}}
+            <p><strong>Tags:</strong> {{.SEOMetaInfo.Keywords}}</p>
+            {{end}}
+        </div>
+    </article>
+    
+    <div class="related-content">
+        <h2>About InvestMango</h2>
+        <p>InvestMango is your trusted partner for real estate investment and portfolio management. Read our latest blogs to stay updated with market trends and investment opportunities.</p>
+    </div>
+</body>
+</html>

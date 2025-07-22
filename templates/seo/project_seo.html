@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="ItwxGLnb2pNSeyJn0kZsRa3DZxRZO3MSCQs5G3kTLgA">
+    
+    <!-- Primary Meta Tags -->
+    <title>{{.MetaInfo.Title}}</title>
+    <meta name="description" content="{{.MetaInfo.Description}}">
+    <meta name="keywords" content="{{.MetaInfo.Keywords}}">
+    <meta name="author" content="InvestMango">
+    <meta name="language" content="en">
+    <meta name="theme-color" content="#ff6b35">
+    <link rel="canonical" href="{{.BaseURL}}/{{.Project.Slug}}">
+    
+    <!-- Performance Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
+    <link rel="dns-prefetch" href="{{.BaseURL}}">
+    
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="{{.MetaInfo.Title}}">
+    <meta property="og:description" content="{{.MetaInfo.Description}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{.BaseURL}}/{{.Project.Slug}}">
+    <meta property="og:image" content="{{.ProjectImage}}">
+    <meta property="og:image:alt" content="{{.Project.ProjectName}} - Real Estate Project">
+    <meta property="og:site_name" content="InvestMango">
+    <meta property="og:locale" content="en_IN">
+    
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@investmango">
+    <meta name="twitter:creator" content="@investmango">
+    <meta name="twitter:title" content="{{.MetaInfo.Title}}">
+    <meta name="twitter:description" content="{{.MetaInfo.Description}}">
+    <meta name="twitter:image" content="{{.ProjectImage}}">
+    <meta name="twitter:image:alt" content="{{.Project.ProjectName}} - Real Estate Project">
+    
+    <meta name="robots" content="index, follow">
+    
+    <!-- Project Structured Data -->
+    {{if .MetaInfo.ProjectSchema}}
+    {{range .MetaInfo.ProjectSchema}}
+    {{.}}
+    {{end}}
+    {{else}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "name": "{{.Project.ProjectName}}",
+        "description": "{{.MetaInfo.Description}}",
+        "image": "{{.ProjectImage}}",
+        "url": "{{.BaseURL}}/{{.Project.Slug}}",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "{{.Project.City}}",
+            "addressRegion": "{{.Project.LocationInfo.ShortAddress}}"
+        },
+        "offers": {
+            "@type": "AggregateOffer",
+            "lowPrice": "{{.Project.MinPrice}}",
+            "highPrice": "{{.Project.MaxPrice}}",
+            "priceCurrency": "INR"
+        },
+        "provider": {
+            "@type": "Organization",
+            "name": "{{.Project.DeveloperInfo.DeveloperName}}"
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{.BaseURL}}/{{.Project.Slug}}"
+        }
+    }
+    </script>
+    {{end}}
+</head>
+<body>
+    <h1>{{.Project.ProjectName}}</h1>
+    <p><strong>Location:</strong> {{.Project.LocationInfo.ShortAddress}}</p>
+    <p><strong>Developer:</strong> {{.Project.DeveloperInfo.DeveloperName}}</p>
+    <p><strong>Price Range:</strong> {{.Project.MinPrice}} - {{.Project.MaxPrice}}</p>
+    <p>{{.MetaInfo.Description}}</p>
+    
+    <h2>About the Project</h2>
+    <p>{{.Project.ProjectName}} is a premium real estate project located in {{.Project.City}}. Developed by {{.Project.DeveloperInfo.DeveloperName}}, this project offers excellent amenities and modern living spaces.</p>
+    
+    <h2>Location Details</h2>
+    <p>Address: {{.Project.LocationInfo.ShortAddress}}</p>
+    <p>City: {{.Project.City}}</p>
+    
+    <h2>Key Features</h2>
+    <ul>
+        <li>Premium location in {{.Project.City}}</li>
+        <li>Developed by {{.Project.DeveloperInfo.DeveloperName}}</li>
+        <li>Price range: {{.Project.MinPrice}} - {{.Project.MaxPrice}}</li>
+        <li>Modern amenities and facilities</li>
+    </ul>
+</body>
+</html>
