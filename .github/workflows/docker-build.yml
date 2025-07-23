@@ -31,10 +31,10 @@ jobs:
           zip -r ../frontend.zip build/
 
       # ✅ Move ZIP to backend folder
-      - name: Copy zip to backend
+      - name: Copy zip to Build Context
         run: |
-          mkdir -p backend/static-zip
-          cp frontend.zip backend/static-zip/frontend.zip
+          mkdir -p static-zip
+          cp frontend.zip static-zip/frontend.zip
 
       # ✅ Login to GHCR (only on main)
       - name: Log in to GHCR
