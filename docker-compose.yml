@@ -23,7 +23,7 @@ services:
       - im_network
 
   backend:
-    image: ghcr.io/deepuprajapat/go_backend:latest
+    image: ghcr.io/deepuprajapat/go_backend:b012eb8a
     container_name: im-backend
     restart: on-failure
     depends_on:

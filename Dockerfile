@@ -1,43 +1,41 @@
 # backend/Dockerfile
 
-# Single stage build with all source code
+# ✅ Base image
 FROM golang:1.23-alpine
 
-# ✅ Install git, unzip, and build tools
+# ✅ Install tools
 RUN apk add --no-cache git ca-certificates build-base unzip
 
-# Set working directory
+# ✅ Working directory
 WORKDIR /app
 
-# Copy go mod files
+# ✅ Copy Go mod files & download deps
 COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
 
-# Copy all backend source code
+# ✅ Copy all backend source
 COPY . .
 
-# ✅ Extract frontend.zip (copied via CI/CD)
+# ✅ Extract frontend.zip into ./build (match Go code path)
 COPY ./static-zip/frontend.zip ./frontend.zip
-RUN unzip -o ./frontend.zip -d ./build && rm -f ./frontend.zip
+RUN unzip -o ./frontend.zip && \
+    mkdir -p ./build && \
+    mv build/* ./build/ && \
+    rm -rf build frontend.zip
 
-# Generate Ent code
+# ✅ Generate Ent code
 RUN go generate ./ent
 
-# Create non-root user
+# ✅ Add non-root user
 RUN addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
 
-# Change ownership of all files
 RUN chown -R appuser:appgroup /app
-
-# Switch to non-root user
 USER appuser
 
-# Expose backend port
+# ✅ Expose backend port
 EXPOSE 9999
 
-# Run the application
+# ✅ Start the server
 CMD ["go", "run", "./cmd/server"]
 
