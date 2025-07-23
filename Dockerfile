@@ -10,9 +10,11 @@ RUN go mod download
 COPY . .
 
 COPY ./static-zip/frontend.zip ./frontend.zip
+
+# ✅ Extract and copy build files safely
 RUN unzip -o ./frontend.zip && \
     mkdir -p ./build && \
-    mv frontend/build/* ./build/ && \
+    cp -r frontend/build/* ./build/ && \
     rm -rf frontend frontend.zip
 
 RUN go generate ./ent
