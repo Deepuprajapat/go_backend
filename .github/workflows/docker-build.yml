@@ -54,7 +54,6 @@ jobs:
       # ✅ Build Docker image (from backend folder)
       - name: Build Docker Image
         run: |
-          cd backend
           docker build -t ghcr.io/${{ env.REPO_LOWER }}:${{ env.SHORT_SHA }} .
           docker tag ghcr.io/${{ env.REPO_LOWER }}:${{ env.SHORT_SHA }} ghcr.io/${{ env.REPO_LOWER }}:latest
 
