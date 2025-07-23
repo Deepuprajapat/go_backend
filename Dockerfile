@@ -1,8 +1,8 @@
 # Single stage build with all source code
 FROM golang:1.23-alpine
 
-# Install git, ca-certificates, and build tools
-RUN apk add --no-cache git ca-certificates build-base
+# Install git, ca-certificates, build tools, unzip
+RUN apk add --no-cache git ca-certificates build-base unzip
 
 # Set working directory
 WORKDIR /app
@@ -13,8 +13,11 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
-# Copy all source code
+# Copy all backend source code
 COPY . .
+
+# ✅ Unzip frontend.zip (copied via CI/CD)
+RUN unzip -o ./static-zip/frontend.zip -d ./frontend && rm -f ./static-zip/frontend.zip
 
 # Generate Ent code
 RUN go generate ./ent
@@ -29,8 +32,9 @@ RUN chown -R appuser:appgroup /app
 # Switch to non-root user
 USER appuser
 
-# Expose port
+# Expose backend port
 EXPOSE 9999
 
-# Build and run the application
-CMD ["go", "run", "./cmd/server"] 
+# ✅ Start the server
+CMD ["go", "run", "./cmd/server"]
+

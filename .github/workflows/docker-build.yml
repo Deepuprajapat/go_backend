@@ -1,4 +1,4 @@
-name: Build and Push Go Backend Docker Image
+name: Build and Push Go Backend Docker Image (with Frontend)
 
 on:
   push:
@@ -10,20 +10,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      # ✅ Checkout Backend Repo (current)
+      - name: Checkout Backend Repo
         uses: actions/checkout@v3
 
-      # ✅ Build the frontend app
-      - name: Build Frontend
+      # ✅ Checkout Frontend Repo
+      - name: Checkout Frontend Repo
+        uses: actions/checkout@v3
+        with:
+          repository: Deepuprajapat/new_ft
+          path: frontend
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      # ✅ Build and ZIP frontend
+      - name: Build and zip frontend
         run: |
           cd frontend
           npm install
           npm run build
-          cd ..
-          mkdir -p backend/frontend
-          cp -r frontend/build/* backend/frontend/
+          zip -r ../frontend.zip build/
 
-      # ✅ Login to GitHub Container Registry (only on main branch)
+      # ✅ Move ZIP to backend folder
+      - name: Copy zip to backend
+        run: |
+          mkdir -p backend/static-zip
+          cp frontend.zip backend/static-zip/frontend.zip
+
+      # ✅ Log in to GHCR (only on main branch)
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -32,24 +45,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      # ✅ Set variables (commit SHA and repo name lowercase)
-      - name: Set up commit hash and lowercase repo
-        id: vars
+      # ✅ Set up commit hash and repo name
+      - name: Set up variables
         run: |
           echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
           echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      # ✅ Build Docker Image
+      # ✅ Build Docker image (from backend folder)
       - name: Build Docker Image
         run: |
           cd backend
           docker build -t ghcr.io/${{ env.REPO_LOWER }}:${{ env.SHORT_SHA }} .
 
-      # ✅ List docker images
-      - name: List docker images
+      # ✅ List Docker images
+      - name: List Docker Images
         run: docker images
 
-      # ✅ Push Docker Image to GHCR (only on main branch)
+      # ✅ Push Docker Image (main branch only)
       - name: Push Docker Image
         if: github.ref == 'refs/heads/main'
         run: |
