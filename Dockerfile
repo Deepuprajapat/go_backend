@@ -20,7 +20,7 @@ COPY . .
 
 # ✅ Extract frontend.zip (copied via CI/CD)
 COPY ./static-zip/frontend.zip ./frontend.zip
-RUN unzip -o ./frontend.zip -d ./frontend && rm -f ./frontend.zip
+RUN unzip -o ./frontend.zip -d ./build && rm -f ./frontend.zip
 
 # Generate Ent code
 RUN go generate ./ent
